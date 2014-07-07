@@ -1,0 +1,11 @@
+package org.sameersingh.ervisualizer.data
+
+/**
+ * @author sameer
+ * @since 6/10/14.
+ */
+case class Provenance(docId: String, sentId: Int, tokPos: Seq[(Int, Int)])
+
+case class Sentence(docId: String, sentId: Int, string: String)
+
+case class Document(docId: String, text: String, sents: Seq[Sentence])

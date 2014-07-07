@@ -1,0 +1,178 @@
+.relation {
+  stroke: #000;
+  stroke-width: 5px;
+  opacity: 0.2;
+  stroke-linecap: round;
+}
+
+.entity {
+  stroke: #000;
+  stroke-width: 1.5px;
+  opacity: 0.2;
+}
+
+.perEnt {
+  fill: #8ac;
+}
+
+.locEnt {
+  fill: #a8c;
+}
+
+.orgEnt {
+  fill: #ac8;
+}
+
+.miscEnt {
+  fill: #888;
+}
+
+.selected {
+  opacity: 1.0;
+}
+
+.hover {
+  opacity: 1.0;
+}
+
+.container {
+  padding: 5px;
+  height: 625px;
+  position:relative;
+}
+
+.canvas {
+  background-color: #eee;
+  border: 1px solid #666;
+  height: 100%;
+  width: 100%;
+  position:absolute;
+}
+
+.infoBox {
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #666;
+  border-radius: 5px;
+  height: 300px;
+  width: 270px;
+  float: right;
+  position:absolute;
+  top:0;
+  right:0;
+  visibility: hidden;
+  overflow:auto;
+}
+
+.freebaseBox {
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #666;
+  border-radius: 5px;
+  height: 300px;
+  width: 370px;
+  float: right;
+  position:absolute;
+  top:300px;
+  right:0;
+  visibility: hidden;
+  overflow:auto;
+}
+
+.predictionBox {
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #666;
+  border-radius: 5px;
+  height: 100px;
+  width: 370px;
+  float: right;
+  position:absolute;
+  top:600px;
+  right:0;
+  visibility: hidden;
+  overflow:auto;
+}
+
+.provenanceBox {
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #666;
+  border-radius: 5px;
+  height: 100px;
+  width: 370px;
+  float: right;
+  position:absolute;
+  top:700px;
+  right:0;
+  visibility: hidden;
+  overflow:auto;
+}
+
+/* typeahead specific style */
+.typeahead,
+.tt-query,
+.tt-hint {
+  width: 100%;
+  height: 30px;
+  padding: 8px 12px;
+  font-size: 24px;
+  line-height: 30px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+}
+
+.typeahead {
+  background-color: #fff;
+}
+
+.twitter-typeahead {
+  width: 400px;
+}
+
+.typeahead:focus {
+  border: 2px solid #0097cf;
+}
+
+.tt-query {
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.tt-hint {
+  color: #999
+}
+
+.tt-dropdown-menu {
+  width: 422px;
+  margin-top: 12px;
+  padding: 8px 0;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.tt-suggestion {
+  padding: 3px 20px;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.tt-suggestion.tt-cursor {
+  color: #fff;
+  background-color: #0097cf;
+
+}
+
+.tt-suggestion p {
+  margin: 0;
+}
+
+.gist {
+  font-size: 14px;
+}
