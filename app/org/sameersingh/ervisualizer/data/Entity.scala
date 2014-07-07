@@ -4,7 +4,7 @@ package org.sameersingh.ervisualizer.data
  * @author sameer
  * @since 6/10/14.
  */
-case class EntityHeader(id: String, name: String, popularity: Double)
+case class EntityHeader(id: String, name: String, nerTag: String, popularity: Double)
 
 case class EntityInfo(id: String, freebaseInfo: Map[String, String])
 

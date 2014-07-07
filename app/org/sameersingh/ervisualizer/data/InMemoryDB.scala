@@ -89,17 +89,18 @@ object InMemoryDB {
   }
 
   def parseEntityInfo(split: Array[String]): (EntityHeader, EntityInfo, EntityFreebase) = {
-    assert(split.length == 5, split.mkString("-|-"))
+    assert(split.length == 6, split.mkString("-|-"))
     val id = split(0)
     val name = split(1)
-    val popularity = split(2).toDouble
-    val freebaseInfo = split(3).split(",").map(kv => {
+    val nerTag = split(2)
+    val popularity = split(3).toDouble
+    val freebaseInfo = split(4).split(",").map(kv => {
       val s = kv.split(":");
       assert(s.length == 2, kv + "\t" + s.mkString("-|-"));
       s(0) -> s(1)
     }).toMap
-    val types = split(4).split(":").toSeq
-    (EntityHeader(id, name, popularity), EntityInfo(id, freebaseInfo), EntityFreebase(id, types))
+    val types = split(5).split(":").toSeq
+    (EntityHeader(id, name, nerTag, popularity), EntityInfo(id, freebaseInfo), EntityFreebase(id, types))
   }
 
   def parseRelationInfo(split: Array[String]): (RelationHeader, RelationFreebase) = {
@@ -125,7 +126,7 @@ object InMemoryDB {
   }
 
   def serializeEntityInfo(eh: EntityHeader, ei: EntityInfo, ef: EntityFreebase): String =
-    "%s\t%s\t%f\t%s\t%s" format(eh.id, eh.name, eh.popularity, ei.freebaseInfo.map(kv => kv._1 + ":" + kv._2).mkString(","), ef.types.mkString(":"))
+    "%s\t%s\t%s\t%f\t%s\t%s" format(eh.id, eh.name, eh.nerTag, eh.popularity, ei.freebaseInfo.map(kv => kv._1 + ":" + kv._2).mkString(","), ef.types.mkString(":"))
 
   def serializeRelationInfo(rh: RelationHeader, rf: RelationFreebase): String =
     "%s\t%s\t%f\t%s" format(rh.sourceId, rh.targetId, rh.popularity, rf.rels.mkString(":"))

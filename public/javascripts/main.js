@@ -85,8 +85,11 @@ function start() {
                 .on("mouseout", hideLabel);
   node
     .append("circle")
-    .classed("miscEnt", true)
     .classed("entity", true)
+    .classed("perEnt", function(d) {return d.nerTag == "PER"; })
+    .classed("locEnt", function(d) {return d.nerTag == "LOC"; })
+    .classed("orgEnt", function(d) {return d.nerTag == "ORG"; })
+    .classed("miscEnt", function(d) {return d.nerTag == "MISC"; })
     .attr("r", function(d) { return Math.sqrt(1000*d.popularity); })
     .append("title")
     .text(function(e) { return e.name; });
@@ -312,7 +315,6 @@ function displayEntityInfo(e, info) {
 }
 
 function initTypeahead(data) {
-    console.log(data.entityArr);
     // constructs the suggestion engine
     var bh = new Bloodhound({
       datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),

@@ -20,12 +20,12 @@ class InMemoryDBTest {
     // entities
     val ent1Id = "ENT_00"
     db._entityIds += ent1Id
-    db._entityHeader(ent1Id) = EntityHeader(ent1Id, "Barack Obama", 1.0)
+    db._entityHeader(ent1Id) = EntityHeader(ent1Id, "Barack Obama", "PER", 1.0)
     db._entityInfo(ent1Id) = EntityInfo(ent1Id, Map("/mid" -> "/m/02mjmr", "/people/person/place_of_birth" -> "Honululu", "/common/topic/image" -> "/m/02nqg_h"))
     db._entityFreebase(ent1Id) = EntityFreebase(ent1Id, Seq("/government/us_president", "/celebrities/celebrity"))
     val ent2Id = "ENT_01"
     db._entityIds += ent2Id
-    db._entityHeader(ent2Id) = EntityHeader(ent2Id, "Michelle Obama", 0.5)
+    db._entityHeader(ent2Id) = EntityHeader(ent2Id, "Michelle Obama", "PER", 0.5)
     db._entityInfo(ent2Id) = EntityInfo(ent2Id, Map("/mid" -> "/m/025s5v9", "/people/person/place_of_birth" -> "Chicago", "/common/topic/image" -> "/m/04s8ccw"))
     db._entityFreebase(ent2Id) = EntityFreebase(ent2Id, Seq("/government/politician", "/celebrities/celebrity"))
 

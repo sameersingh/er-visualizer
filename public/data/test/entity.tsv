@@ -1,2 +1,2 @@
-ENT_00	Barack Obama	1.000000	/mid:/m/02mjmr,/people/person/place_of_birth:Honululu,/common/topic/image:/m/02nqg_h	/government/us_president:/celebrities/celebrity
-ENT_01	Michelle Obama	0.500000	/mid:/m/025s5v9,/people/person/place_of_birth:Chicago,/common/topic/image:/m/04s8ccw	/government/politician:/celebrities/celebrity
+ENT_00	Barack Obama	PER	1.000000	/mid:/m/02mjmr,/people/person/place_of_birth:Honululu,/common/topic/image:/m/02nqg_h	/government/us_president:/celebrities/celebrity
+ENT_01	Michelle Obama	PER	0.500000	/mid:/m/025s5v9,/people/person/place_of_birth:Chicago,/common/topic/image:/m/04s8ccw	/government/politician:/celebrities/celebrity
