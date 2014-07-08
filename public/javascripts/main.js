@@ -138,8 +138,8 @@ function run() {
     force = d3.layout.force()
               .nodes(data.entityArr)
               .links(data.links)
-              .charge(-400)
-              .linkDistance(120)
+              .charge(-5000)
+              .linkDistance(100)
               .size([width, height])
               .on("tick", tick);
     //start();
@@ -255,8 +255,8 @@ function selectRelation(d) {
         var cy = height/2;
         d.source.fixed = true;
         d.target.fixed = true;
-        updateEntPosition(d.source, cx, cy-100);
-        updateEntPosition(d.target, cx, cy+100);
+        updateEntPosition(d.source, cx-75, cy);
+        updateEntPosition(d.target, cx+75, cy);
 
         // global settings
         // d3.select("#entityEntry .tt-input").attr("value", d.name);
@@ -340,11 +340,11 @@ function initTypeahead(data) {
     })
     .on('typeahead:selected', function($e, datum){
             selectEntity(datum);
-            }
+          }
         )
     .on('typeahead:autocompleted', function($e, datum){
                 $('#entityEntry .typeahead').typeahead('close');
                 selectEntity(datum);
-                }
+              }
             );
 }
