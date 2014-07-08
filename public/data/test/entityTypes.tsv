@@ -1,2 +1,4 @@
-ENT_00	/people/person	DOC_000|1|5:7
-ENT_01	/people/person	DOC_000|1|22:30
+ENT_00	person	DOC_000|1|5:7
+ENT_01	person	DOC_000|1|22:30
+ENT_02	person	DOC_000|2|32:41
+ENT_03	country	DOC_000|2|19:22
