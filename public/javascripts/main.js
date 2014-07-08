@@ -60,7 +60,7 @@ function start() {
         .append("line")
         .attr("class", "relation")
         .attr("id", function(d) { return d.source.id + "-" + d.target.id; })
-        .style("stroke-width", function(d) { return Math.sqrt(25*d.popularity); })
+        .style("stroke-width", function(d) { return 3 + Math.sqrt(20*d.popularity); })
         .on("click", function(e) { selectRelation(e); d3.event.stopPropagation(); })
         .on("mouseover", function(d) {
            d3.select(this).classed("hover", true);
