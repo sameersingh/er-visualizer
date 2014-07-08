@@ -14,82 +14,93 @@ class InMemoryDBTest {
     val db = new InMemoryDB
     // docs
     val doc1Id = "DOC_000"
-    db._documents(doc1Id) = Document(doc1Id, "Obama is awesome. Yes, he is married to Michelle. He is president of USA, same as George W.",
+    db._documents(doc1Id) = Document(doc1Id, "Obama is awesome. Yes, he is married to Michelle. He is a resident of USA, same as George W. and Michelle.",
       Seq(Sentence(doc1Id, 0, "Obama is awesome."),
         Sentence(doc1Id, 1, "Yes, he is married to Michelle."),
-        Sentence(doc1Id, 2, "He is president of USA, same as George W.")))
+        Sentence(doc1Id, 2, "He is a resident of USA, same as George W. and Michelle.")))
 
     // entities
-    val ent1Id = "ENT_00"
-    db._entityIds += ent1Id
-    db._entityHeader(ent1Id) = EntityHeader(ent1Id, "Barack Obama", "PER", 1.0)
-    db._entityInfo(ent1Id) = EntityInfo(ent1Id, Map("/mid" -> "/m/02mjmr", "/people/person/place_of_birth" -> "Honululu", "/common/topic/image" -> "/m/02nqg_h"))
-    db._entityFreebase(ent1Id) = EntityFreebase(ent1Id, Seq("/government/us_president", "/celebrities/celebrity"))
-    val ent2Id = "ENT_01"
-    db._entityIds += ent2Id
-    db._entityHeader(ent2Id) = EntityHeader(ent2Id, "Michelle Obama", "PER", 0.5)
-    db._entityInfo(ent2Id) = EntityInfo(ent2Id, Map("/mid" -> "/m/025s5v9", "/people/person/place_of_birth" -> "Chicago", "/common/topic/image" -> "/m/04s8ccw"))
-    db._entityFreebase(ent2Id) = EntityFreebase(ent2Id, Seq("/government/politician", "/celebrities/celebrity"))
-    val ent3Id = "ENT_02"
-    db._entityIds += ent3Id
-    db._entityHeader(ent3Id) = EntityHeader(ent3Id, "George W. Bush", "PER", 0.75)
-    db._entityInfo(ent3Id) = EntityInfo(ent3Id, Map("/mid" -> "/m/09b6zr", "/people/person/place_of_birth" -> "New Haven", "/common/topic/image" -> "/m/02bs94j"))
-    db._entityFreebase(ent3Id) = EntityFreebase(ent3Id, Seq("/government/us_president", "/celebrities/celebrity"))
-    val ent4Id = "ENT_03"
-    db._entityIds += ent4Id
-    db._entityHeader(ent4Id) = EntityHeader(ent4Id, "United State of America", "LOC", 0.8)
-    db._entityInfo(ent4Id) = EntityInfo(ent4Id, Map("/mid" -> "/m/09c7w0", "/common/topic/image" -> "/m/02bs94j"))
-    db._entityFreebase(ent4Id) = EntityFreebase(ent4Id, Seq("/location/country", "/location/nation"))
+    val barackId = "BarackObama"
+    db._entityIds += barackId
+    db._entityHeader(barackId) = EntityHeader(barackId, "Barack Obama", "PER", 1.0)
+    db._entityInfo(barackId) = EntityInfo(barackId, Map("/mid" -> "/m/02mjmr", "/people/person/place_of_birth" -> "Honululu", "/common/topic/image" -> "/m/02nqg_h"))
+    db._entityFreebase(barackId) = EntityFreebase(barackId, Seq("/government/us_president", "/celebrities/celebrity"))
+    val michelleId = "MichelleObama"
+    db._entityIds += michelleId
+    db._entityHeader(michelleId) = EntityHeader(michelleId, "Michelle Obama", "PER", 0.5)
+    db._entityInfo(michelleId) = EntityInfo(michelleId, Map("/mid" -> "/m/025s5v9", "/people/person/place_of_birth" -> "Chicago", "/common/topic/image" -> "/m/04s8ccw"))
+    db._entityFreebase(michelleId) = EntityFreebase(michelleId, Seq("/government/politician", "/celebrities/celebrity"))
+    val georgeId = "GeorgeBush"
+    db._entityIds += georgeId
+    db._entityHeader(georgeId) = EntityHeader(georgeId, "George W. Bush", "PER", 0.75)
+    db._entityInfo(georgeId) = EntityInfo(georgeId, Map("/mid" -> "/m/09b6zr", "/people/person/place_of_birth" -> "New Haven", "/common/topic/image" -> "/m/02bs94j"))
+    db._entityFreebase(georgeId) = EntityFreebase(georgeId, Seq("/government/us_president", "/celebrities/celebrity"))
+    val usaId = "USA"
+    db._entityIds += usaId
+    db._entityHeader(usaId) = EntityHeader(usaId, "United State of America", "LOC", 0.8)
+    db._entityInfo(usaId) = EntityInfo(usaId, Map("/mid" -> "/m/09c7w0", "/common/topic/image" -> "/m/02bs94j"))
+    db._entityFreebase(usaId) = EntityFreebase(usaId, Seq("/location/country", "/location/nation"))
 
     // entity text provenances
-    db._entityText(ent1Id) = EntityText(ent1Id, Seq(Provenance(doc1Id, 0, Seq(0 -> 5)), Provenance(doc1Id, 1, Seq(5 -> 7)), Provenance(doc1Id, 2, Seq(0 -> 2))))
-    db._entityText(ent2Id) = EntityText(ent2Id, Seq(Provenance(doc1Id, 1, Seq(22 -> 30))))
-    db._entityText(ent3Id) = EntityText(ent3Id, Seq(Provenance(doc1Id, 2, Seq(32 -> 41))))
-    db._entityText(ent4Id) = EntityText(ent4Id, Seq(Provenance(doc1Id, 2, Seq(19 -> 22))))
+    db._entityText(barackId) = EntityText(barackId, Seq(Provenance(doc1Id, 0, Seq(0 -> 5)), Provenance(doc1Id, 1, Seq(5 -> 7)), Provenance(doc1Id, 2, Seq(0 -> 2))))
+    db._entityText(michelleId) = EntityText(michelleId, Seq(Provenance(doc1Id, 1, Seq(22 -> 30)), Provenance(doc1Id, 2, Seq(47 -> 54))))
+    db._entityText(georgeId) = EntityText(georgeId, Seq(Provenance(doc1Id, 2, Seq(33 -> 42))))
+    db._entityText(usaId) = EntityText(usaId, Seq(Provenance(doc1Id, 2, Seq(20 -> 23))))
 
     // entity type provenances
-    db._entityTypePredictions(ent1Id) = Seq("person")
-    db._entityTypeProvenances.getOrElseUpdate(ent1Id, new mutable.HashMap)("person") =
-      TypeModelProvenances(ent1Id, "person", Seq(Provenance(doc1Id, 1, Seq(5 -> 7))))
-    db._entityTypePredictions(ent2Id) = Seq("person")
-    db._entityTypeProvenances.getOrElseUpdate(ent2Id, new mutable.HashMap)("person") =
-      TypeModelProvenances(ent2Id, "person", Seq(Provenance(doc1Id, 1, Seq(22 -> 30))))
-    db._entityTypePredictions(ent3Id) = Seq("person")
-    db._entityTypeProvenances.getOrElseUpdate(ent3Id, new mutable.HashMap)("person") =
-      TypeModelProvenances(ent3Id, "person", Seq(Provenance(doc1Id, 2, Seq(32 -> 41))))
-    db._entityTypePredictions(ent4Id) = Seq("country")
-    db._entityTypeProvenances.getOrElseUpdate(ent4Id, new mutable.HashMap)("country") =
-      TypeModelProvenances(ent4Id, "country", Seq(Provenance(doc1Id, 2, Seq(19 -> 22))))
+    db._entityTypePredictions(barackId) = Seq("person")
+    db._entityTypeProvenances.getOrElseUpdate(barackId, new mutable.HashMap)("person") =
+      TypeModelProvenances(barackId, "person", Seq(Provenance(doc1Id, 1, Seq(5 -> 7))))
+    db._entityTypePredictions(michelleId) = Seq("person")
+    db._entityTypeProvenances.getOrElseUpdate(michelleId, new mutable.HashMap)("person") =
+      TypeModelProvenances(michelleId, "person", Seq(Provenance(doc1Id, 1, Seq(22 -> 30)), Provenance(doc1Id, 2, Seq(47 -> 54))))
+    db._entityTypePredictions(georgeId) = Seq("person")
+    db._entityTypeProvenances.getOrElseUpdate(georgeId, new mutable.HashMap)("person") =
+      TypeModelProvenances(georgeId, "person", Seq(Provenance(doc1Id, 2, Seq(32 -> 41))))
+    db._entityTypePredictions(usaId) = Seq("country")
+    db._entityTypeProvenances.getOrElseUpdate(usaId, new mutable.HashMap)("country") =
+      TypeModelProvenances(usaId, "country", Seq(Provenance(doc1Id, 2, Seq(20 -> 23))))
 
     // relations
-    val rel1Id = ent1Id -> ent2Id
-    db._relationIds += rel1Id
-    db._relationHeader(rel1Id) = RelationHeader(rel1Id._1, rel1Id._2, 0.25)
-    db._relationFreebase(rel1Id) = RelationFreebase(rel1Id._1, rel1Id._2, Seq("/people/person/spouse"))
-    val rel2Id = ent3Id -> ent4Id
-    db._relationIds += rel2Id
-    db._relationHeader(rel2Id) = RelationHeader(rel2Id._1, rel2Id._2, 1.0)
-    db._relationFreebase(rel2Id) = RelationFreebase(rel2Id._1, rel2Id._2, Seq("/location/president"))
-    val rel3Id = ent1Id -> ent4Id
-    db._relationIds += rel3Id
-    db._relationHeader(rel3Id) = RelationHeader(rel3Id._1, rel3Id._2, 0.75)
-    db._relationFreebase(rel3Id) = RelationFreebase(rel3Id._1, rel3Id._2, Seq("/location/president"))
+    val barackMichelleId = barackId -> michelleId
+    db._relationIds += barackMichelleId
+    db._relationHeader(barackMichelleId) = RelationHeader(barackMichelleId._1, barackMichelleId._2, 0.25)
+    db._relationFreebase(barackMichelleId) = RelationFreebase(barackMichelleId._1, barackMichelleId._2, Seq("/people/person/spouse"))
+    val georgeUSAId = georgeId -> usaId
+    db._relationIds += georgeUSAId
+    db._relationHeader(georgeUSAId) = RelationHeader(georgeUSAId._1, georgeUSAId._2, 1.0)
+    db._relationFreebase(georgeUSAId) = RelationFreebase(georgeUSAId._1, georgeUSAId._2, Seq("/location/president"))
+    val barackUSAId = barackId -> usaId
+    db._relationIds += barackUSAId
+    db._relationHeader(barackUSAId) = RelationHeader(barackUSAId._1, barackUSAId._2, 0.75)
+    db._relationFreebase(barackUSAId) = RelationFreebase(barackUSAId._1, barackUSAId._2, Seq("/location/president"))
+    val michelleUSAId = michelleId -> usaId
+    db._relationIds += michelleUSAId
+    db._relationHeader(michelleUSAId) = RelationHeader(michelleUSAId._1, michelleUSAId._2, 0.25)
+    db._relationFreebase(michelleUSAId) = RelationFreebase(michelleUSAId._1, michelleUSAId._2, Seq("/location/citizen"))
 
     // relations text provenances
-    db._relationText(rel1Id) = RelationText(rel1Id._1, rel1Id._2, Seq(Provenance(doc1Id, 1, Seq(5 -> 7, 22 -> 30))))
-    db._relationText(rel2Id) = RelationText(rel1Id._1, rel1Id._2, Seq(Provenance(doc1Id, 2, Seq(32 -> 41, 19 -> 22))))
-    db._relationText(rel3Id) = RelationText(rel1Id._1, rel1Id._2, Seq(Provenance(doc1Id, 2, Seq(0 -> 2, 19 -> 22))))
+    db._relationText(barackMichelleId) = RelationText(barackMichelleId._1, barackMichelleId._2, Seq(Provenance(doc1Id, 1, Seq(5 -> 7, 22 -> 30))))
+    db._relationText(georgeUSAId) = RelationText(barackMichelleId._1, barackMichelleId._2, Seq(Provenance(doc1Id, 2, Seq(33 -> 42, 20 -> 23))))
+    db._relationText(barackUSAId) = RelationText(barackMichelleId._1, barackMichelleId._2, Seq(Provenance(doc1Id, 2, Seq(0 -> 2, 20 -> 23))))
+    db._relationText(michelleUSAId) = RelationText(michelleUSAId._1, michelleUSAId._2, Seq(Provenance(doc1Id, 2, Seq(47 -> 54, 20 -> 23))))
 
     // relations type provenances
-    db._relationPredictions(rel1Id) = Seq("per:spouse")
-    db._relationProvenances.getOrElseUpdate(rel1Id, new mutable.HashMap)("per:spouse") =
-      RelModelProvenances(rel1Id._1, rel1Id._2, "per:spouse", Seq(Provenance(doc1Id, 1, Seq(5 -> 7, 22 -> 30))))
-    db._relationPredictions(rel2Id) = Seq("loc:president")
-    db._relationProvenances.getOrElseUpdate(rel2Id, new mutable.HashMap)("loc:president") =
-      RelModelProvenances(rel2Id._1, rel2Id._2, "loc:president", Seq(Provenance(doc1Id, 2, Seq(32 -> 41, 19 -> 22))))
-    db._relationPredictions(rel3Id) = Seq("loc:president")
-    db._relationProvenances.getOrElseUpdate(rel3Id, new mutable.HashMap)("loc:president") =
-      RelModelProvenances(rel3Id._1, rel2Id._2, "loc:president", Seq(Provenance(doc1Id, 2, Seq(0 -> 2, 19 -> 22))))
+    db._relationPredictions(barackMichelleId) = Seq("per:spouse")
+    db._relationProvenances.getOrElseUpdate(barackMichelleId, new mutable.HashMap)("per:spouse") =
+      RelModelProvenances(barackMichelleId._1, barackMichelleId._2, "per:spouse", Seq(Provenance(doc1Id, 1, Seq(5 -> 7, 22 -> 30))))
+
+    db._relationPredictions(georgeUSAId) = Seq("loc:citizen")
+    db._relationProvenances.getOrElseUpdate(georgeUSAId, new mutable.HashMap)("loc:citizen") =
+      RelModelProvenances(georgeUSAId._1, georgeUSAId._2, "loc:citizen", Seq(Provenance(doc1Id, 2, Seq(33 -> 42, 20 -> 23))))
+
+    db._relationPredictions(barackUSAId) = Seq("loc:citizen")
+    db._relationProvenances.getOrElseUpdate(barackUSAId, new mutable.HashMap)("loc:citizen") =
+      RelModelProvenances(barackUSAId._1, barackUSAId._2, "loc:citizen", Seq(Provenance(doc1Id, 2, Seq(0 -> 2, 20 -> 23))))
+
+    db._relationPredictions(michelleUSAId) = Seq("loc:citizen")
+    db._relationProvenances.getOrElseUpdate(michelleUSAId, new mutable.HashMap)("loc:citizen") =
+      RelModelProvenances(michelleUSAId._1, michelleUSAId._2, "loc:citizen", Seq(Provenance(doc1Id, 2, Seq(47 -> 54, 20 -> 23))))
 
     db
   }

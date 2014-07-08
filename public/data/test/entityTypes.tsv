@@ -1,4 +1,5 @@
-ENT_00	person	DOC_000|1|5:7
-ENT_01	person	DOC_000|1|22:30
-ENT_02	person	DOC_000|2|32:41
-ENT_03	country	DOC_000|2|19:22
+BarackObama	person	DOC_000|1|5:7
+MichelleObama	person	DOC_000|1|22:30
+MichelleObama	person	DOC_000|2|47:54
+GeorgeBush	person	DOC_000|2|32:41
+USA	country	DOC_000|2|20:23

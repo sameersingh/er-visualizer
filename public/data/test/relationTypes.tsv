@@ -1,3 +1,4 @@
-ENT_00	ENT_01	per:spouse	DOC_000|1|5:7,22:30
-ENT_02	ENT_03	loc:president	DOC_000|2|32:41,19:22
-ENT_00	ENT_03	loc:president	DOC_000|2|0:2,19:22
+BarackObama	MichelleObama	per:spouse	DOC_000|1|5:7,22:30
+GeorgeBush	USA	loc:citizen	DOC_000|2|33:42,20:23
+BarackObama	USA	loc:citizen	DOC_000|2|0:2,20:23
+MichelleObama	USA	loc:citizen	DOC_000|2|47:54,20:23
