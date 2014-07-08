@@ -37,14 +37,13 @@
 
 .container {
   padding: 5px;
-  height: 625px;
   position:relative;
 }
 
 .canvas {
   background-color: #eee;
   border: 1px solid #666;
-  height: 100%;
+  height: 955px;
   width: 100%;
   position:absolute;
 }

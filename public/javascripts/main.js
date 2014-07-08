@@ -124,8 +124,8 @@ function hideLabel(d) {
 }
 
 function run() {
-    width = $(".canvas").parent().width();
-    height = $(".canvas").parent().height(),
+    width = $(".canvas").width();
+    height = $(".canvas").height(),
     svg = d3.select(".canvas").append("svg")
             .attr("width", width)
             .attr("height", height)
