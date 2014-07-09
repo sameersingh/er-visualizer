@@ -254,25 +254,38 @@ function selectRelation(d) {
 
 function hideAllBoxes() {
     d3.select(".infoBox").transition().style("opacity", "0.0")
-        .each("end", function() { d3.select(this).style("visibility", "hidden"); d3.select("#infoBoxText").text(""); });
-    d3.select(".freebaseBox").transition().style("opacity", "0.0")
-        .each("end", function() { d3.select(this).style("visibility", "hidden"); d3.select("#freebaseText").text(""); });
-    d3.select(".predictionBox").transition().style("opacity", "0.0")
-        .each("end", function() { d3.select(this).style("visibility", "hidden"); d3.select("#predictionText").text(""); });
-    d3.select(".provenanceBox").transition().style("opacity", "0.0")
-        .each("end", function() { d3.select(this).style("visibility", "hidden"); d3.select("#provenanceText").text(""); });
+        .each("end", function() {
+            d3.select(this).style("visibility", "hidden");
+            d3.select("#infoBoxText").text("");
+            d3.select("#infoBoxHeading").text("");
+            d3.select("#infoBoxTable").text("");
+        });
+    d3.select(".provWindow").transition().style("opacity", "0.0")
+        .each("end", function() {
+            d3.select(this).style("visibility", "hidden");
+            d3.select("#freebaseText").text("");
+            d3.select("#predictionText").text("");
+            d3.select("#provenanceText").text("");
+        });
 }
 
 function showAllBoxes(infoEnd) {
-        d3.select(".infoBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible"); d3.select("#infoBoxText").text("Loading..."); })
-            .each("end", infoEnd);
-        d3.select(".freebaseBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible"); d3.select("#freebaseText").text("Loading..."); });
-        d3.select(".predictionBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible"); d3.select("#predictionText").text("Loading..."); });
-        d3.select(".provenanceBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible"); d3.select("#provenanceText").text("Loading..."); });
+    d3.select(".infoBox").transition().style("opacity", "1.0")
+        .each("start", function() {
+            d3.select(this).style("visibility", "visible");
+            d3.select("#infoBoxText").text("");
+            d3.select("#infoBoxImg").attr("src", "");
+            d3.select("#infoBoxHeading").text("Loading...");
+            d3.select("#infoBoxTable").text("");
+        })
+        .each("end", infoEnd);
+    d3.select(".provWindow").transition().style("opacity", "1.0")
+        .each("start", function() {
+            d3.select(this).style("visibility", "visible");
+            d3.select("#freebaseText").text("Loading...");
+            d3.select("#predictionText").text("Loading...");
+            d3.select("#provenanceText").text("Loading...");
+        });
 }
 
 function getEntityInfo(e, onFinish) {
@@ -291,13 +304,14 @@ function displayEntityInfo(e, info) {
       // d3.select(".debugBox").text(JSON.stringify(e)+JSON.stringify(info));
       infoBox.text("");
       // name
-      infoBox.append("h4").text(e.name);
+      d3.select("#infoBoxHeading").text(e.name);
       // image
-      infoBox.append("img")
-        .attr("src", "https://www.googleapis.com/freebase/v1/image" + info.freebaseInfo["/common/topic/image"] + "?key=AIzaSyCQVC9yA72POMg2VjiQhSJQQP1nf3ToZTs&maxwidth=100")
-        .attr("width", "100px");
+      d3.select("#infoBoxImg").attr("src", "https://www.googleapis.com/freebase/v1/image" + info.freebaseInfo["/common/topic/image"] + "?key=AIzaSyCQVC9yA72POMg2VjiQhSJQQP1nf3ToZTs&maxwidth=100")
+        //      infoBox.append("img")
+        //        .attr("width", "100px")
+        //        .attr("class", "img-thumbnail");
       // freebase info (as table)
-      var table = infoBox.append("table"),
+      var table = d3.select("#infoBoxTable"),
           // thead = table.append("thead"),
           tbody = table.append("tbody");
       for(key in info.freebaseInfo) {

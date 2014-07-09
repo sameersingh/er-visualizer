@@ -54,19 +54,22 @@ body, html {
   height:100%;
 }
 
-.infoWindow {
+.provWindow {
   float:right;
   width:33%;
   position:absolute;
   right:10px;
   top:10px;
   z-index:100;
+  visibility: hidden;
+  overflow:auto;
+  max-height: 100%;
   /*margin-left: 60%;
   margin-right:0px;*/
 }
 
 .canvas {
-  background-color: #eee;
+  background-color: #fefefe;
   border: 1px solid #666;
   height: 100%;
   width: 100%;
@@ -87,34 +90,20 @@ body, html {
 }
 
 .infoBox {
-  padding: 5px;
-  background-color: #fff;
-  border: 1px solid #666;
-  border-radius: 5px;
-  height: 300px;
-  width: 270px;
+  width: 20%;
   float: left;
   position:absolute;
   top:10px;
   left:10px;
   visibility: hidden;
   overflow:auto;
-}
-
-.sidebox {
+  /*
+  height: 300px;
   padding: 5px;
   background-color: #fff;
   border: 1px solid #666;
   border-radius: 5px;
-  max-height: 300px;
-  /*
-  width: 370px;
-  float: right;
-  position:absolute;
-  top:300px;
-  right:0;*/
-  visibility: hidden;
-  overflow:auto;
+  */
 }
 
 .closeButton {
