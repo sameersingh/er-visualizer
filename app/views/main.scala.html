@@ -17,21 +17,39 @@
         <script src="@routes.Assets.at("javascripts/main.js")" type="text/javascript"></script>
     </head>
     <body class="container">
-        <div id="entityEntry" class="form-group">
-            <input class="typeahead form-control" type="text" placeholder="Entity Name">
+        <div class="center">
+            <div id="entityEntry" class="centerContent form-group">
+                <input class="typeahead form-control" type="text" placeholder="Entity Name">
+            </div>
         </div>
-        <div class="canvas">
-            <div class="infoBox">
-            info
-            </div>
-            <div class="freebaseBox">
-            freebase
-            </div>
-            <div class="predictionBox">
-            prediction
-            </div>
-            <div class="provenanceBox">
-            provenance
+        <div class="infoWindow">
+                <div class="freebaseBox sidebox">
+                <button type="button" class="btn btn-default btn-sm closeButton" onclick="d3.select('.freebaseBox').style('visibility', 'hidden')">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+                <span id="freebaseText"></span>
+                </div>
+                <div class="predictionBox sidebox">
+                <button type="button" class="btn btn-default btn-sm closeButton">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+                <span id="predictionText"></span>
+                </div>
+                <div class="provenanceBox sidebox">
+                <button type="button" class="btn btn-default btn-sm closeButton">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+                <span id="provenanceText"></span>
+                </div>
+        </div>
+        <div class="graphWindow">
+            <div class="canvas">
+                <div class="infoBox">
+                <button type="button" class="btn btn-default btn-sm closeButton" onclick="d3.select('.infoBox').style('visibility', 'hidden')">
+                    <span class="glyphicon glyphicon-remove"></span>
+                </button>
+                <span id="infoBoxText"></span>
+                </div>
             </div>
         </div>
         <script>

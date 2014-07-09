@@ -188,14 +188,7 @@ function unselect() {
     d3.selectAll(".selected").classed("selected", false);
     //d3.select("#entityEntry .tt-input").attr("value", "");
     $("#entityEntry .tt-input").typeahead("val", "");
-    d3.select(".infoBox").transition().style("opacity", "0.0")
-        .each("end", function() { d3.select(this).style("visibility", "hidden").text(""); });
-    d3.select(".freebaseBox").transition().style("opacity", "0.0")
-        .each("end", function() { d3.select(this).style("visibility", "hidden").text(""); });
-    d3.select(".predictionBox").transition().style("opacity", "0.0")
-        .each("end", function() { d3.select(this).style("visibility", "hidden").text(""); });
-    d3.select(".provenanceBox").transition().style("opacity", "0.0")
-        .each("end", function() { d3.select(this).style("visibility", "hidden").text(""); });
+    hideAllBoxes();
     force.start();
 }
 
@@ -209,7 +202,7 @@ function selectEntity(d) {
         var circle = d3.select("#"+d.id).select("circle");
         circle.classed("selected", true);
         data.currEnt.fixed = true;
-        var cx = width/2;
+        var cx = (width/2)-100;
         var cy = height/2;
         updateEntPosition(data.currEnt, cx, cy);
         //d3.select("#"+d.id).transition().attr("transform", function(d) { return "translate("+(width/2)+ "," + (height/2) + ")"; });
@@ -224,16 +217,7 @@ function selectEntity(d) {
         // d3.select("#entityEntry .tt-input").attr("value", d.name);
         $("#entityEntry .tt-input").typeahead("val", d.name);
         // entity info
-        d3.select(".infoBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible").text("Loading..."); });
-        getEntityInfo(d, displayEntityInfo);
-
-        d3.select(".freebaseBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible").text("Loading..."); });
-        d3.select(".predictionBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible").text("Loading..."); });
-        d3.select(".provenanceBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible").text("Loading..."); });
+        showAllBoxes(function(){getEntityInfo(d, displayEntityInfo)});
         force.start();
     } else {
         unselect();
@@ -251,29 +235,44 @@ function selectRelation(d) {
         d3.select("#"+d.sourceId).select("circle").classed("selected", true);
         d3.select("#"+d.targetId).select("circle").classed("selected", true);
 
-        var cx = width/2;
+        var cx = (width/2)-100;
         var cy = height/2;
         d.source.fixed = true;
         d.target.fixed = true;
-        updateEntPosition(d.source, cx-75, cy);
-        updateEntPosition(d.target, cx+75, cy);
+        updateEntPosition(d.source, cx, cy+75);
+        updateEntPosition(d.target, cx, cy-75);
 
         // global settings
         // d3.select("#entityEntry .tt-input").attr("value", d.name);
         $("#entityEntry .tt-input").typeahead("val", d.source.name + "~>" + d.target.name);
 
-        // relation info
-        d3.select(".infoBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible").text("Loading..."); });
+        showAllBoxes(function(){});
         // getEntityInfo(d, displayEntityInfo);
-
-        d3.select(".freebaseBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible").text("Loading..."); });
-        d3.select(".predictionBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible").text("Loading..."); });
-        d3.select(".provenanceBox").transition().style("opacity", "1.0")
-            .each("start", function() { d3.select(this).style("visibility", "visible").text("Loading..."); });
+        force.start();
     } else { unselect(); }
+}
+
+function hideAllBoxes() {
+    d3.select(".infoBox").transition().style("opacity", "0.0")
+        .each("end", function() { d3.select(this).style("visibility", "hidden"); d3.select("#infoBoxText").text(""); });
+    d3.select(".freebaseBox").transition().style("opacity", "0.0")
+        .each("end", function() { d3.select(this).style("visibility", "hidden"); d3.select("#freebaseText").text(""); });
+    d3.select(".predictionBox").transition().style("opacity", "0.0")
+        .each("end", function() { d3.select(this).style("visibility", "hidden"); d3.select("#predictionText").text(""); });
+    d3.select(".provenanceBox").transition().style("opacity", "0.0")
+        .each("end", function() { d3.select(this).style("visibility", "hidden"); d3.select("#provenanceText").text(""); });
+}
+
+function showAllBoxes(infoEnd) {
+        d3.select(".infoBox").transition().style("opacity", "1.0")
+            .each("start", function() { d3.select(this).style("visibility", "visible"); d3.select("#infoBoxText").text("Loading..."); })
+            .each("end", infoEnd);
+        d3.select(".freebaseBox").transition().style("opacity", "1.0")
+            .each("start", function() { d3.select(this).style("visibility", "visible"); d3.select("#freebaseText").text("Loading..."); });
+        d3.select(".predictionBox").transition().style("opacity", "1.0")
+            .each("start", function() { d3.select(this).style("visibility", "visible"); d3.select("#predictionText").text("Loading..."); });
+        d3.select(".provenanceBox").transition().style("opacity", "1.0")
+            .each("start", function() { d3.select(this).style("visibility", "visible"); d3.select("#provenanceText").text("Loading..."); });
 }
 
 function getEntityInfo(e, onFinish) {
@@ -286,9 +285,9 @@ function getEntityInfo(e, onFinish) {
 }
 
 function displayEntityInfo(e, info) {
-    console.log("disp einfo: " + e.id)
     if(data.currEnt.id == e.id) {
-      var infoBox = d3.select(".infoBox");
+      console.log("disp einfo: " + e.id)
+      var infoBox = d3.select("#infoBoxText");
       // d3.select(".debugBox").text(JSON.stringify(e)+JSON.stringify(info));
       infoBox.text("");
       // name
@@ -311,6 +310,8 @@ function displayEntityInfo(e, info) {
           tr.append("td").text(info.freebaseInfo[key]);
         }
       }
+    } else {
+      console.log("einfo obsolete: " + e.id + ", curr: " + data.currEnt.id);
     }
 }
 

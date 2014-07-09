@@ -35,17 +35,55 @@
   opacity: 1.0;
 }
 
+body, html {
+  height: 100%;
+}
+
 .container {
-  padding: 5px;
   position:relative;
+  max-width:100%;
+  width:100%;
+  height:100%;
+  padding:0px;
+}
+
+.graphWindow {
+/*  position:absolute;
+  width:60%;
+  left: 0px;*/
+  height:100%;
+}
+
+.infoWindow {
+  float:right;
+  width:33%;
+  position:absolute;
+  right:10px;
+  top:10px;
+  z-index:100;
+  /*margin-left: 60%;
+  margin-right:0px;*/
 }
 
 .canvas {
   background-color: #eee;
   border: 1px solid #666;
-  height: 955px;
+  height: 100%;
   width: 100%;
   position:absolute;
+}
+
+.center {
+  position: absolute;
+  top:10px;
+  left:50%;
+  z-index:100;
+}
+
+.centerContent {
+  position: relative;
+  left:-50%;
+  z-index:100;
 }
 
 .infoBox {
@@ -55,57 +93,32 @@
   border-radius: 5px;
   height: 300px;
   width: 270px;
-  float: right;
+  float: left;
   position:absolute;
-  top:0;
-  right:0;
+  top:10px;
+  left:10px;
   visibility: hidden;
   overflow:auto;
 }
 
-.freebaseBox {
+.sidebox {
   padding: 5px;
   background-color: #fff;
   border: 1px solid #666;
   border-radius: 5px;
-  height: 300px;
+  max-height: 300px;
+  /*
   width: 370px;
   float: right;
   position:absolute;
   top:300px;
-  right:0;
+  right:0;*/
   visibility: hidden;
   overflow:auto;
 }
 
-.predictionBox {
-  padding: 5px;
-  background-color: #fff;
-  border: 1px solid #666;
-  border-radius: 5px;
-  height: 100px;
-  width: 370px;
-  float: right;
-  position:absolute;
-  top:600px;
-  right:0;
-  visibility: hidden;
-  overflow:auto;
-}
-
-.provenanceBox {
-  padding: 5px;
-  background-color: #fff;
-  border: 1px solid #666;
-  border-radius: 5px;
-  height: 100px;
-  width: 370px;
-  float: right;
-  position:absolute;
-  top:700px;
-  right:0;
-  visibility: hidden;
-  overflow:auto;
+.closeButton {
+  float:right;
 }
 
 /* typeahead specific style */
@@ -113,9 +126,9 @@
 .tt-query,
 .tt-hint {
   width: 100%;
-  height: 30px;
-  padding: 8px 12px;
-  font-size: 24px;
+  height: 40px;
+  padding: 4px 6px;
+  font-size: 16px;
   line-height: 30px;
   border: 2px solid #ccc;
   border-radius: 5px;
@@ -127,7 +140,7 @@
 }
 
 .twitter-typeahead {
-  width: 400px;
+  width: 250px;
 }
 
 .typeahead:focus {
@@ -145,9 +158,9 @@
 }
 
 .tt-dropdown-menu {
-  width: 422px;
-  margin-top: 12px;
-  padding: 8px 0;
+  width: 250px;
+  margin-top: 6px;
+  padding: 4px 0;
   background-color: #fff;
   border: 1px solid #ccc;
   border: 1px solid rgba(0, 0, 0, 0.2);
@@ -158,7 +171,7 @@
 
 .tt-suggestion {
   padding: 3px 20px;
-  font-size: 18px;
+  font-size: 12px;
   line-height: 24px;
 }
 
