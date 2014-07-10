@@ -14,7 +14,7 @@ class InMemoryDBTest {
     val db = new InMemoryDB
     // docs
     val doc1Id = "DOC_000"
-    db._documents(doc1Id) = Document(doc1Id, "Obama is awesome. Yes, he is married to Michelle. He is a resident of USA, same as George W. and Michelle.",
+    db._documents(doc1Id) = Document(doc1Id, "", "", "", "Obama is awesome. Yes, he is married to Michelle. He is a resident of USA, same as George W. and Michelle.",
       Seq(Sentence(doc1Id, 0, "Obama is awesome."),
         Sentence(doc1Id, 1, "Yes, he is married to Michelle."),
         Sentence(doc1Id, 2, "He is a resident of USA, same as George W. and Michelle.")))
@@ -43,7 +43,7 @@ class InMemoryDBTest {
 
     // entity text provenances
     db._entityText(barackId) = EntityText(barackId, Seq(Provenance(doc1Id, 0, Seq(0 -> 5)), Provenance(doc1Id, 1, Seq(5 -> 7)), Provenance(doc1Id, 2, Seq(0 -> 2))))
-    db._entityText(michelleId) = EntityText(michelleId, Seq(Provenance(doc1Id, 1, Seq(22 -> 30)), Provenance(doc1Id, 2, Seq(47 -> 54))))
+    db._entityText(michelleId) = EntityText(michelleId, Seq(Provenance(doc1Id, 1, Seq(22 -> 30)), Provenance(doc1Id, 2, Seq(47 -> 55))))
     db._entityText(georgeId) = EntityText(georgeId, Seq(Provenance(doc1Id, 2, Seq(33 -> 42))))
     db._entityText(usaId) = EntityText(usaId, Seq(Provenance(doc1Id, 2, Seq(20 -> 23))))
 
@@ -53,7 +53,7 @@ class InMemoryDBTest {
       TypeModelProvenances(barackId, "person", Seq(Provenance(doc1Id, 1, Seq(5 -> 7))))
     db._entityTypePredictions(michelleId) = Seq("person")
     db._entityTypeProvenances.getOrElseUpdate(michelleId, new mutable.HashMap)("person") =
-      TypeModelProvenances(michelleId, "person", Seq(Provenance(doc1Id, 1, Seq(22 -> 30)), Provenance(doc1Id, 2, Seq(47 -> 54))))
+      TypeModelProvenances(michelleId, "person", Seq(Provenance(doc1Id, 1, Seq(22 -> 30)), Provenance(doc1Id, 2, Seq(47 -> 55))))
     db._entityTypePredictions(georgeId) = Seq("person")
     db._entityTypeProvenances.getOrElseUpdate(georgeId, new mutable.HashMap)("person") =
       TypeModelProvenances(georgeId, "person", Seq(Provenance(doc1Id, 2, Seq(32 -> 41))))
@@ -83,7 +83,7 @@ class InMemoryDBTest {
     db._relationText(barackMichelleId) = RelationText(barackMichelleId._1, barackMichelleId._2, Seq(Provenance(doc1Id, 1, Seq(5 -> 7, 22 -> 30))))
     db._relationText(georgeUSAId) = RelationText(barackMichelleId._1, barackMichelleId._2, Seq(Provenance(doc1Id, 2, Seq(33 -> 42, 20 -> 23))))
     db._relationText(barackUSAId) = RelationText(barackMichelleId._1, barackMichelleId._2, Seq(Provenance(doc1Id, 2, Seq(0 -> 2, 20 -> 23))))
-    db._relationText(michelleUSAId) = RelationText(michelleUSAId._1, michelleUSAId._2, Seq(Provenance(doc1Id, 2, Seq(47 -> 54, 20 -> 23))))
+    db._relationText(michelleUSAId) = RelationText(michelleUSAId._1, michelleUSAId._2, Seq(Provenance(doc1Id, 2, Seq(47 -> 55, 20 -> 23))))
 
     // relations type provenances
     db._relationPredictions(barackMichelleId) = Seq("per:spouse")
@@ -100,7 +100,7 @@ class InMemoryDBTest {
 
     db._relationPredictions(michelleUSAId) = Seq("loc:citizen")
     db._relationProvenances.getOrElseUpdate(michelleUSAId, new mutable.HashMap)("loc:citizen") =
-      RelModelProvenances(michelleUSAId._1, michelleUSAId._2, "loc:citizen", Seq(Provenance(doc1Id, 2, Seq(47 -> 54, 20 -> 23))))
+      RelModelProvenances(michelleUSAId._1, michelleUSAId._2, "loc:citizen", Seq(Provenance(doc1Id, 2, Seq(47 -> 55, 20 -> 23))))
 
     db
   }

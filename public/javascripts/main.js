@@ -218,7 +218,11 @@ function selectEntity(d) {
         // d3.select("#entityEntry .tt-input").attr("value", d.name);
         $("#entityEntry .tt-input").typeahead("val", d.name);
         // entity info
-        showAllBoxes(function(){getEntityInfo(d, displayEntityInfo)});
+        showAllBoxes(function(){
+            getEntityCmd(d, 'info', displayEntityInfo);
+            getEntityCmd(d, 'fb', displayEntityFreebase);
+            getAndDisplayProvenances(d);
+          });
         force.start();
     } else {
         unselect();
@@ -248,7 +252,6 @@ function selectRelation(d) {
         $("#entityEntry .tt-input").typeahead("val", d.source.name + "~>" + d.target.name);
 
         showAllBoxes(function(){});
-        // getEntityInfo(d, displayEntityInfo);
         force.start();
     } else { unselect(); }
 }
@@ -260,17 +263,16 @@ function hideAllBoxes() {
             d3.select("#infoBoxText").text("");
             d3.select("#infoBoxHeading").text("");
             d3.select("#infoBoxTable").text("");
+            d3.select("#infoBoxList").text("");
         });
     d3.select(".provWindow").transition().style("opacity", "0.0")
         .each("end", function() {
             d3.select(this).style("visibility", "hidden");
-            d3.select("#freebaseText").text("");
-            d3.select("#predictionText").text("");
-            d3.select("#provenanceText").text("");
+            d3.select("#accordion").text("");
         });
 }
 
-function showAllBoxes(infoEnd) {
+function showAllBoxes(onFinish) {
     d3.select(".infoBox").transition().style("opacity", "1.0")
         .each("start", function() {
             d3.select(this).style("visibility", "visible");
@@ -278,21 +280,20 @@ function showAllBoxes(infoEnd) {
             d3.select("#infoBoxImg").attr("src", "");
             d3.select("#infoBoxHeading").text("Loading...");
             d3.select("#infoBoxTable").text("");
+            d3.select("#infoBoxList").text("");
         })
-        .each("end", infoEnd);
+        .each("end", onFinish);
     d3.select(".provWindow").transition().style("opacity", "1.0")
         .each("start", function() {
             d3.select(this).style("visibility", "visible");
-            d3.select("#freebaseText").text("Loading...");
-            d3.select("#predictionText").text("Loading...");
-            d3.select("#provenanceText").text("Loading...");
+            d3.select("#accordion").text("");
         });
 }
 
-function getEntityInfo(e, onFinish) {
+function getEntityCmd(e, cmd, onFinish) {
     $.ajax({
        type: "GET",
-       url: '/entity/info/'+e.id,
+       url: '/entity/'+cmd+'/'+e.id,
        success: function(d) { onFinish(e, d); },
        error: function(j, t, e) { console.log(e); }
     });
@@ -328,6 +329,178 @@ function displayEntityInfo(e, info) {
     } else {
       console.log("einfo obsolete: " + e.id + ", curr: " + data.currEnt.id);
     }
+}
+
+function displayEntityFreebase(e, fbts) {
+    if(data.currEnt.id == e.id) {
+      console.log("disp efb: " + e.id);
+      // console.log(fbts);
+      var infoBoxList = d3.select('#infoBoxList');
+      infoBoxList.text("");
+      infoBoxList.selectAll("li")
+        .data(fbts.types)
+        .enter()
+        .append("li")
+        .classed('list-group-item', true)
+        //.classed('prov-item', true)
+        .text(function(d) {return d;});
+    } else {
+      console.log("efb obsolete: " + e.id + ", curr: " + data.currEnt.id);
+    }
+}
+
+function getAndDisplayProvenances(d) {
+    var accordian = d3.select('#accordion');
+    // add all text panel
+    var textPanel = accordian
+                        .append("div")
+                        .attr("class", "panel panel-default");
+    // heading
+    textPanel.append("div")
+             .attr("class", "panel-heading")
+             .append("h4")
+             .attr("class", "panel-title")
+             .append("a")
+             .attr("data-toggle", "collapse")
+             .attr("data-parent", "#accordian")
+             .attr("href", "#allTextPanel")
+             .text("All Sentences");
+    // body
+    textPanel.append("div")
+             .attr("class", "panel-collapse collapse")
+             .attr("id", "allTextPanel")
+             .append("ul")
+             .attr("class", "list-group provListGroup")
+             .attr("id", "allTextList")
+             .text("Loading...");
+    getEntityCmd(d, 'text', displayEntityText);
+
+    // type Provenances
+    getEntityCmd(d, 'types', displayTypeProvs);
+}
+
+function displayEntityText(e, txt) {
+    if(data.currEnt.id == e.id) {
+      console.log("disp etxt: " + e.id);
+      // console.log(txt);
+      var allTextList = d3.select('#allTextList');
+      allTextList.text("");
+      allTextList.selectAll("li")
+        .data(txt.provenances)
+        .enter()
+        .append("li")
+        .classed('list-group-item', true)
+        .classed('prov-item', true)
+        .text("Loading...")
+        .each(function(d) { displayProv(d, d3.select(this)) });
+    } else {
+      console.log("etxt obsolete: " + e.id + ", curr: " + data.currEnt.id);
+    }
+}
+
+function displayTypeProvs(e, types) {
+    if(data.currEnt.id == e.id) {
+      console.log("disp etPs: " + e.id);
+      var pairs = types.map(function(t) {return { id: e.id, type: t};})
+      // console.log(types);
+      // console.log(pairs);
+      var accordion = d3.select('#accordion');
+      // add all text panel
+      var textPanel = accordion
+                      .selectAll(".typeProv")
+                      .data(pairs)
+                      .enter()
+                      .append("div")
+                      .attr("class", "panel panel-default typeProv");
+      // heading
+      textPanel.append("div")
+               .attr("class", "panel-heading")
+               .append("h4")
+               .attr("class", "panel-title")
+               .append("a")
+               .attr("data-toggle", "collapse")
+               .attr("data-parent", "#accordian")
+               .attr("href", function(d) {return '#'+d.type;})
+               .text(function(d) {return d.type;});
+      // body
+      textPanel.append("div")
+               .attr("class", "panel-collapse collapse")
+               .attr("id", function(d) {return d.type;})
+               .append("ul")
+               .attr("class", "list-group provListGroup")
+               .attr("id", function(d) {return d.type+'List';})
+               .each(function(p) {
+                 getAndDisplayTypeProv(p.id, p.type, d3.select(this));
+               });
+    } else {
+      console.log("etPs obsolete: " + e.id + ", curr: " + data.currEnt.id);
+    }
+}
+
+function getAndDisplayTypeProv(id, type, dom) {
+    $.ajax({
+       type: "GET",
+       url: '/entity/typeprov/'+id+'/'+type,
+       success: function(d) {
+         displayTypeProv(id, type, dom, d);
+       },
+       error: function(j, t, e) { console.log(e); }
+    });
+}
+
+function displayTypeProv(id, type, dom, tp) {
+    if(data.currEnt.id == id) {
+      console.log("disp etp: " + id + ", "+ type);
+      //console.log(tp);
+      var typeProvList = dom;
+      typeProvList.text("");
+      typeProvList.selectAll("li")
+        .data(tp.provenances)
+        .enter()
+        .append("li")
+        .classed('list-group-item', true)
+        .classed('prov-item', true)
+        .text("Loading...")
+        .each(function(p) { displayProv(p, d3.select(this)) });
+    } else {
+      console.log("etxt obsolete: " + id + ", curr: " + data.currEnt.id);
+    }
+}
+
+
+function displayProv(prov, dom) {
+  //dom.text(JSON.stringify(prov));
+  $.ajax({
+     type: "GET",
+     url: '/docs/sentence/'+prov.docId+'/'+prov.sentId,
+     success: function(d) {
+       dom.text("");
+       // docid
+       dom.append("a")
+         .attr("href", "/docs/doc/"+d.docId)
+         .attr("target", "_blank")
+         .text(d.docId)
+         .classed("docId", true);
+       var sent = d.string;
+       // dom.append("span")
+       //  .text(sent + JSON.stringify(prov.tokPos));
+       var currIndex = 0;
+       for(i=0; i<prov.tokPos.length; i+=1) {
+         // string
+         dom.append("span")
+           .text(sent.slice(currIndex, prov.tokPos[i][0]));
+         // mention
+         dom.append("mark")
+           //.classed("argument", true)
+           .text(sent.slice(prov.tokPos[i][0], prov.tokPos[i][1]));
+         currIndex = prov.tokPos[i][1];
+       }
+       // last part of sent
+       dom.append("span")
+           .text(sent.slice(currIndex, sent.length));
+     },
+     error: function(j, t, e) { console.log(e); }
+  });
 }
 
 function initTypeahead(data) {

@@ -5,9 +5,17 @@
 # Home page
 GET     /                           controllers.Application.index
 
+# Docs etc.
+GET /docs/doc/:doc    controllers.Application.document(doc: String)
+GET /docs/sentence/:doc/:sid    controllers.Application.sentence(doc: String, sid: Int)
+
 # Entity Stuff
 GET /entity/all             controllers.Application.entityHeaders
 GET /entity/info/:id        controllers.Application.entityInfo(id: String)
+GET /entity/fb/:id        controllers.Application.entityFreebase(id: String)
+GET /entity/text/:id        controllers.Application.entityText(id: String)
+GET /entity/types/:id        controllers.Application.entityTypes(id: String)
+GET /entity/typeprov/:id/:etype        controllers.Application.entityTypeProv(id: String, etype: String)
 
 # Relation Stuff
 GET /relation/all                       controllers.Application.relationHeaders

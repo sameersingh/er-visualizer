@@ -8,4 +8,4 @@ case class Provenance(docId: String, sentId: Int, tokPos: Seq[(Int, Int)])
 
 case class Sentence(docId: String, sentId: Int, string: String)
 
-case class Document(docId: String, text: String, sents: Seq[Sentence])
+case class Document(docId: String, path: String, title: String, cite: String, text: String, sents: Seq[Sentence])

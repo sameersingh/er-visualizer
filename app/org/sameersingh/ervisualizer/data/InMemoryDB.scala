@@ -144,7 +144,7 @@ object InMemoryDB {
       for (s <- docSents) {
         sentBuffer += Sentence(docId, sentBuffer.size, s._2)
       }
-      db._documents(docId) = Document(docId, sentBuffer.map(_.string).mkString(" "), sentBuffer)
+      db._documents(docId) = Document(docId, "", "", "", sentBuffer.map(_.string).mkString(" "), sentBuffer)
     }
     // ENTITIES
     // id and header and info and freebase types
