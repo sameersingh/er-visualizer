@@ -81,6 +81,7 @@ function start() {
                 .append("g").attr("class", "node")
                 .attr("id", function(e) { return e.id; })
                 .on("click", function(d) { selectEntity(d); d3.event.stopPropagation(); })
+                .call(force.drag)
                 .on("mouseover", showLabel)
                 .on("mouseout", hideLabel);
   node
@@ -204,7 +205,7 @@ function selectEntity(d) {
         data.currEnt.fixed = true;
         var cx = (width/2)-100;
         var cy = height/2;
-        updateEntPosition(data.currEnt, cx, cy);
+        //updateEntPosition(data.currEnt, cx, cy);
         //d3.select("#"+d.id).transition().attr("transform", function(d) { return "translate("+(width/2)+ "," + (height/2) + ")"; });
         //circle.transition().attr("cx", width/2);
         //data.currEnt.x = width/2;
@@ -239,8 +240,8 @@ function selectRelation(d) {
         var cy = height/2;
         d.source.fixed = true;
         d.target.fixed = true;
-        updateEntPosition(d.source, cx, cy+75);
-        updateEntPosition(d.target, cx, cy-75);
+        //updateEntPosition(d.source, cx, cy+75);
+        //updateEntPosition(d.target, cx, cy-75);
 
         // global settings
         // d3.select("#entityEntry .tt-input").attr("value", d.name);
