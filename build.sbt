@@ -9,3 +9,5 @@ libraryDependencies ++= Seq(
 )     
 
 play.Project.playScalaSettings
+
+libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.3.1"
