@@ -24,12 +24,10 @@
         </div>
         <div class="provWindow panel panel-default">
             <div class="panel-heading clearfix">
+                <button type="button pull-right" class="close" onclick="d3.select('.provWindow').style('visibility', 'hidden')">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
                 <h4  id="provWindowHeading" class="panel-title pull-left" style="padding-top: 7.5px;">Provenance</h4>
-                <div class="btn-group pull-right">
-                    <button type="button" class="btn btn-default btn-sm closeButton" onclick="d3.select('.provWindow').style('visibility', 'hidden')">
-                        <span class="glyphicon glyphicon-remove"></span>
-                    </button>
-                </div>
             </div>
 
             <div class="panel-body">
@@ -41,12 +39,10 @@
             <div class="canvas">
                 <div class="infoBox panel panel-default">
                     <div class="panel-heading clearfix">
+                        <button type="button pull-right" class="close" onclick="d3.select('.infoBox').style('visibility', 'hidden')">
+                            <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                        </button>
                         <h4  id="infoBoxHeading" class="panel-title pull-left" style="padding-top: 7.5px;">Heading</h4>
-                        <div class="btn-group pull-right">
-                            <button type="button" class="btn btn-default btn-sm closeButton" onclick="d3.select('.infoBox').style('visibility', 'hidden')">
-                                <span class="glyphicon glyphicon-remove"></span>
-                            </button>
-                        </div>
                     </div>
                     <div class="panel-body">
                         <img id="infoBoxImg" src="" width="100px" class="img-thumbnail" />
