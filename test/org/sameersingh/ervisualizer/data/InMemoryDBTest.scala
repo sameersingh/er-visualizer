@@ -86,21 +86,21 @@ class InMemoryDBTest {
     db._relationText(michelleUSAId) = RelationText(michelleUSAId._1, michelleUSAId._2, Seq(Provenance(doc1Id, 2, Seq(47 -> 55, 20 -> 23))))
 
     // relations type provenances
-    db._relationPredictions(barackMichelleId) = Seq("per:spouse")
-    db._relationProvenances.getOrElseUpdate(barackMichelleId, new mutable.HashMap)("per:spouse") =
-      RelModelProvenances(barackMichelleId._1, barackMichelleId._2, "per:spouse", Seq(Provenance(doc1Id, 1, Seq(5 -> 7, 22 -> 30))))
+    db._relationPredictions(barackMichelleId) = Seq("spouse")
+    db._relationProvenances.getOrElseUpdate(barackMichelleId, new mutable.HashMap)("spouse") =
+      RelModelProvenances(barackMichelleId._1, barackMichelleId._2, "spouse", Seq(Provenance(doc1Id, 1, Seq(5 -> 7, 22 -> 30))))
 
-    db._relationPredictions(georgeUSAId) = Seq("loc:citizen")
-    db._relationProvenances.getOrElseUpdate(georgeUSAId, new mutable.HashMap)("loc:citizen") =
-      RelModelProvenances(georgeUSAId._1, georgeUSAId._2, "loc:citizen", Seq(Provenance(doc1Id, 2, Seq(33 -> 42, 20 -> 23))))
+    db._relationPredictions(georgeUSAId) = Seq("citizen")
+    db._relationProvenances.getOrElseUpdate(georgeUSAId, new mutable.HashMap)("citizen") =
+      RelModelProvenances(georgeUSAId._1, georgeUSAId._2, "citizen", Seq(Provenance(doc1Id, 2, Seq(33 -> 42, 20 -> 23))))
 
-    db._relationPredictions(barackUSAId) = Seq("loc:citizen")
-    db._relationProvenances.getOrElseUpdate(barackUSAId, new mutable.HashMap)("loc:citizen") =
-      RelModelProvenances(barackUSAId._1, barackUSAId._2, "loc:citizen", Seq(Provenance(doc1Id, 2, Seq(0 -> 2, 20 -> 23))))
+    db._relationPredictions(barackUSAId) = Seq("citizen")
+    db._relationProvenances.getOrElseUpdate(barackUSAId, new mutable.HashMap)("citizen") =
+      RelModelProvenances(barackUSAId._1, barackUSAId._2, "citizen", Seq(Provenance(doc1Id, 2, Seq(0 -> 2, 20 -> 23))))
 
-    db._relationPredictions(michelleUSAId) = Seq("loc:citizen")
-    db._relationProvenances.getOrElseUpdate(michelleUSAId, new mutable.HashMap)("loc:citizen") =
-      RelModelProvenances(michelleUSAId._1, michelleUSAId._2, "loc:citizen", Seq(Provenance(doc1Id, 2, Seq(47 -> 55, 20 -> 23))))
+    db._relationPredictions(michelleUSAId) = Seq("citizen")
+    db._relationProvenances.getOrElseUpdate(michelleUSAId, new mutable.HashMap)("citizen") =
+      RelModelProvenances(michelleUSAId._1, michelleUSAId._2, "citizen", Seq(Provenance(doc1Id, 2, Seq(47 -> 55, 20 -> 23))))
 
     db
   }

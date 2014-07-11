@@ -190,7 +190,7 @@ function unselect() {
     //d3.select("#entityEntry .tt-input").attr("value", "");
     $("#entityEntry .tt-input").typeahead("val", "");
     hideAllBoxes();
-    force.start();
+    //force.start();
 }
 
 function selectEntity(d) {
@@ -206,16 +206,8 @@ function selectEntity(d) {
         var cx = (width/2)-100;
         var cy = height/2;
         //updateEntPosition(data.currEnt, cx, cy);
-        //d3.select("#"+d.id).transition().attr("transform", function(d) { return "translate("+(width/2)+ "," + (height/2) + ")"; });
-        //circle.transition().attr("cx", width/2);
-        //data.currEnt.x = width/2;
-        //data.currEnt.y = height/2;
-        //data.currEnt.px = width/2;
-        //data.currEnt.py = height/2;
-        force.start();
-        // tick();
+        //force.start();
         // global settings
-        // d3.select("#entityEntry .tt-input").attr("value", d.name);
         $("#entityEntry .tt-input").typeahead("val", d.name);
         // entity info
         showAllBoxes(function(){
@@ -223,7 +215,7 @@ function selectEntity(d) {
             getEntityCmd(d, 'fb', displayEntityFreebase);
             getAndDisplayProvenances(d);
           });
-        force.start();
+        //force.start();
     } else {
         unselect();
     }
@@ -248,11 +240,14 @@ function selectRelation(d) {
         //updateEntPosition(d.target, cx, cy-75);
 
         // global settings
-        // d3.select("#entityEntry .tt-input").attr("value", d.name);
         $("#entityEntry .tt-input").typeahead("val", d.source.name + "~>" + d.target.name);
 
-        showAllBoxes(function(){});
-        force.start();
+        showAllBoxes(function(){
+            getRelCmd(d, 'fb', displayRelFreebase);
+            displayRelInfo(d);
+            getAndDisplayProvenances(d);
+        });
+        //force.start();
     } else { unselect(); }
 }
 
@@ -299,6 +294,15 @@ function getEntityCmd(e, cmd, onFinish) {
     });
 }
 
+function getRelCmd(l, cmd, onFinish) {
+    $.ajax({
+       type: "GET",
+       url: '/relation/'+cmd+'/'+l.source.id+'/'+l.target.id,
+       success: function(d) { onFinish(l, d); },
+       error: function(j, t, e) { console.log(e); }
+    });
+}
+
 function displayEntityInfo(e, info) {
     if(data.currEnt.id == e.id) {
       console.log("disp einfo: " + e.id)
@@ -306,9 +310,22 @@ function displayEntityInfo(e, info) {
       // d3.select(".debugBox").text(JSON.stringify(e)+JSON.stringify(info));
       infoBox.text("");
       // name
-      d3.select("#infoBoxHeading").text(e.name);
+      d3.select("#infoBoxHeading").text("");
+      d3.select("#infoBoxHeading")
+        .append("span")
+        .classed("glyphicon", true)
+        .classed("glyphicon-user", e.nerTag == "PER")
+        .classed("glyphicon-map-marker", e.nerTag == "LOC")
+        .classed("glyphicon-briefcase", e.nerTag == "ORG")
+        .classed("glyphicon-question-sign", e.nerTag == "MISC");
+      d3.select("#infoBoxHeading")
+        .append("span")
+        .text("  " +e.name);
       // image
-      d3.select("#infoBoxImg").attr("src", "https://www.googleapis.com/freebase/v1/image" + info.freebaseInfo["/common/topic/image"] + "?key=AIzaSyCQVC9yA72POMg2VjiQhSJQQP1nf3ToZTs&maxwidth=100")
+      d3.select("#infoBoxImg")
+        .attr("src", "https://www.googleapis.com/freebase/v1/image" + info.freebaseInfo["/common/topic/image"] + "?key=AIzaSyCQVC9yA72POMg2VjiQhSJQQP1nf3ToZTs&maxwidth=100")
+        .classed("img-thumbnail", true)
+        .attr("width", "100px");
         //      infoBox.append("img")
         //        .attr("width", "100px")
         //        .attr("class", "img-thumbnail");
@@ -331,6 +348,23 @@ function displayEntityInfo(e, info) {
     }
 }
 
+function displayRelInfo(l) {
+    var name = l.source.name + " ~><br>" + l.target.name;
+    if(data.currLink == l) {
+      console.log("disp rinfo: " + name)
+      var infoBox = d3.select("#infoBoxText");
+      infoBox.text("Relation between " + l.source.name + " and " + l.target.name);
+      // name
+      d3.select("#infoBoxHeading").html(name);
+      // image
+      d3.select("#infoBoxImg").attr("src", "")
+        .classed("img-thumbnail", false)
+        .attr("width", "0px");
+    } else {
+      console.log("linfo obsolete: " + name + ", curr: " + data.currLink);
+    }
+}
+
 function displayEntityFreebase(e, fbts) {
     if(data.currEnt.id == e.id) {
       console.log("disp efb: " + e.id);
@@ -349,7 +383,29 @@ function displayEntityFreebase(e, fbts) {
     }
 }
 
+function displayRelFreebase(l, fbts) {
+    if(data.currLink == l) {
+      console.log("disp rfb: " + l.source.id + "~>" + l.target.id);
+      console.log(fbts);
+      var infoBoxList = d3.select('#infoBoxList');
+      infoBoxList.text("");
+      infoBoxList.selectAll("li")
+        .data(fbts.rels)
+        .enter()
+        .append("li")
+        .classed('list-group-item', true)
+        //.classed('prov-item', true)
+        .text(function(d) {return d;});
+    } else {
+      console.log("rfb obsolete: " + l + ", curr: " + data.currLink);
+    }
+}
+
 function getAndDisplayProvenances(d) {
+    var isEntity = true;
+    if(d == data.currLink) {
+        isEntity = false;
+    }
     var accordian = d3.select('#accordion');
     // add all text panel
     var textPanel = accordian
@@ -373,16 +429,18 @@ function getAndDisplayProvenances(d) {
              .attr("class", "list-group provListGroup")
              .attr("id", "allTextList")
              .text("Loading...");
-    getEntityCmd(d, 'text', displayEntityText);
-
-    // type Provenances
-    getEntityCmd(d, 'types', displayTypeProvs);
+    if(isEntity) {
+      getEntityCmd(d, 'text', displayEntityText);
+      getEntityCmd(d, 'types', displayTypeProvs);
+    } else {
+      getRelCmd(d, 'text', displayEntityText);
+      getRelCmd(d, 'types', displayTypeProvs);
+    }
 }
 
 function displayEntityText(e, txt) {
-    if(data.currEnt.id == e.id) {
-      console.log("disp etxt: " + e.id);
-      // console.log(txt);
+    if(data.currEnt == e || data.currLink == e ) {
+      // console.log("disp etxt: " + e.id);
       var allTextList = d3.select('#allTextList');
       allTextList.text("");
       allTextList.selectAll("li")
@@ -399,9 +457,9 @@ function displayEntityText(e, txt) {
 }
 
 function displayTypeProvs(e, types) {
-    if(data.currEnt.id == e.id) {
+    if(data.currEnt == e || data.currLink == e) {
       console.log("disp etPs: " + e.id);
-      var pairs = types.map(function(t) {return { id: e.id, type: t};})
+      var pairs = types.map(function(t) {return { src: e, type: t};})
       // console.log(types);
       // console.log(pairs);
       var accordion = d3.select('#accordion');
@@ -430,27 +488,39 @@ function displayTypeProvs(e, types) {
                .attr("class", "list-group provListGroup")
                .attr("id", function(d) {return d.type+'List';})
                .each(function(p) {
-                 getAndDisplayTypeProv(p.id, p.type, d3.select(this));
+                 getAndDisplayTypeProv(p.src, p.type, d3.select(this));
                });
     } else {
       console.log("etPs obsolete: " + e.id + ", curr: " + data.currEnt.id);
     }
 }
 
-function getAndDisplayTypeProv(id, type, dom) {
-    $.ajax({
-       type: "GET",
-       url: '/entity/typeprov/'+id+'/'+type,
-       success: function(d) {
-         displayTypeProv(id, type, dom, d);
-       },
-       error: function(j, t, e) { console.log(e); }
-    });
+function getAndDisplayTypeProv(e, type, dom) {
+    if(e == data.currEnt) {
+        $.ajax({
+           type: "GET",
+           url: '/entity/typeprov/'+e.id+'/'+type,
+           success: function(d) {
+             displayTypeProv(e, type, dom, d);
+           },
+           error: function(j, t, e) { console.log(e); }
+        });
+    } else {
+        $.ajax({
+           type: "GET",
+           url: '/relation/typeprov/'+e.source.id+'/'+e.target.id+'/'+type,
+           success: function(d) {
+             console.log(d);
+             displayTypeProv(e, type, dom, d);
+           },
+           error: function(j, t, e) { console.log(e); }
+        });
+    }
 }
 
-function displayTypeProv(id, type, dom, tp) {
-    if(data.currEnt.id == id) {
-      console.log("disp etp: " + id + ", "+ type);
+function displayTypeProv(e, type, dom, tp) {
+    if(data.currEnt == e || data.currLink == e) {
+      console.log("disp etp: " + e + ", "+ type);
       //console.log(tp);
       var typeProvList = dom;
       typeProvList.text("");
@@ -463,7 +533,7 @@ function displayTypeProv(id, type, dom, tp) {
         .text("Loading...")
         .each(function(p) { displayProv(p, d3.select(this)) });
     } else {
-      console.log("etxt obsolete: " + id + ", curr: " + data.currEnt.id);
+      console.log("etxt obsolete: " + e + ", curr: " + data.currEnt.id);
     }
 }
 
@@ -484,6 +554,7 @@ function displayProv(prov, dom) {
        var sent = d.string;
        // dom.append("span")
        //  .text(sent + JSON.stringify(prov.tokPos));
+       prov.tokPos.sort(function(a,b) {return a[0]-b[0]});
        var currIndex = 0;
        for(i=0; i<prov.tokPos.length; i+=1) {
          // string

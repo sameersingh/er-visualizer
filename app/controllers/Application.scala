@@ -40,7 +40,9 @@ object Application extends Controller {
   implicit val entityTypeProvWrites = Json.writes[TypeModelProvenances]
 
   implicit val relationHeaderWrites = Json.writes[RelationHeader]
-  implicit val relationFreebaseoWrites = Json.writes[RelationFreebase]
+  implicit val relationFreebaseWrites = Json.writes[RelationFreebase]
+  implicit val relationTextWrites = Json.writes[RelationText]
+  implicit val relationProvWrites = Json.writes[RelModelProvenances]
 
   def index = Action {
     Ok(views.html.index("Your new application is ready."))
@@ -95,5 +97,21 @@ object Application extends Controller {
     println("RelFreebase: " + (sid -> tid))
     Ok(Json.toJson(db.relationFreebase(sid, tid)))
   }
+
+  def relationText(sid: String, tid: String) = Action {
+    println("RelFreebase: " + (sid -> tid))
+    Ok(Json.toJson(db.relationText(sid, tid)))
+  }
+
+  def relationPredictions(sid: String, tid: String) = Action {
+    println("RelFreebase: " + (sid -> tid))
+    Ok(Json.toJson(db.relationPredictions(sid, tid)))
+  }
+
+  def relationProvenances(sid: String, tid: String, rtype: String) = Action {
+    println("RelFreebase: " + (sid -> tid))
+    Ok(Json.toJson(db.relationProvenances(sid, tid, rtype)))
+  }
+
 
 }

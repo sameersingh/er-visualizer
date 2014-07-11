@@ -19,7 +19,10 @@ GET /entity/typeprov/:id/:etype        controllers.Application.entityTypeProv(id
 
 # Relation Stuff
 GET /relation/all                       controllers.Application.relationHeaders
-GET /relation/freebase/:sid/:tid        controllers.Application.relationFreebase(sid: String, tid: String)
+GET /relation/fb/:sid/:tid        controllers.Application.relationFreebase(sid: String, tid: String)
+GET /relation/text/:sid/:tid        controllers.Application.relationText(sid: String, tid: String)
+GET /relation/types/:sid/:tid        controllers.Application.relationPredictions(sid: String, tid: String)
+GET /relation/typeprov/:sid/:tid/:rtype        controllers.Application.relationProvenances(sid: String, tid: String, rtype: String)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
