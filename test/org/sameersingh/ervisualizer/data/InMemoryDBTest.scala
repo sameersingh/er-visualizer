@@ -38,7 +38,7 @@ class InMemoryDBTest {
     val usaId = "USA"
     db._entityIds += usaId
     db._entityHeader(usaId) = EntityHeader(usaId, "United State of America", "LOC", 0.8)
-    db._entityInfo(usaId) = EntityInfo(usaId, Map("/mid" -> "/m/09c7w0", "/common/topic/image" -> "/m/02bs94j"))
+    db._entityInfo(usaId) = EntityInfo(usaId, Map("/mid" -> "/m/09c7w0", "/common/topic/image" -> "/m/02nbh90"))
     db._entityFreebase(usaId) = EntityFreebase(usaId, Seq("/location/country", "/location/nation"))
 
     // entity text provenances
