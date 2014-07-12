@@ -12,6 +12,8 @@ play.Project.playScalaSettings
 
 resolvers += "Local Maven Repository" at "file:///"+Path.userHome+"/.m2/repository"
 
+resolvers += "Local Ivy2 Repository" at "file:///"+Path.userHome+"/.ivy2/local"
+
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
 libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.3.1"
