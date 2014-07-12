@@ -87,7 +87,7 @@ class MultiRRunner(val pathToMultirFiles: String,
         val result = getPrediction(features.toList, arg1, arg2, senText)
         if (result != null) {
           val relationScoreTriple: Triple[String, Double, Double] = getPrediction(features.toList, arg1, arg2, senText)._1
-          val extractionString: String = arg1.getArgName + " " + relationScoreTriple._2 + " " + arg2.getArgName + "\n" + senText
+          val extractionString: String = arg1.getArgName + " " + relationScoreTriple._1 + " " + arg2.getArgName + "\n" + senText
           extractions.add(new Pair[String, Double](extractionString, relationScoreTriple._3))
         }
       }
