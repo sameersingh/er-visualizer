@@ -12,7 +12,7 @@ play.Project.playScalaSettings
 
 resolvers += "Local Maven Repository" at "file:///"+Path.userHome+"/.m2/repository"
 
-resolvers += "Local Ivy2 Repository" at "file:///"+Path.userHome+"/.ivy2/local"
+resolvers += Resolver.file("Local ivy2 repo", file(System.getProperty("user.home") + "/.ivy2/local"))(Resolver.ivyStylePatterns)
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
