@@ -11,3 +11,6 @@ libraryDependencies ++= Seq(
 play.Project.playScalaSettings
 
 libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.3.1"
+
+libraryDependencies += "org.mongodb" %% "casbah" % "2.7.2"
+
