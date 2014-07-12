@@ -135,7 +135,11 @@ function run() {
             .attr("width", width)
             .attr("height", height)
             .append("g")
-                .call(d3.behavior.zoom().scaleExtent([1, 100]).on("zoom", zoom))
+                .call(d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoom))
+                .on("mousedown.zoom", null)
+                .on("touchstart.zoom", null)
+                .on("touchmove.zoom", null)
+                .on("touchend.zoom", null)
               .append("g")
             .on("click", unselect);
 
