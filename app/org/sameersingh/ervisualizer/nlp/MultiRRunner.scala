@@ -58,6 +58,8 @@ class MultiRRunner(val pathToMultirFiles: String,
     }
   }
 
+  init()
+
   def extractFromText(text: String, name: String) {
     import scala.collection.JavaConversions._
 
