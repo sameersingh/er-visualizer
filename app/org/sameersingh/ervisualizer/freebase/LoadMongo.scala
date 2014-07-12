@@ -65,7 +65,7 @@ class LoadMongo(host: String = "localhost", port: Int) {
     }
     source.close()
     buffer.forceInsert()
-    buffer.coll.createIndex("entity")
+    buffer.coll.createIndex(MongoDBObject("entity" -> 1))
   }
 
   def loadEntityImages(fname: String) {
@@ -89,7 +89,7 @@ class LoadMongo(host: String = "localhost", port: Int) {
     }
     source.close()
     buffer.forceInsert()
-    buffer.coll.createIndex("entity")
+    buffer.coll.createIndex(MongoDBObject("entity" -> 1))
   }
 
   def loadEntityDescription(fname: String) {
@@ -112,7 +112,7 @@ class LoadMongo(host: String = "localhost", port: Int) {
     }
     source.close()
     buffer.forceInsert()
-    buffer.coll.createIndex("entity")
+    buffer.coll.createIndex(MongoDBObject("entity" -> 1))
   }
 
   def loadEntityTypes(fname: String) {
@@ -136,7 +136,7 @@ class LoadMongo(host: String = "localhost", port: Int) {
     }
     source.close()
     buffer.forceInsert()
-    buffer.coll.createIndex("entity")
+    buffer.coll.createIndex(MongoDBObject("entity" -> 1))
   }
 }
 
