@@ -14,7 +14,8 @@ import org.sameersingh.ervisualizer.data.Sentence
 import org.sameersingh.ervisualizer.data.Document
 import java.util.Arrays
 import java.util
-import play.api.Play
+import play.api.{Configuration, Play}
+import com.typesafe.config.ConfigFactory
 
 /**
  * @author sameer
@@ -186,7 +187,7 @@ class MultiRRunner(val pathToMultirFiles: String,
 
 object TestMultiRRunner {
   def main(args: Array[String]){
-    val modelPath = Play.current.configuration.getString("multir.modelPath").get
+    val modelPath = ConfigFactory.load().getString("multir.modelPath")
     println(modelPath)
     val multir = new MultiRRunner(modelPath)
     multir.extractFromText("Barack Obama is married to Michelle.", "test")
