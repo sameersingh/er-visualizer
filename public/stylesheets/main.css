@@ -97,6 +97,11 @@ body, html {
   position:absolute;
 }
 
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
 .center {
   position: absolute;
   top:10px;

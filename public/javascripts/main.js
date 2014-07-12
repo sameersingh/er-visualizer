@@ -80,7 +80,11 @@ function start() {
   var node = entitySelEnter
                 .append("g").attr("class", "node")
                 .attr("id", function(e) { return e.id; })
-                .on("click", function(d) { selectEntity(d); d3.event.stopPropagation(); })
+                .on("click", function(d) {
+                    if (d3.event.defaultPrevented) return; // ignore drag
+                    selectEntity(d);
+                    d3.event.stopPropagation();
+                })
                 .call(force.drag)
                 .on("mouseover", showLabel)
                 .on("mouseout", hideLabel);
@@ -130,8 +134,15 @@ function run() {
     svg = d3.select(".canvas").append("svg")
             .attr("width", width)
             .attr("height", height)
-    //        .style("border", "5px solid black")
+            .append("g")
+                .call(d3.behavior.zoom().scaleExtent([1, 100]).on("zoom", zoom))
+              .append("g")
             .on("click", unselect);
+
+    svg.append("rect")
+        .attr("class", "overlay")
+        .attr("width", width)
+        .attr("height", height)
 
     entitySel = svg.selectAll(".node");
     link = svg.selectAll(".link");
@@ -146,6 +157,10 @@ function run() {
     //start();
     getAllEntities();
     // end of run()
+}
+
+function zoom() {
+  svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
 
 function tick() {
