@@ -67,7 +67,7 @@ class MultiRRunner(val pathToMultirFiles: String,
         arg2.getArgName, arg2.getStartOffset, arg2.getEndOffset, score)
   }
 
-  def extractFromText(text: String, name: String = ""): Seq[RelationMention] = {
+  def extractFromText(text: String, name: String = "default"): Seq[RelationMention] = {
     import scala.collection.JavaConversions._
 
     val doc: Annotation = CorpusPreprocessing.getTestDocumentFromRawString(text, name)
