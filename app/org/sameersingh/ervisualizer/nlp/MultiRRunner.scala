@@ -61,13 +61,13 @@ class MultiRRunner(val pathToMultirFiles: String,
 
   case class RelationMention(arg1: Argument, arg2: Argument, relation: String, score: Double, senText: String) {
     def toFormattedString: String =
-      "%s|%d|%d|%s|%s|%d|%d|%f" format(
+      "%s|||%d|||%d|||%s|||%s|||%d|||%d|||%f" format(
         arg1.getArgName, arg1.getStartOffset, arg1.getEndOffset,
-        relation.replaceAll("|","___"),
+        // relation.replaceAll("|","___"),
         arg2.getArgName, arg2.getStartOffset, arg2.getEndOffset, score)
   }
 
-  def extractFromText(text: String, name: String): Seq[RelationMention] = {
+  def extractFromText(text: String, name: String = ""): Seq[RelationMention] = {
     import scala.collection.JavaConversions._
 
     val doc: Annotation = CorpusPreprocessing.getTestDocumentFromRawString(text, name)
@@ -208,18 +208,23 @@ class MultiRRunner(val pathToMultirFiles: String,
 
 }
 
-object TestMultiRRunner {
-  def main(args: Array[String]){
-    val modelPath = ConfigFactory.load().getString("nlp.multir.modelPath")
-    val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
-    println(modelPath)
-    val multir = new MultiRRunner(modelPath)
+object TestMultiRRunner extends App {
+  val modelPath = ConfigFactory.load().getString("nlp.multir.modelPath")
+  println(modelPath)
+  val multir = new MultiRRunner(modelPath)
+  println(multir.extractFromText("Barack s married to Michelle.").mkString("\n"))
+}
 
-    val fileList = io.Source.fromFile(baseDir + "/d2d.filelist")
-    for(line <- fileList.getLines();
-        fid = line.split("\t")(0).dropRight(4)) {
-      multir.extractFromDoc(fid, baseDir)
-    }
-    fileList.close()
+object RunMultiRRunner extends App{
+  val modelPath = ConfigFactory.load().getString("nlp.multir.modelPath")
+  val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
+  println(modelPath)
+  val multir = new MultiRRunner(modelPath)
+
+  val fileList = io.Source.fromFile(baseDir + "/d2d.filelist")
+  for(line <- fileList.getLines();
+      fid = line.split("\t")(0).dropRight(4)) {
+    multir.extractFromDoc(fid, baseDir)
   }
+  fileList.close()
 }
