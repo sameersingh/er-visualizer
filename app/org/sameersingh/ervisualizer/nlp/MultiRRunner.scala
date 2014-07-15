@@ -16,6 +16,7 @@ import java.util.Arrays
 import java.util
 import play.api.{Configuration, Play}
 import com.typesafe.config.ConfigFactory
+import java.io.PrintWriter
 
 /**
  * @author sameer
@@ -31,8 +32,6 @@ class MultiRRunner(val pathToMultirFiles: String,
   private var params: Parameters = null
   private var scorer: Scorer = null
   private val relID2rel = new mutable.HashMap[Integer, String]
-
-  case class Relation(s: Sentence)
 
   def init() = {
     import scala.collection.JavaConversions._
@@ -60,11 +59,19 @@ class MultiRRunner(val pathToMultirFiles: String,
 
   init()
 
-  def extractFromText(text: String, name: String) {
+  case class RelationMention(arg1: Argument, arg2: Argument, relation: String, score: Double, senText: String) {
+    def toFormattedString: String =
+      "%s|%d|%d|%s|%s|%d|%d|%f" format(
+        arg1.getArgName, arg1.getStartOffset, arg1.getEndOffset,
+        relation.replaceAll("|","___"),
+        arg2.getArgName, arg2.getStartOffset, arg2.getEndOffset, score)
+  }
+
+  def extractFromText(text: String, name: String): Seq[RelationMention] = {
     import scala.collection.JavaConversions._
 
     val doc: Annotation = CorpusPreprocessing.getTestDocumentFromRawString(text, name)
-    val extractions = new ArrayBuffer[Pair[String, Double]]
+    val extractions = new ArrayBuffer[RelationMention]
     val sentences = doc.get(classOf[CoreAnnotations.SentencesAnnotation])
 
     for (s <- sentences) {
@@ -87,17 +94,20 @@ class MultiRRunner(val pathToMultirFiles: String,
         val result = getPrediction(features.toList, arg1, arg2, senText)
         if (result != null) {
           val relationScoreTriple: Triple[String, Double, Double] = getPrediction(features.toList, arg1, arg2, senText)._1
-          val extractionString: String = arg1.getArgName + " " + relationScoreTriple._1 + " " + arg2.getArgName + "\n" + senText
-          extractions.add(new Pair[String, Double](extractionString, relationScoreTriple._3))
+          //val extractionString: String = arg1.getArgName + " " + relationScoreTriple._1 + " " + arg2.getArgName + "\n" + senText
+          extractions.add(RelationMention(arg1, arg2, relationScoreTriple._1, relationScoreTriple._3, senText))
+          //extractions.add(new Pair[String, Double](extractionString, relationScoreTriple._3))
         }
       }
     }
 
-    for (extr <- extractions) {
-      val extrString: String = extr._1
-      val score: Double = extr._2
+    for (e <- extractions) {
+      val extrString: String = e.arg1.getArgName + " " + e.relation + " " + e.arg2.getArgName + "\n" + e.senText
+      val score: Double = e.score
       System.out.println(extrString + "\t" + score)
     }
+
+    extractions
   }
 
   /**
@@ -180,18 +190,36 @@ class MultiRRunner(val pathToMultirFiles: String,
     return p
   }
 
-  def extract(doc: Document): Seq[Relation] = {
-    extractFromText(doc.text, doc.path)
-    Seq.empty
+  def extractFromDoc(fid: String, baseDir: String) {
+    val dname = "%s/processed/%s.sents" format(baseDir, fid)
+    val output = "%s/processed/%s.rels" format(baseDir, fid)
+    val writer = new PrintWriter(output)
+    val input = io.Source.fromFile(dname)
+
+    for(s <- input.getLines()) {
+      val extrs = extractFromText(s, "")
+      assert(extrs.map(_.senText).distinct.size == 1, "Multiple sentences in {%s}: %s" format(s, extrs.mkString(", ")))
+      writer.println(s + "\t" + extrs.map(_.toFormattedString).mkString("\t"))
+    }
+
+    input.close()
+    writer.close()
   }
 
 }
 
 object TestMultiRRunner {
   def main(args: Array[String]){
-    val modelPath = ConfigFactory.load().getString("multir.modelPath")
+    val modelPath = ConfigFactory.load().getString("nlp.multir.modelPath")
+    val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
     println(modelPath)
     val multir = new MultiRRunner(modelPath)
-    multir.extractFromText("Barack Obama is married to Michelle.", "test")
+
+    val fileList = io.Source.fromFile(baseDir + "/d2d.filelist")
+    for(line <- fileList.getLines();
+        fid = line.split("\t")(0).dropRight(4)) {
+      multir.extractFromDoc(fid, baseDir)
+    }
+    fileList.close()
   }
 }
