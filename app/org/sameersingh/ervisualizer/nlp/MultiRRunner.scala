@@ -212,7 +212,7 @@ object TestMultiRRunner extends App {
   val modelPath = ConfigFactory.load().getString("nlp.multir.modelPath")
   println(modelPath)
   val multir = new MultiRRunner(modelPath)
-  println(multir.extractFromText("Barack s married to Michelle.").mkString("\n"))
+  println(multir.extractFromText("Barack is married to Michelle.").mkString("\n"))
 }
 
 object RunMultiRRunner extends App{
