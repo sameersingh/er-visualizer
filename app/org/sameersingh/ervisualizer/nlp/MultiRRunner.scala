@@ -61,9 +61,9 @@ class MultiRRunner(val pathToMultirFiles: String,
 
   case class RelationMention(arg1: Argument, arg2: Argument, relation: String, score: Double, senText: String) {
     def toFormattedString: String =
-      "%s|||%d|||%d|||%s|||%d|||%d|||%f" format(
+      "%s|||%d|||%d|||%s|||%s|||%d|||%d|||%f" format(
         arg1.getArgName, arg1.getStartOffset, arg1.getEndOffset,
-        // relation.replaceAll("|","___"),
+        relation, //.replaceAll("|","___"),
         arg2.getArgName, arg2.getStartOffset, arg2.getEndOffset, score)
   }
 
@@ -198,6 +198,7 @@ class MultiRRunner(val pathToMultirFiles: String,
     val input = io.Source.fromFile(dname)
 
     for(s <- input.getLines()) {
+      // TODO run only if s has linked entities, or at least 2 NERs.
       val extrs = extractFromText(s)
       if(extrs.map(_.senText).distinct.size > 1)
         println("Multiple sentences in {%s}: %s" format(s, extrs.mkString(", ")))
