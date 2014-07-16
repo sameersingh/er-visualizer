@@ -14,12 +14,13 @@ class ReadD2DDocs(val baseDir: String) {
     "%s/allafrica.com_07-2013-to-05-2014_%s/%s.%s" format(baseDir, format, name, format)
   }
   
-  def readNLP(name: String) {
+  def readD2DNLP(name: String) {
     val source = io.Source.fromFile(path(baseDir, name, "nlp"))
-    val s = source.getLines().drop(8).mkString("\n")//.replaceAll("\\]\\[", "]\n[")
-    println(s)
-    val sg = SemanticGraph.valueOf(s)
-    println(sg.toFormattedString)
+    for(s <- source.getLines().drop(8)) {
+      println(s)
+      val sg = SemanticGraph.valueOf(s)
+      println(sg.toFormattedString)
+    } //.mkString("\n")//.replaceAll("\\]\\[", "]\n[")
 
     source.close()
   }
@@ -31,21 +32,21 @@ class ReadD2DDocs(val baseDir: String) {
   def readOriginalDoc(name: String): D2DDoc = {
     val source = io.Source.fromFile(path(baseDir, name, "json"))
     val s = source.getLines().mkString("\n")//.replaceAll("\\]\\[", "]\n[")
-    println(s)
+    // println(s)
     val d = Json.fromJson[D2DDoc](Json.parse(s)).get
-    println(d)
+    // println(d)
     d
   }
 
   def readDoc(id: String, name: String): Document = {
     val d = readOriginalDoc(name)
-    Document(id, name, d.title.mkString("___SEP___"), d.cite.mkString("___SEP___"), d.div.mkString("___SEP___"), Seq.empty)
+    Document(id, name, d.title.mkString("___SEP___"), d.cite.mkString("___SEP___"), d.div.mkString("\n"), Seq.empty)
   }
 }
 
 object ReadD2DDocs extends ReadD2DDocs("/Users/sameer/Work/data/d2d") {
   def main(args: Array[String]) {
-    // readNLP("Nigeria/piracy/stories/201307010505")
-    readOriginalDoc("Nigeria/piracy/stories/201307010505")
+    readD2DNLP("Nigeria/piracy/stories/201307010505")
+    // readOriginalDoc("Nigeria/piracy/stories/201307010505")
   }
 }
