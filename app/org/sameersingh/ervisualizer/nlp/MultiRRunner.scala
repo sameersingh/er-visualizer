@@ -61,7 +61,7 @@ class MultiRRunner(val pathToMultirFiles: String,
 
   case class RelationMention(arg1: Argument, arg2: Argument, relation: String, score: Double, senText: String) {
     def toFormattedString: String =
-      "%s|||%d|||%d|||%s|||%s|||%d|||%d|||%f" format(
+      "%s|||%d|||%d|||%s|||%d|||%d|||%f" format(
         arg1.getArgName, arg1.getStartOffset, arg1.getEndOffset,
         // relation.replaceAll("|","___"),
         arg2.getArgName, arg2.getStartOffset, arg2.getEndOffset, score)
@@ -95,7 +95,8 @@ class MultiRRunner(val pathToMultirFiles: String,
         if (result != null) {
           val relationScoreTriple: Triple[String, Double, Double] = getPrediction(features.toList, arg1, arg2, senText)._1
           //val extractionString: String = arg1.getArgName + " " + relationScoreTriple._1 + " " + arg2.getArgName + "\n" + senText
-          extractions.add(RelationMention(arg1, arg2, relationScoreTriple._1, relationScoreTriple._3, senText))
+          if(relationScoreTriple._1 != "NA")
+            extractions.add(RelationMention(arg1, arg2, relationScoreTriple._1, relationScoreTriple._3, senText))
           //extractions.add(new Pair[String, Double](extractionString, relationScoreTriple._3))
         }
       }
