@@ -191,14 +191,15 @@ class MultiRRunner(val pathToMultirFiles: String,
   }
 
   def extractFromDoc(fid: String, baseDir: String) {
-    val dname = "%s/processed/%s.sents" format(baseDir, fid)
+    val dname = "%s/processed/%s.sent" format(baseDir, fid)
     val output = "%s/processed/%s.rels" format(baseDir, fid)
     val writer = new PrintWriter(output)
     val input = io.Source.fromFile(dname)
 
     for(s <- input.getLines()) {
       val extrs = extractFromText(s, "")
-      assert(extrs.map(_.senText).distinct.size == 1, "Multiple sentences in {%s}: %s" format(s, extrs.mkString(", ")))
+      if(extrs.map(_.senText).distinct.size != 1)
+        println("Multiple sentences in {%s}: %s" format(s, extrs.mkString(", ")))
       writer.println(s + "\t" + extrs.map(_.toFormattedString).mkString("\t"))
     }
 
