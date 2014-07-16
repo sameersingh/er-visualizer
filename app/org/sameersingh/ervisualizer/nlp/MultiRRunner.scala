@@ -199,7 +199,7 @@ class MultiRRunner(val pathToMultirFiles: String,
 
     for(s <- input.getLines()) {
       val extrs = extractFromText(s)
-      if(extrs.map(_.senText).distinct.size != 1)
+      if(extrs.map(_.senText).distinct.size > 1)
         println("Multiple sentences in {%s}: %s" format(s, extrs.mkString(", ")))
       writer.println(s + "\t" + extrs.map(_.toFormattedString).mkString("\t"))
     }
