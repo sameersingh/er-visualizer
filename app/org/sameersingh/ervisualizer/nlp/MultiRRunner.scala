@@ -95,7 +95,7 @@ class MultiRRunner(val pathToMultirFiles: String,
         if (result != null) {
           val relationScoreTriple: Triple[String, Double, Double] = getPrediction(features.toList, arg1, arg2, senText)._1
           //val extractionString: String = arg1.getArgName + " " + relationScoreTriple._1 + " " + arg2.getArgName + "\n" + senText
-          if(relationScoreTriple._1 != "NA")
+          if (relationScoreTriple._1 != "NA")
             extractions.add(RelationMention(arg1, arg2, relationScoreTriple._1, relationScoreTriple._3, senText))
           //extractions.add(new Pair[String, Double](extractionString, relationScoreTriple._3))
         }
@@ -191,18 +191,18 @@ class MultiRRunner(val pathToMultirFiles: String,
     return p
   }
 
-  def extractFromDoc(fid: String, baseDir: String) {
+  def extractFromDoc(fid: String, baseDir: String, filterSent: Int => Boolean = s => true) {
     val dname = "%s/processed/%s.sent" format(baseDir, fid)
     val output = "%s/processed/%s.rels" format(baseDir, fid)
     val writer = new PrintWriter(output)
     val input = io.Source.fromFile(dname)
-
-    for(s <- input.getLines()) {
-      // TODO run only if s has linked entities, or at least 2 NERs.
-      val extrs = extractFromText(s)
-      if(extrs.map(_.senText).distinct.size > 1)
+    var sentId = 0
+    for (s <- input.getLines()) {
+      val extrs = if (filterSent(sentId)) extractFromText(s) else Seq.empty[RelationMention]
+      if (extrs.map(_.senText).distinct.size > 1)
         println("Multiple sentences in {%s}: %s" format(s, extrs.mkString(", ")))
       writer.println(s + "\t" + extrs.map(_.toFormattedString).mkString("\t"))
+      sentId += 1
     }
 
     input.close()
@@ -218,16 +218,22 @@ object TestMultiRRunner extends App {
   println(multir.extractFromText("Barack is married to Michelle.").mkString("\n"))
 }
 
-object RunMultiRRunner extends App{
+object RunMultiRRunner extends App {
   val modelPath = ConfigFactory.load().getString("nlp.multir.modelPath")
   val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
   println(modelPath)
   val multir = new MultiRRunner(modelPath)
 
+  println("Reading processed documents")
+  val reader = new ReadProcessedDocs(baseDir)
+  val (db,einfo) = reader.readAllDocs
+
+  println("Running relation extraction")
   val fileList = io.Source.fromFile(baseDir + "/d2d.filelist")
-  for(line <- fileList.getLines();
-      fid = line.split("\t")(0).dropRight(4)) {
-    multir.extractFromDoc(fid, baseDir)
+  for (line <- fileList.getLines();
+       fid = line.split("\t")(0).dropRight(4)) {
+    println("doc: " + fid)
+    multir.extractFromDoc(fid, baseDir, (s:Int) => einfo.sentences.getOrElse(fid -> s, Seq.empty).size >= 2)
   }
   fileList.close()
 }

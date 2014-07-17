@@ -140,14 +140,19 @@ class ReadProcessedDocs(val baseDir: String) {
 
   class EntityInfo {
     val mentions = new mutable.HashMap[String, ArrayBuffer[Mention]]
+    val sentences = new mutable.HashMap[(String, Int), mutable.HashSet[String]]
+
+    def +=(m: Mention) {
+      val mid = m.wiki.get._1.drop(1).replaceAll("/", ".")
+      mentions.getOrElseUpdate(mid, new ArrayBuffer) += m
+      sentences.getOrElseUpdate(m.docId -> m.sentId, new mutable.HashSet) += mid
+    }
   }
 
   def assimilateMentions(mentions: Seq[Mention], einfo: EntityInfo) {
     for (m <- mentions) {
       if (m.wiki.isDefined && m.wiki.get._1 != "null") {
-        val wikiVal = m.wiki.get
-        val mid = wikiVal._1.drop(1).replaceAll("/", ".")
-        einfo.mentions.getOrElseUpdate(mid, new ArrayBuffer) += m
+        einfo += m
       }
     }
   }
@@ -202,7 +207,7 @@ class ReadProcessedDocs(val baseDir: String) {
     assimilateMentions(mentions, einfo)
   }
 
-  def readAllDocs: DB = {
+  def readAllDocs: (DB, EntityInfo) = {
     val db = new InMemoryDB
     val einfo = new EntityInfo
     val fileList = io.Source.fromFile(baseDir + "/d2d.filelist")
@@ -225,7 +230,7 @@ class ReadProcessedDocs(val baseDir: String) {
       entityToDB(mid, ms, db)
     }
     println("Num of errors: " + errors)
-    db
+    (db, einfo)
   }
 }
 
