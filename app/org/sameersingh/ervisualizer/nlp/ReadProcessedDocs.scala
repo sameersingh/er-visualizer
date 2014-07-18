@@ -7,6 +7,7 @@ import scala.collection.mutable
 import scala.Some
 import org.sameersingh.ervisualizer.data.Sentence
 import org.sameersingh.ervisualizer.data.Document
+import java.io.PrintWriter
 
 /**
  * @author sameer
@@ -239,5 +240,10 @@ object ReadProcessedDocs extends App {
   val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
   val reader = new ReadProcessedDocs(baseDir)
   val db = reader.readAllDocs
+  val entityIdWriter = new PrintWriter(baseDir + "/d2d.mids")
+  for(mid <- db._1.entityIds) {
+    entityIdWriter.println(mid)
+  }
+  entityIdWriter.close()
   //println(db)
 }
