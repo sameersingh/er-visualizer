@@ -18,7 +18,7 @@ class ReadProcessedDocs(val baseDir: String) {
   val reader = new ReadD2DDocs(baseDir)
 
   def sentences(fid: String): Seq[String] = {
-    val sents = io.Source.fromFile(baseDir + "/processed/%s.sent" format (fid))
+    val sents = io.Source.fromFile(baseDir + "/processed/%s.sent" format (fid), "UTF-8")
     val strings = new ArrayBuffer[String]
     for (s <- sents.getLines()) {
       strings += s
@@ -102,9 +102,9 @@ class ReadProcessedDocs(val baseDir: String) {
       currentMention.figerTypes ++= figer
     }
 
-    val figerIter = io.Source.fromFile(baseDir + "/processed/%s.figer" format (fid)).getLines()
-    val segsIter = io.Source.fromFile(baseDir + "/processed/%s.segment" format (fid)).getLines()
-    val wikiIter = io.Source.fromFile(baseDir + "/processed/%s.wiki" format (fid)).getLines()
+    val figerIter = io.Source.fromFile(baseDir + "/processed/%s.figer" format (fid), "UTF-8").getLines()
+    val segsIter = io.Source.fromFile(baseDir + "/processed/%s.segment" format (fid), "UTF-8").getLines()
+    val wikiIter = io.Source.fromFile(baseDir + "/processed/%s.wiki" format (fid), "UTF-8").getLines()
 
     while (figerIter.hasNext && segsIter.hasNext && wikiIter.hasNext) {
       val figer = figerIter.next().split("\t")
@@ -211,7 +211,7 @@ class ReadProcessedDocs(val baseDir: String) {
   def readAllDocs: (DB, EntityInfo) = {
     val db = new InMemoryDB
     val einfo = new EntityInfo
-    val fileList = io.Source.fromFile(baseDir + "/d2d.filelist")
+    val fileList = io.Source.fromFile(baseDir + "/d2d.filelist", "UTF-8")
     var numRead = 0
     for (line <- fileList.getLines()) {
       val split = line.split("\t")

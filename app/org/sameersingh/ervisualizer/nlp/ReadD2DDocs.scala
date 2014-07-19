@@ -15,7 +15,7 @@ class ReadD2DDocs(val baseDir: String) {
   }
   
   def readD2DNLP(name: String) {
-    val source = io.Source.fromFile(path(baseDir, name, "nlp"))
+    val source = io.Source.fromFile(path(baseDir, name, "nlp"), "UTF-8")
     for(s <- source.getLines().drop(8)) {
       println(s)
       val sg = SemanticGraph.valueOf(s)
@@ -30,7 +30,7 @@ class ReadD2DDocs(val baseDir: String) {
   implicit val d2dDocReads = Json.reads[D2DDoc]
 
   def readOriginalDoc(name: String): D2DDoc = {
-    val source = io.Source.fromFile(path(baseDir, name, "json"))
+    val source = io.Source.fromFile(path(baseDir, name, "json"), "UTF-8")
     val s = source.getLines().mkString("\n")//.replaceAll("\\]\\[", "]\n[")
     // println(s)
     val d = Json.fromJson[D2DDoc](Json.parse(s)).get

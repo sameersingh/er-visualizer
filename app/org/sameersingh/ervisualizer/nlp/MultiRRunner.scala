@@ -13,7 +13,7 @@ import edu.stanford.nlp.ling.CoreAnnotations
 import java.util.Arrays
 import java.util
 import com.typesafe.config.ConfigFactory
-import java.io.PrintWriter
+import java.io.{FileOutputStream, OutputStreamWriter, PrintWriter}
 
 /**
  * @author sameer
@@ -191,8 +191,8 @@ class MultiRRunner(val pathToMultirFiles: String,
   def extractFromDoc(fid: String, baseDir: String, filterSent: Int => Boolean = s => true) {
     val dname = "%s/processed/%s.sent" format(baseDir, fid)
     val output = "%s/processed/%s.rels" format(baseDir, fid)
-    val writer = new PrintWriter(output)
-    val input = io.Source.fromFile(dname)
+    val writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), "UTF-8"))
+    val input = io.Source.fromFile(dname, "UTF-8")
     var sentId = 0
     for (s <- input.getLines()) {
       val extrs = if (filterSent(sentId)) extractFromText(s) else Seq.empty[RelationMention]
@@ -226,7 +226,7 @@ object RunMultiRRunner extends App {
   val (db,einfo) = reader.readAllDocs
 
   println("Running relation extraction")
-  val fileList = io.Source.fromFile(baseDir + "/d2d.filelist")
+  val fileList = io.Source.fromFile(baseDir + "/d2d.filelist", "UTF-8")
   for (line <- fileList.getLines();
        fid = line.split("\t")(0).dropRight(4)) {
     println("doc: " + fid)
