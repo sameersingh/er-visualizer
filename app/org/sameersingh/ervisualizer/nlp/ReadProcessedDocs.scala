@@ -195,7 +195,7 @@ class ReadProcessedDocs(val baseDir: String) {
   }
 
   def readDoc(fid: String, path: String, db: InMemoryDB, einfo: EntityInfo) {
-    // println("--- doc: " + fid + " ---")
+    println("--- doc: " + fid + " ---")
     val origName = "Nigeria/%s/stories/%s" format(path, fid)
     // read document
     val ddoc = reader.readDoc(fid, origName)

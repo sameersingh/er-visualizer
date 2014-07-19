@@ -10,11 +10,8 @@ import edu.stanford.nlp.pipeline.Annotation
 import edu.washington.multir.preprocess.CorpusPreprocessing
 import edu.washington.multirframework.data.{KBArgument, Argument}
 import edu.stanford.nlp.ling.CoreAnnotations
-import org.sameersingh.ervisualizer.data.Sentence
-import org.sameersingh.ervisualizer.data.Document
 import java.util.Arrays
 import java.util
-import play.api.{Configuration, Play}
 import com.typesafe.config.ConfigFactory
 import java.io.PrintWriter
 
@@ -204,8 +201,8 @@ class MultiRRunner(val pathToMultirFiles: String,
       writer.println(s + "\t" + extrs.map(_.toFormattedString).mkString("\t"))
       sentId += 1
     }
-
     input.close()
+    writer.flush()
     writer.close()
   }
 
