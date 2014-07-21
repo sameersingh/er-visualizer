@@ -165,6 +165,8 @@ class MongoIO(host: String = "localhost", port: Int) {
     val imgColl = db("entityImages")
     val descColl = db("entityDescription")
     val typeColl = db("entityTypes")
+    var index = 0
+    val numEnts = store.entityIds.size
     for (mid <- store.entityIds) {
       // info
       // TODO: query mongo
@@ -176,6 +178,14 @@ class MongoIO(host: String = "localhost", port: Int) {
       store._entityInfo(mid) = EntityInfo(mid, info.toMap)
       // freebase
       store._entityFreebase(mid) = EntityFreebase(mid, typeColl.find("entity" $eq mid).map(o => o.get("type").toString).toSeq)
+      // print it
+      //println(store.entityHeader(mid))
+      //println(store.entityInfo(mid))
+      //println(store.entityFreebase(mid))
+      //println("---------------------")
+      index += 1
+      if(index % (numEnts/100) == 0) print(".")
+      println
     }
   }
 }

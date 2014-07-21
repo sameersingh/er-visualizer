@@ -7,7 +7,9 @@ import scala.collection.mutable
 import scala.Some
 import org.sameersingh.ervisualizer.data.Sentence
 import org.sameersingh.ervisualizer.data.Document
-import java.io.PrintWriter
+import java.io.{FileOutputStream, OutputStreamWriter, PrintWriter}
+import org.sameersingh.ervisualizer.freebase.MongoIO
+import play.api.libs.json.Json
 
 /**
  * @author sameer
@@ -167,10 +169,10 @@ class ReadProcessedDocs(val baseDir: String) {
     // TODO: normalize popularity?
     db._entityHeader(mid) = EntityHeader(mid, name, nerTag, mentions.size)
     // info
-    // TODO: query mongo
+    // empty for now, filled in later
     db._entityInfo(mid) = EntityInfo(mid, Map.empty)
     // freebase
-    // TODO: query mongo
+    // empty for now, filled in later
     db._entityFreebase(mid) = EntityFreebase(mid, Seq.empty)
     // text provenances
     val provenances = mentions.map(m => m.provenance(db.document(m.docId).sents(m.sentId)))
@@ -195,7 +197,7 @@ class ReadProcessedDocs(val baseDir: String) {
   }
 
   def readDoc(fid: String, path: String, db: InMemoryDB, einfo: EntityInfo) {
-    println("--- doc: " + fid + " ---")
+    //println("--- doc: " + fid + " ---")
     val origName = "Nigeria/%s/stories/%s" format(path, fid)
     // read document
     val ddoc = reader.readDoc(fid, origName)
@@ -240,10 +242,29 @@ object ReadProcessedDocs extends App {
   val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
   val reader = new ReadProcessedDocs(baseDir)
   val db = reader.readAllDocs
+  /*
+  println("Writing mids")
   val entityIdWriter = new PrintWriter(baseDir + "/d2d.mids")
   for(mid <- db._1.entityIds) {
     entityIdWriter.println(mid)
   }
+  entityIdWriter.flush()
   entityIdWriter.close()
+  */
+  println("Starting Mongo")
+  val mongo = new MongoIO("localhost", 27017)
+  mongo.updateDB(db._1.asInstanceOf[InMemoryDB])
+  println("Writing Mongo")
+  val entityInfoWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(baseDir + "/d2d.ent.info"), "UTF-8"))
+  val entityFreebaseWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(baseDir + "/d2d.ent.freebase"), "UTF-8"))
+  import org.sameersingh.ervisualizer.data.JsonWrites._
+  for(mid <- db._1.entityIds) {
+    entityInfoWriter.println(Json.toJson(db._1.entityInfo(mid)))
+    entityFreebaseWriter.println(Json.toJson(db._1.entityFreebase(mid)))
+  }
+  entityInfoWriter.flush()
+  entityInfoWriter.close()
+  entityFreebaseWriter.flush()
+  entityFreebaseWriter.close()
   //println(db)
 }
