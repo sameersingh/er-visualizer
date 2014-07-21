@@ -57,6 +57,11 @@ object Application extends Controller {
     Ok(Json.toJson(db.entityText(id)))
   }
 
+  def entityRelations(id: String) = Action {
+    println("eRels: " + id)
+    Ok(Json.toJson(db.relations(id)))
+  }
+
   def entityTypes(id: String) = Action {
     println("eT: " + id + ": " + db.entityTypePredictions(id).mkString(", "))
     Ok(Json.toJson(db.entityTypePredictions(id)))

@@ -13,6 +13,7 @@ GET /docs/sentence/:doc/:sid    controllers.Application.sentence(doc: String, si
 GET /entity/all             controllers.Application.entityHeaders
 GET /entity/info/:id        controllers.Application.entityInfo(id: String)
 GET /entity/fb/:id        controllers.Application.entityFreebase(id: String)
+GET /entity/rels/:id        controllers.Application.entityRelations(id: String)
 GET /entity/text/:id        controllers.Application.entityText(id: String)
 GET /entity/types/:id        controllers.Application.entityTypes(id: String)
 GET /entity/typeprov/:id/:etype        controllers.Application.entityTypeProv(id: String, etype: String)

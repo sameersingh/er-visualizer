@@ -6,6 +6,11 @@ import play.api.libs.json.{Json, JsValue, Writes}
  * Created by sameer on 7/20/14.
  */
 object JsonWrites {
+  implicit val seqStringPairWrites: Writes[Seq[(String, String)]] = new Writes[Seq[(String, String)]] {
+    override def writes(o: Seq[(String, String)]): JsValue = {
+      Json.toJson(o.map(p => Json.toJson(Seq(p._1, p._2))))
+    }
+  }
   val seqIntPairWrites: Writes[Seq[(Int, Int)]] = new Writes[Seq[(Int, Int)]] {
     override def writes(o: Seq[(Int, Int)]): JsValue = {
       Json.toJson(o.map(p => Json.toJson(Seq(p._1, p._2))))
