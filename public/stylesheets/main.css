@@ -68,6 +68,11 @@ body, html {
   margin-right:0px;*/
 }
 
+#infoBoxPanel {
+  max-height: 200px;
+  overflow:auto;
+}
+
 .provListGroup {
   margin-bottom: 0px;
 }
@@ -123,6 +128,7 @@ body, html {
   left:10px;
   visibility: hidden;
   overflow:auto;
+  max-height: 100%;
   /*
   height: 300px;
   padding: 5px;

@@ -259,7 +259,7 @@ function selectRelation(d) {
         //updateEntPosition(d.target, cx, cy-75);
 
         // global settings
-        $("#entityEntry .tt-input").typeahead("val", d.source.name + "~>" + d.target.name);
+        // $("#entityEntry .tt-input").typeahead("val", d.source.name + "~>" + d.target.name);
 
         showAllBoxes(function(){
             getRelCmd(d, 'fb', displayRelFreebase);
@@ -276,7 +276,9 @@ function hideAllBoxes() {
             d3.select(this).style("visibility", "hidden");
             d3.select("#infoBoxText").text("");
             d3.select("#infoBoxHeading").text("");
-            d3.select("#infoBoxTable").text("");
+            d3.select("#infoBoxSubHeading").text("");
+            d3.select("#infoBoxPanelHeading").text("");
+            // d3.select("#infoBoxTable").text("");
             d3.select("#infoBoxList").text("");
         });
     d3.select(".provWindow").transition().style("opacity", "0.0")
@@ -291,9 +293,11 @@ function showAllBoxes(onFinish) {
         .each("start", function() {
             d3.select(this).style("visibility", "visible");
             d3.select("#infoBoxText").text("");
-            d3.select("#infoBoxImg").attr("src", "");
+            d3.select("#infoBoxImgs").text("");
             d3.select("#infoBoxHeading").text("Loading...");
-            d3.select("#infoBoxTable").text("");
+            d3.select("#infoBoxSubHeading").text("");
+            d3.select("#infoBoxPanelHeading").text("");
+            //d3.select("#infoBoxTable").text("");
             d3.select("#infoBoxList").text("");
         })
         .each("end", onFinish);
@@ -325,9 +329,6 @@ function getRelCmd(l, cmd, onFinish) {
 function displayEntityInfo(e, info) {
     if(data.currEnt.id == e.id) {
       console.log("disp einfo: " + e.id)
-      var infoBox = d3.select("#infoBoxText");
-      // d3.select(".debugBox").text(JSON.stringify(e)+JSON.stringify(info));
-      infoBox.text("");
       // name
       d3.select("#infoBoxHeading").text("");
       d3.select("#infoBoxHeading")
@@ -340,27 +341,35 @@ function displayEntityInfo(e, info) {
       d3.select("#infoBoxHeading")
         .append("span")
         .text("  " +e.name);
-      // image
-      d3.select("#infoBoxImg")
-        .attr("src", "https://www.googleapis.com/freebase/v1/image" + info.freebaseInfo["/common/topic/image"] + "?key=AIzaSyCQVC9yA72POMg2VjiQhSJQQP1nf3ToZTs&maxwidth=100")
-        .classed("img-thumbnail", true)
-        .attr("width", "100px");
-        //      infoBox.append("img")
-        //        .attr("width", "100px")
-        //        .attr("class", "img-thumbnail");
+
       // freebase info (as table)
-      var table = d3.select("#infoBoxTable"),
+      //var table = d3.select("#infoBoxTable"),
           // thead = table.append("thead"),
-          tbody = table.append("tbody");
+        //  tbody = table.append("tbody");
       for(key in info.freebaseInfo) {
-        var tr = tbody.append("tr");
         if(key == "/mid") {
-          tr.append("td").text("Freebase");
-          tr.append("td").append("a").attr("href", "http://www.freebase.com" + info.freebaseInfo[key]).text(e.name);
-        } else {
+          d3.select('#infoBoxPanelHeading')
+            .append("a")
+            .text("Read more on Freebase")
+            .attr("href", "http://www.freebase.com" + info.freebaseInfo[key]);
+        }
+        if(key == "/common/topic/image") {
+            // image
+            d3.select("#infoBoxImgs")
+              .append("img")
+              .attr("src", "https://www.googleapis.com/freebase/v1/image" + info.freebaseInfo[key] + "?key=AIzaSyCQVC9yA72POMg2VjiQhSJQQP1nf3ToZTs&maxwidth=100")
+              .classed("img-thumbnail", true)
+              .attr("width", "100px");
+        }
+        if(key == "/common/topic/description") {
+            d3.select("#infoBoxText").text(info.freebaseInfo[key]) //.slice(0,250) + "...")
+        }
+        /*
+        else {
+          var tr = tbody.append("tr");
           tr.append("td").text(key);
           tr.append("td").text(info.freebaseInfo[key]);
-        }
+        }*/
       }
     } else {
       console.log("einfo obsolete: " + e.id + ", curr: " + data.currEnt.id);
@@ -368,17 +377,32 @@ function displayEntityInfo(e, info) {
 }
 
 function displayRelInfo(l) {
-    var name = l.source.name + " ~><br>" + l.target.name;
+    var name = l.source.name + " <span class=\"glyphicon glyphicon-resize-horizontal\"></span><br>" + l.target.name;
     if(data.currLink == l) {
       console.log("disp rinfo: " + name)
       var infoBox = d3.select("#infoBoxText");
       infoBox.text("Relation between " + l.source.name + " and " + l.target.name);
       // name
       d3.select("#infoBoxHeading").html(name);
-      // image
-      d3.select("#infoBoxImg").attr("src", "")
-        .classed("img-thumbnail", false)
-        .attr("width", "0px");
+      // neighbors
+      neighs = Array(l.source, l.target)
+          .sort(function(a,b){
+          return b.popularity - a.popularity;
+        });
+      d3.select('#infoBoxList')
+        .text("")
+        .selectAll("a")
+        .data(neighs)
+        .enter()
+        .append("a")
+        .classed('list-group-item', true)
+        .classed('infoBoxListItem', true)
+        .attr("href", "#")
+        .attr("onclick", function(e) {
+          return "selectEntity(data.entityObj[\""+e.id+"\"])";
+        })
+        .text(function(e) {return e.name;});
+
     } else {
       console.log("linfo obsolete: " + name + ", curr: " + data.currLink);
     }
@@ -388,15 +412,28 @@ function displayEntityFreebase(e, fbts) {
     if(data.currEnt.id == e.id) {
       console.log("disp efb: " + e.id);
       // console.log(fbts);
-      var infoBoxList = d3.select('#infoBoxList');
-      infoBoxList.text("");
-      infoBoxList.selectAll("li")
-        .data(fbts.types)
-        .enter()
-        .append("li")
-        .classed('list-group-item', true)
-        //.classed('prov-item', true)
-        .text(function(d) {return d;});
+      d3.select('#infoBoxSubHeading').text(fbts.types)
+      getEntityCmd(e, 'rels', function(e,d) {
+        neighs = d.map(function(a) {
+              if(a[0]==e.id) return a[1];
+              else return a[0];
+          }).map(function(id){ return data.entityObj[id]; })
+          .sort(function(a,b){
+            return b.popularity - a.popularity;
+          });
+        d3.select('#infoBoxList')
+          .selectAll("a")
+          .data(neighs)
+          .enter()
+          .append("a")
+          .classed('list-group-item', true)
+          .classed('infoBoxListItem', true)
+          .attr("href", "#")
+          .attr("onclick", function(e) {
+            return "selectEntity(data.entityObj[\""+e.id+"\"])";
+          })
+          .text(function(e) {return e.name;});
+      })
     } else {
       console.log("efb obsolete: " + e.id + ", curr: " + data.currEnt.id);
     }
@@ -405,16 +442,16 @@ function displayEntityFreebase(e, fbts) {
 function displayRelFreebase(l, fbts) {
     if(data.currLink == l) {
       console.log("disp rfb: " + l.source.id + "~>" + l.target.id);
-      console.log(fbts);
-      var infoBoxList = d3.select('#infoBoxList');
-      infoBoxList.text("");
-      infoBoxList.selectAll("li")
-        .data(fbts.rels)
-        .enter()
-        .append("li")
-        .classed('list-group-item', true)
-        //.classed('prov-item', true)
-        .text(function(d) {return d;});
+      //console.log(fbts);
+      //var infoBoxList = d3.select('#infoBoxList');
+      //infoBoxList.text("");
+      //infoBoxList.selectAll("li")
+      //  .data(fbts.rels)
+      //  .enter()
+      //  .append("li")
+      //  .classed('list-group-item', true)
+      //  //.classed('prov-item', true)
+      //  .text(function(d) {return d;});
     } else {
       console.log("rfb obsolete: " + l + ", curr: " + data.currLink);
     }
@@ -529,7 +566,7 @@ function getAndDisplayTypeProv(e, type, dom) {
            type: "GET",
            url: '/relation/typeprov/'+e.source.id+'/'+e.target.id+'/'+type,
            success: function(d) {
-             console.log(d);
+             //console.log(d);
              displayTypeProv(e, type, dom, d);
            },
            error: function(j, t, e) { console.log(e); }
