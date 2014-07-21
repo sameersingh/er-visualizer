@@ -185,8 +185,8 @@ class MongoIO(host: String = "localhost", port: Int) {
       //println("---------------------")
       index += 1
       if(index % (numEnts/100) == 0) print(".")
-      println
     }
+    println
   }
 }
 
