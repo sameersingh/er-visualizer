@@ -94,12 +94,12 @@ object InMemoryDB {
     val name = split(1)
     val nerTag = split(2)
     val popularity = split(3).toDouble
-    val freebaseInfo = split(4).split(",").map(kv => {
-      val s = kv.split(":");
+    val freebaseInfo = split(4).split("\\|\\|\\|").map(kv => {
+      val s = kv.split(":::");
       assert(s.length == 2, kv + "\t" + s.mkString("-|-"));
       s(0) -> s(1)
     }).toMap
-    val types = split(5).split(":").toSeq
+    val types = split(5).split(":::").toSeq
     (EntityHeader(id, name, nerTag, popularity), EntityInfo(id, freebaseInfo), EntityFreebase(id, types))
   }
 
@@ -126,7 +126,7 @@ object InMemoryDB {
   }
 
   def serializeEntityInfo(eh: EntityHeader, ei: EntityInfo, ef: EntityFreebase): String =
-    "%s\t%s\t%s\t%f\t%s\t%s" format(eh.id, eh.name, eh.nerTag, eh.popularity, ei.freebaseInfo.map(kv => kv._1 + ":" + kv._2).mkString(","), ef.types.mkString(":"))
+    "%s\t%s\t%s\t%f\t%s\t%s" format(eh.id, eh.name, eh.nerTag, eh.popularity, ei.freebaseInfo.map(kv => kv._1 + ":::" + kv._2.replaceAll("\\t", " ")).mkString("|||"), ef.types.mkString(":::"))
 
   def serializeRelationInfo(rh: RelationHeader, rf: RelationFreebase): String =
     "%s\t%s\t%f\t%s" format(rh.sourceId, rh.targetId, rh.popularity, rf.rels.mkString(":"))

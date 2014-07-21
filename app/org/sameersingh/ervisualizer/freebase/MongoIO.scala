@@ -173,11 +173,11 @@ class MongoIO(host: String = "localhost", port: Int) {
       val info = new mutable.HashMap[String, String]
       info("/mid") = "/" + mid.replace('.', '/')
       nameColl.findOne("entity" $eq mid).map(o => o.get("name").toString).foreach(v => info("Name") = v)
-      imgColl.findOne("entity" $eq mid).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = v)
+      imgColl.findOne("entity" $eq mid).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = "/" + v.replace('.', '/'))
       descColl.findOne("entity" $eq mid).map(o => o.get("desc").toString).foreach(v => info("/common/topic/description") = v)
       store._entityInfo(mid) = EntityInfo(mid, info.toMap)
       // freebase
-      store._entityFreebase(mid) = EntityFreebase(mid, typeColl.find("entity" $eq mid).map(o => o.get("type").toString).toSeq)
+      store._entityFreebase(mid) = EntityFreebase(mid, typeColl.find("entity" $eq mid).map(o => o.get("type").toString).map(s => "/" + s.replace('.', '/')).toSeq)
       // print it
       //println(store.entityHeader(mid))
       //println(store.entityInfo(mid))
