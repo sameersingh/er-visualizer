@@ -11,6 +11,12 @@ var data = {
     currLink: -1
     };
 
+var nerTags = {
+    person: "PERSON",
+    location: "LOCATION",
+    organization: "ORGANIZATION"
+}
+
 // local vars
 var svg = 0;
 var link = 0, entitySel = {};
@@ -91,17 +97,17 @@ function start() {
   node
     .append("circle")
     .classed("entity", true)
-    .classed("perEnt", function(d) {return d.nerTag == "PER"; })
-    .classed("locEnt", function(d) {return d.nerTag == "LOC"; })
-    .classed("orgEnt", function(d) {return d.nerTag == "ORG"; })
-    .classed("miscEnt", function(d) {return d.nerTag == "MISC"; })
-    .attr("r", function(d) { return Math.sqrt(1000*d.popularity); })
+    .classed("perEnt", function(d) {return d.nerTag == nerTags.person; })
+    .classed("locEnt", function(d) {return d.nerTag == nerTags.location; })
+    .classed("orgEnt", function(d) {return d.nerTag == nerTags.organization; })
+    // .classed("miscEnt", function(d) {return d.nerTag == "MISC"; })
+    .attr("r", function(d) { return 15+(25*d.popularity); })
     .append("title")
     .text(function(e) { return e.name; });
   node
     .append("text")
-    .attr("x", function(d) { return Math.sqrt(1000*d.popularity)+5; })
-    .attr("y", function(d) { return Math.sqrt(1000*d.popularity)+5; })
+    .attr("x", function(d) { return 15+(25*d.popularity)+5; })
+    .attr("y", function(d) { return 15+(25*d.popularity)+5; })
     .attr("dy", ".35em")
     .style("z-index", "-10")
     .attr("visibility", "hidden")
@@ -154,7 +160,8 @@ function run() {
     force = d3.layout.force()
               .nodes(data.entityArr)
               .links(data.links)
-              .charge(-5000)
+              .charge(-2500)
+              .gravity(0.5)
               .linkDistance(100)
               .size([width, height])
               .on("tick", tick);
@@ -242,7 +249,7 @@ function selectEntity(d) {
 
 function selectRelation(d) {
     if(data.currLink != d) {
-        console.log("selected: " + d.id);
+        console.log("selected: " + d);
         unselect();
         data.currLink = d;
         // set color and position
@@ -334,10 +341,10 @@ function displayEntityInfo(e, info) {
       d3.select("#infoBoxHeading")
         .append("span")
         .classed("glyphicon", true)
-        .classed("glyphicon-user", e.nerTag == "PER")
-        .classed("glyphicon-map-marker", e.nerTag == "LOC")
-        .classed("glyphicon-briefcase", e.nerTag == "ORG")
-        .classed("glyphicon-question-sign", e.nerTag == "MISC");
+        .classed("glyphicon-user", e.nerTag == nerTags.person)
+        .classed("glyphicon-map-marker", e.nerTag == nerTags.location)
+        .classed("glyphicon-briefcase", e.nerTag == nerTags.organization)
+        //.classed("glyphicon-question-sign", e.nerTag == "MISC");
       d3.select("#infoBoxHeading")
         .append("span")
         .text("  " +e.name);
@@ -409,17 +416,22 @@ function displayRelInfo(l) {
 }
 
 function displayEntityFreebase(e, fbts) {
+    function otherId(a) {
+              if(a[0]==e.id) return a[1];
+              else return a[0];
+          }
+
     if(data.currEnt.id == e.id) {
       console.log("disp efb: " + e.id);
       // console.log(fbts);
       d3.select('#infoBoxSubHeading').text(fbts.types)
       getEntityCmd(e, 'rels', function(e,d) {
-        neighs = d.map(function(a) {
-              if(a[0]==e.id) return a[1];
-              else return a[0];
-          }).map(function(id){ return data.entityObj[id]; })
-          .sort(function(a,b){
-            return b.popularity - a.popularity;
+        neighs = d
+        //.map().map(function(id){ return data.entityObj[id]; })
+            .sort(function(a,b){
+            var aid = otherId(a);
+            var bid = otherId(b);
+            return data.entityObj[bid].popularity - data.entityObj[aid].popularity;
           });
         d3.select('#infoBoxList')
           .selectAll("a")
@@ -429,10 +441,24 @@ function displayEntityFreebase(e, fbts) {
           .classed('list-group-item', true)
           .classed('infoBoxListItem', true)
           .attr("href", "#")
-          .attr("onclick", function(e) {
-            return "selectEntity(data.entityObj[\""+e.id+"\"])";
+          .attr("onclick", function(a) {
+            return "selectRelation(data.links.filter(function(d) {return (d.sourceId==\""+a[0]+"\" && d.targetId==\""+a[1]+"\");})[0])";
           })
-          .text(function(e) {return e.name;});
+          .text(function(a) {
+                var othId = otherId(a);
+                var othEnt = data.entityObj[othId];
+                return othEnt.name; //"<span class=\"glyphicon glyphicon-arrow-right\"/> " +
+            })
+          .on("mouseover", function(d) {
+                var othId = otherId(d);
+                var othEnt = data.entityObj[othId];
+                showLabel(othEnt);
+          })
+          .on("mouseout", function(d) {
+                var othId = otherId(d);
+                var othEnt = data.entityObj[othId];
+                hideLabel(othEnt);
+          });
       })
     } else {
       console.log("efb obsolete: " + e.id + ", curr: " + data.currEnt.id);
@@ -534,15 +560,15 @@ function displayTypeProvs(e, types) {
                .append("a")
                .attr("data-toggle", "collapse")
                .attr("data-parent", "#accordian")
-               .attr("href", function(d) {return '#'+d.type;})
+               .attr("href", function(d) {return '#'+d.type.replace(/:/g, "_");})
                .text(function(d) {return d.type;});
       // body
       textPanel.append("div")
                .attr("class", "panel-collapse collapse")
-               .attr("id", function(d) {return d.type;})
+               .attr("id", function(d) {return d.type.replace(/:/g, "_");})
                .append("ul")
                .attr("class", "list-group provListGroup")
-               .attr("id", function(d) {return d.type+'List';})
+               .attr("id", function(d) {return d.type.replace(/:/g, "_")+'List';})
                .each(function(p) {
                  getAndDisplayTypeProv(p.src, p.type, d3.select(this));
                });
