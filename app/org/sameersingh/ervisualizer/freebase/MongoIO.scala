@@ -171,13 +171,14 @@ class MongoIO(host: String = "localhost", port: Int) {
       // info
       // TODO: query mongo
       val info = new mutable.HashMap[String, String]
-      info("/mid") = "/" + mid.replace('.', '/')
-      nameColl.findOne("entity" $eq mid).map(o => o.get("name").toString).foreach(v => info("Name") = v)
-      imgColl.findOne("entity" $eq mid).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = "/" + v.replace('.', '/'))
-      descColl.findOne("entity" $eq mid).map(o => o.get("desc").toString).foreach(v => info("/common/topic/description") = v)
+      val queryID = mid.replace('_', '.')
+      info("/mid") = "/" + mid.replace('_', '/')
+      nameColl.findOne("entity" $eq queryID).map(o => o.get("name").toString).foreach(v => info("Name") = v)
+      imgColl.findOne("entity" $eq queryID).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = "/" + v.replace('.', '/'))
+      descColl.findOne("entity" $eq queryID).map(o => o.get("desc").toString).foreach(v => info("/common/topic/description") = v)
       store._entityInfo(mid) = EntityInfo(mid, info.toMap)
       // freebase
-      store._entityFreebase(mid) = EntityFreebase(mid, typeColl.find("entity" $eq mid).map(o => o.get("type").toString).map(s => "/" + s.replace('.', '/')).toSeq)
+      store._entityFreebase(mid) = EntityFreebase(mid, typeColl.find("entity" $eq queryID).map(o => o.get("type").toString).map(imgID => nameColl.findOne("entity" $eq imgID).map(_.get("name").toString)).flatten.toSeq)
       // print it
       //println(store.entityHeader(mid))
       //println(store.entityInfo(mid))
