@@ -1,6 +1,6 @@
 package org.sameersingh.ervisualizer.nlp
 
-import org.sameersingh.ervisualizer.data.{Document, Sentence}
+import org.sameersingh.ervisualizer.data._
 import scala.collection.mutable.ArrayBuffer
 import edu.washington.multirframework.featuregeneration.{FeatureGenerator, DefaultFeatureGeneratorMinusDirMinusDep}
 import edu.washington.multirframework.argumentidentification.{SententialInstanceGeneration, ArgumentIdentification, DefaultSententialInstanceGeneration, NERArgumentIdentification}
@@ -13,7 +13,8 @@ import edu.stanford.nlp.ling.CoreAnnotations
 import java.util.Arrays
 import java.util
 import com.typesafe.config.ConfigFactory
-import java.io.{FileOutputStream, OutputStreamWriter, PrintWriter}
+import java.io.{File, FileOutputStream, OutputStreamWriter, PrintWriter}
+import org.sameersingh.ervisualizer.data.Provenance
 
 /**
  * @author sameer
@@ -223,14 +224,96 @@ object RunMultiRRunner extends App {
 
   println("Reading processed documents")
   val reader = new ReadProcessedDocs(baseDir)
-  val (db,einfo) = reader.readAllDocs
+  val (db, einfo) = reader.readAllDocs
 
   println("Running relation extraction")
   val fileList = io.Source.fromFile(baseDir + "/d2d.filelist", "UTF-8")
   for (line <- fileList.getLines();
        fid = line.split("\t")(0).dropRight(4)) {
     println("doc: " + fid)
-    multir.extractFromDoc(fid, baseDir, (s:Int) => einfo.sentences.getOrElse(fid -> s, Seq.empty).size >= 2)
+    multir.extractFromDoc(fid, baseDir, (s: Int) => einfo.sentences.getOrElse(fid -> s, Seq.empty).size >= 2)
   }
   fileList.close()
+}
+
+class ReadMultiROutput(val baseDir: String, val minScore: Double = Double.NegativeInfinity) {
+
+  case class Mention(string: String, start: Int, end: Int)
+
+  case class RelationMention(relation: String, arg1: Mention, arg2: Mention, score: Double)
+
+  var numDirectErrors = 0
+  var numSearchErrors = 0
+  var numTotalRequests = 0
+
+  private def findClosestProvenance(db: DB, m: Mention, ps: Seq[(String, Provenance)]): Option[(String, Provenance)] = {
+    numTotalRequests += 1
+    def dist(m: Mention, p: Provenance): Double = math.pow(m.start - p.tokPos(0)._1, 2) + math.pow(m.end - p.tokPos(0)._2, 2)
+    val sp = ps.minBy(sp => dist(m, sp._2))
+    val d = dist(m, sp._2)
+    if (d > 0.0) {
+      val sent = db.sentence(sp._2.docId, sp._2.sentId)
+      numDirectErrors += 1
+      //println(m + "\t" + sent + "\n\t" + ps.map(_._2.tokPos(0)).map(se => se + ":" + sent.substring(se._1, se._2)).mkString("\t"))
+      // now try searching
+      val result = ps.find(sp => m.string == sent.string.substring(sp._2.tokPos(0)._1,sp._2.tokPos(0)._2))
+      if(result.isEmpty) numSearchErrors += 1
+      result
+    } else Some(sp)
+  }
+
+  def updateFromDoc(fid: String, db: InMemoryDB) {
+    val dname = "%s/processed/%s.rels" format(baseDir, fid)
+    if (!new File(dname).exists()) return
+    val input = io.Source.fromFile(dname, "UTF-8")
+    var sentId = 0
+    for (s <- input.getLines()) {
+      val split = s.split("\\t").drop(1) // drop the sentence text
+      val rms = for (rmstr <- split) yield {
+          // NDLEA|||58|||63|||/organization/organization/headquarters|/location/mailing_address/citytown|||Lagos|||117|||122|||138884194.000000
+          val rmSplit = rmstr.split("\\|\\|\\|")
+          assert(rmSplit.length == 8)
+          RelationMention(rmSplit(3),
+            Mention(rmSplit(0), rmSplit(1).toInt, rmSplit(2).toInt),
+            Mention(rmSplit(4), rmSplit(5).toInt, rmSplit(6).toInt), rmSplit(7).toDouble)
+        }
+      val trueProvenances = db.docEntityProvenances(fid, sentId).map({
+        case (mid, ps) => ps.map(mid -> _)
+      }).flatten.toSeq
+      for (rm <- rms) {
+        val a1 = findClosestProvenance(db, rm.arg1, trueProvenances)
+        val a2 = findClosestProvenance(db, rm.arg2, trueProvenances)
+        for (arg1P <- a1; arg2P <- a2) {
+          val p = Provenance(fid, sentId, arg1P._2.tokPos ++ arg2P._2.tokPos)
+          // add to db
+          val rid = arg1P._1 -> arg2P._1
+          val rel = rm.relation
+          db._relationPredictions(rid) = db._relationPredictions.getOrElse(rid, Set.empty) ++ Seq(rel)
+          val rt = db._relationText.getOrElse(rid, RelationText(rid._1, rid._2, Seq.empty))
+          db._relationText(rid) = RelationText(rt.sourceId, rt.targetId, rt.provenances ++ Seq(p))
+          val rmp = db._relationProvenances.getOrElseUpdate(rid, new mutable.HashMap).getOrElseUpdate(rel, RelModelProvenances(rid._1, rid._2, rel, Seq.empty))
+          db._relationProvenances(rid)(rel) = RelModelProvenances(rmp.sourceId, rmp.targetId, rmp.relType, rmp.provenances ++ Seq(p))
+        }
+      }
+      sentId += 1
+    }
+    input.close()
+  }
+
+  def updateFromAllDocs(db: InMemoryDB) {
+    println("Running relation extraction")
+    val fileList = io.Source.fromFile(baseDir + "/d2d.filelist", "UTF-8")
+    var numRead = 0
+    for (line <- fileList.getLines();
+         fid = line.split("\t")(0).dropRight(4)) {
+      // println("doc: " + fid)
+      updateFromDoc(fid, db)
+      if (numRead % 79 == 0) print(".")
+      numRead += 1
+    }
+    fileList.close()
+    println
+    println(s"numDirect: $numDirectErrors, numSearch: $numSearchErrors, total: $numTotalRequests")
+  }
+
 }
