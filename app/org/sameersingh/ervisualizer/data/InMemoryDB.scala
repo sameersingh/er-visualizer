@@ -25,6 +25,7 @@ class InMemoryDB extends DB {
   val _entityText = new HashMap[String, EntityText]
   val _entityTypePredictions = new HashMap[String, Seq[String]]
   val _entityTypeProvenances = new HashMap[String, HashMap[String, TypeModelProvenances]]
+  val _docEntityProvenances = new HashMap[(String, Int), HashMap[String, Seq[Provenance]]]
 
   override def entityIds: Seq[String] = _entityIds
 
@@ -41,13 +42,14 @@ class InMemoryDB extends DB {
   override def entityTypeProvenances(id: String, etype: String): TypeModelProvenances =
     _entityTypeProvenances.getOrElse(id, new HashMap).getOrElse(etype, EntityUtils.emptyTypeProvenance(id, etype))
 
+  override def docEntityProvenances(docId: String, sentId: Int): Seq[(String, Seq[Provenance])] = _docEntityProvenances.getOrElse(docId -> sentId, Seq.empty).toSeq
 
   // Relations
   val _relationIds = new ArrayBuffer[(String, String)]
   val _relationHeader = new HashMap[(String, String), RelationHeader]
   val _relationFreebase = new HashMap[(String, String), RelationFreebase]
   val _relationText = new HashMap[(String, String), RelationText]
-  val _relationPredictions = new HashMap[(String, String), Seq[String]]
+  val _relationPredictions = new HashMap[(String, String), Set[String]]
   val _relationProvenances = new HashMap[(String, String), HashMap[String, RelModelProvenances]]
 
   override def relationIds: Seq[(String, String)] = _relationIds
@@ -58,7 +60,7 @@ class InMemoryDB extends DB {
 
   override def relationText(sid: String, tid: String): RelationText = _relationText.getOrElse(sid -> tid, RelationUtils.emptyProvenance(sid, tid))
 
-  override def relationPredictions(sid: String, tid: String): Seq[String] = _relationPredictions.getOrElse(sid -> tid, Seq.empty)
+  override def relationPredictions(sid: String, tid: String): Seq[String] = _relationPredictions.getOrElse(sid -> tid, Set.empty).toSeq
 
   override def relationProvenances(sid: String, tid: String, etype: String): RelModelProvenances =
     _relationProvenances.getOrElse(sid -> tid, new HashMap).getOrElse(etype, RelationUtils.emptyRelProvenance(sid, tid, etype))
@@ -191,7 +193,7 @@ object InMemoryDB {
       for ((et, idTypePs) <- idPs.groupBy(_._2)) {
         tps(et) = RelModelProvenances(id._1, id._2, et, idTypePs.map(_._3).toSeq)
       }
-      db._relationPredictions(id) = tps.map(_._1).toSeq
+      db._relationPredictions(id) = tps.map(_._1).toSet
       db._relationProvenances(id) = tps
     }
     db

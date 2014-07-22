@@ -12,6 +12,8 @@ trait DB {
 
   def sentence(docId: String, sentId: Int): Sentence = document(docId).sents(sentId)
 
+  def docEntityProvenances(docId: String, sentId: Int): Seq[(String, Seq[Provenance])]
+
   def entityIds: Seq[String]
 
   def entityHeader(id: String): EntityHeader
