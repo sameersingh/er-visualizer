@@ -219,15 +219,16 @@ object TestMultiRRunner extends App {
 object RunMultiRRunner extends App {
   val modelPath = ConfigFactory.load().getString("nlp.multir.modelPath")
   val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
+  val filelist = ConfigFactory.load().getString("nlp.data.filelist")
   println(modelPath)
   val multir = new MultiRRunner(modelPath)
 
   println("Reading processed documents")
-  val reader = new ReadProcessedDocs(baseDir)
+  val reader = new ReadProcessedDocs(baseDir, filelist)
   val (db, einfo) = reader.readAllDocs
 
   println("Running relation extraction")
-  val fileList = io.Source.fromFile(baseDir + "/d2d.filelist", "UTF-8")
+  val fileList = io.Source.fromFile(baseDir + "/" +  filelist, "UTF-8")
   for (line <- fileList.getLines();
        fid = line.split("\t")(0).dropRight(4)) {
     println("doc: " + fid)
@@ -236,7 +237,7 @@ object RunMultiRRunner extends App {
   fileList.close()
 }
 
-class ReadMultiROutput(val baseDir: String, val minScore: Double = Double.NegativeInfinity) {
+class ReadMultiROutput(val baseDir: String, val filelist: String, val minScore: Double = Double.NegativeInfinity) {
 
   case class Mention(string: String, start: Int, end: Int)
 
@@ -262,6 +263,13 @@ class ReadMultiROutput(val baseDir: String, val minScore: Double = Double.Negati
     } else Some(sp)
   }
 
+  def multirRelation(r: String): String = if(r.contains("/")) {
+    val init = r.drop(1)
+    val firstSlash = init.indexOf("/")
+    val lastSlash = init.lastIndexOf("/")
+    init.substring(0, firstSlash) + "_" + init.substring(lastSlash + 1)
+  } else r
+
   def updateFromDoc(fid: String, db: InMemoryDB) {
     val dname = "%s/processed/%s.rels" format(baseDir, fid)
     if (!new File(dname).exists()) return
@@ -273,7 +281,7 @@ class ReadMultiROutput(val baseDir: String, val minScore: Double = Double.Negati
           // NDLEA|||58|||63|||/organization/organization/headquarters|/location/mailing_address/citytown|||Lagos|||117|||122|||138884194.000000
           val rmSplit = rmstr.split("\\|\\|\\|")
           assert(rmSplit.length == 8)
-          RelationMention(rmSplit(3),
+          RelationMention(multirRelation(rmSplit(3)),
             Mention(rmSplit(0), rmSplit(1).toInt, rmSplit(2).toInt),
             Mention(rmSplit(4), rmSplit(5).toInt, rmSplit(6).toInt), rmSplit(7).toDouble)
         }
@@ -286,7 +294,7 @@ class ReadMultiROutput(val baseDir: String, val minScore: Double = Double.Negati
         for (arg1P <- a1; arg2P <- a2) {
           val p = Provenance(fid, sentId, arg1P._2.tokPos ++ arg2P._2.tokPos)
           // add to db
-          val rid = arg1P._1 -> arg2P._1
+          val rid = if(arg1P._1 < arg2P._1) arg1P._1 -> arg2P._1 else arg2P._1 -> arg1P._1
           val rel = rm.relation
           db._relationPredictions(rid) = db._relationPredictions.getOrElse(rid, Set.empty) ++ Seq(rel)
           val rt = db._relationText.getOrElse(rid, RelationText(rid._1, rid._2, Seq.empty))
@@ -302,7 +310,7 @@ class ReadMultiROutput(val baseDir: String, val minScore: Double = Double.Negati
 
   def updateFromAllDocs(db: InMemoryDB) {
     println("Running relation extraction")
-    val fileList = io.Source.fromFile(baseDir + "/d2d.filelist", "UTF-8")
+    val fileList = io.Source.fromFile(baseDir + "/" + filelist, "UTF-8")
     var numRead = 0
     for (line <- fileList.getLines();
          fid = line.split("\t")(0).dropRight(4)) {

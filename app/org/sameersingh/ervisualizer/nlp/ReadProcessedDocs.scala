@@ -15,7 +15,7 @@ import play.api.libs.json.Json
  * @author sameer
  * @since 7/15/14.
  */
-class ReadProcessedDocs(val baseDir: String) {
+class ReadProcessedDocs(val baseDir: String, val filelist: String) {
 
   val reader = new ReadD2DDocs(baseDir)
 
@@ -131,7 +131,7 @@ class ReadProcessedDocs(val baseDir: String) {
         val seg = segs(1)
         val ner = segs(2)
         val figerStr = figer(1)
-        val figerList: Seq[String] = if (figerStr == "O") Seq.empty else figerStr.drop(2).split(",").toSeq
+        val figerList: Seq[String] = if (figerStr == "O") Seq.empty else figerStr.drop(2).split(",").map(_.drop(1).replaceAll("\\/", ":")).toSeq
         val wikiTriplet = if (wiki(1) == "O") ("O", "", 0) else (wiki(1), wiki(2), wiki(3).toInt)
         addToCurrMention(tok, seg, figerList, wikiTriplet, ner)
         currentTokId += 1
@@ -148,7 +148,7 @@ class ReadProcessedDocs(val baseDir: String) {
     val sentences = new mutable.HashMap[(String, Int), mutable.HashSet[String]]
 
     def +=(m: Mention) {
-      val mid = m.wiki.get._1.drop(1).replaceAll("/", ".")
+      val mid = m.wiki.get._1.drop(1).replaceAll("/", "_")
       mentions.getOrElseUpdate(mid, new ArrayBuffer) += m
       sentences.getOrElseUpdate(m.docId -> m.sentId, new mutable.HashSet) += mid
     }
@@ -221,7 +221,7 @@ class ReadProcessedDocs(val baseDir: String) {
   def readAllDocs: (DB, EntityInfo) = {
     val db = new InMemoryDB
     val einfo = new EntityInfo
-    val fileList = io.Source.fromFile(baseDir + "/d2d.filelist", "UTF-8")
+    val fileList = io.Source.fromFile(baseDir + "/" + filelist, "UTF-8")
     var numRead = 0
     for (line <- fileList.getLines()) {
       val split = line.split("\t")
@@ -249,7 +249,8 @@ class ReadProcessedDocs(val baseDir: String) {
 
 object ReadProcessedDocs extends App {
   val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
-  val reader = new ReadProcessedDocs(baseDir)
+  val filelist = ConfigFactory.load().getString("nlp.data.filelist")
+  val reader = new ReadProcessedDocs(baseDir, filelist)
   val db = reader.readAllDocs
   /*
   println("Writing mids")

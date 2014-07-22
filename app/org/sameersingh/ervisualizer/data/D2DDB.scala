@@ -26,7 +26,8 @@ class D2DDB {
     println("Read raw docs")
     val cfg = ConfigFactory.load()
     val baseDir = cfg.getString("nlp.data.baseDir")
-    val processedDocReader = new ReadProcessedDocs(baseDir)
+    val filelist = cfg.getString("nlp.data.filelist")
+    val processedDocReader = new ReadProcessedDocs(baseDir, filelist)
     val (db, einfo) = processedDocReader.readAllDocs
 
     // fill entity info with freebase info
@@ -36,7 +37,7 @@ class D2DDB {
 
     // read relations and convert that to provenances
     println("Read relations")
-    val relReader = new ReadMultiROutput(baseDir)
+    val relReader = new ReadMultiROutput(baseDir, filelist)
     relReader.updateFromAllDocs(db.asInstanceOf[InMemoryDB])
 
     // aggregate info to relations from provenances
