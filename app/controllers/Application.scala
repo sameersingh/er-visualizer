@@ -15,7 +15,8 @@ object Application extends Controller {
   def db = _db
 
   def init() {
-    _db = InMemoryDB.readFromTSV("public/data/test/")
+    // _db = InMemoryDB.readFromTSV("public/data/test/")
+    _db = D2DDB.readDB
     println(db)
   }
 
