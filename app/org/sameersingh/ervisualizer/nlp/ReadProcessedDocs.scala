@@ -40,7 +40,7 @@ class ReadProcessedDocs(val baseDir: String) {
     override def toString: String =
       "%s %d:\t%s\t%s\t%s\t%s" format(docId, sentId, toks.mkString(", "), nerTag, wiki, figerTypes.mkString(", "))
 
-    def provenance(s: Sentence): Provenance = {
+    def provenance(s: Sentence): Option[Provenance] = {
       assert(s.sentId == sentId)
       assert(s.docId == docId)
       val searchString = {
@@ -61,9 +61,11 @@ class ReadProcessedDocs(val baseDir: String) {
       if (start < 0) {
         errors += 1
         println("Cannot find {%s} in {%s}" format(searchString, s.string))
+        None
+      } else {
+        val end = start + searchString.length
+        Some(Provenance(s.docId, s.sentId, Seq(start -> end)))
       }
-      val end = start + searchString.length
-      Provenance(s.docId, s.sentId, if (start > 0) Seq(start -> end) else Seq.empty)
     }
   }
 
@@ -160,14 +162,14 @@ class ReadProcessedDocs(val baseDir: String) {
     }
   }
 
-  def entityToDB(mid: String, mentions: Seq[Mention], db: InMemoryDB) {
+  def entityToDB(mid: String, mentions: Seq[Mention], db: InMemoryDB, maxMentions: Double) {
     // TODO get types from mongo, and then filter mentions according to that, then continue if mentions.isNotEmpty
     db._entityIds += mid
     // header
     val name = mentions.head.wiki.get._2
     val nerTag = mentions.map(_.nerTag.get).groupBy(x => x).map(p => p._1 -> p._2.size).toSeq.sortBy(-_._2).head._1
-    // TODO: normalize popularity?
-    db._entityHeader(mid) = EntityHeader(mid, name, nerTag, mentions.size)
+    // normalize popularity?
+    db._entityHeader(mid) = EntityHeader(mid, name, nerTag, mentions.size / maxMentions)
     // info
     // empty for now, filled in later
     db._entityInfo(mid) = EntityInfo(mid, Map.empty)
@@ -176,7 +178,13 @@ class ReadProcessedDocs(val baseDir: String) {
     db._entityFreebase(mid) = EntityFreebase(mid, Seq.empty)
     // text provenances
     val provenances = mentions.map(m => m.provenance(db.document(m.docId).sents(m.sentId)))
-    db._entityText(mid) = EntityText(mid, provenances)
+    val distinctProvenances = provenances.flatten.distinct
+    db._entityText(mid) = EntityText(mid, distinctProvenances)
+    for(p <- distinctProvenances) {
+      assert(p.tokPos.length == 1)
+      val map = db._docEntityProvenances.getOrElseUpdate(p.docId -> p.sentId, new mutable.HashMap)
+      map(mid) = map.getOrElse(mid, Seq.empty) ++ Seq(p)
+    }
     // figer provenances
     val figerTypes = new mutable.LinkedHashSet[String]
     mentions.foreach(figerTypes ++= _.figerTypes)
@@ -192,7 +200,7 @@ class ReadProcessedDocs(val baseDir: String) {
       .map({
       case (s, v) => s -> v.map(_._2)
     }).map({
-      case (s, mps) => s -> TypeModelProvenances(mid, s, mps.map(_._2))
+      case (s, mps) => s -> TypeModelProvenances(mid, s, mps.map(_._2).flatten.distinct)
     })
   }
 
@@ -229,8 +237,9 @@ class ReadProcessedDocs(val baseDir: String) {
       case (k, v) => k + "(" + v.size + ")"
     }).mkString(","))
     // add entities to DB
+    val maxMentions = einfo.mentions.map(_._2.size).max.toDouble
     for ((mid, ms) <- einfo.mentions) {
-      entityToDB(mid, ms, db)
+      entityToDB(mid, ms, db, maxMentions)
     }
     println("Num of errors: " + errors)
     (db, einfo)
