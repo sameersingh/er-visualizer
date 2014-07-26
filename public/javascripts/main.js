@@ -651,6 +651,71 @@ function displayProv(prov, dom) {
        // last part of sent
        dom.append("span")
            .text(sent.slice(currIndex, sent.length));
+      // buttons
+             /*
+              <div class="btn-group">
+                <button type="button" class="btn btn-default">Left</button>
+                <button type="button" class="btn btn-default">Middle</button>
+                <button type="button" class="btn btn-default">Right</button>
+              </div>*/
+      var btnDiv = dom.append("div").classed("btn-group", true);
+      btnDiv.append("button")
+        .attr("type", "button")
+        .attr("class", "btn btn-default btn-xs")
+        .html("<span class=\"glyphicon glyphicon-ok text-success\"></span>")
+        .on("click", function(d) {
+          console.log("clicked!");
+          console.log(dom);
+          dom
+             .classed("text-success", true)
+             .classed("text-danger", false)
+        });
+      btnDiv.append("button")
+        .attr("type", "button")
+        .attr("class", "btn btn-default btn-xs")
+        .html("<span class=\"glyphicon glyphicon-remove text-danger\"></span>")
+        .on("click", function(d) {
+          console.log("clicked!");
+          console.log(dom);
+          dom
+             .classed("text-success", false)
+             .classed("text-danger", true)
+        });
+
+      /*
+      var btnDiv = dom.append("div").classed("btn-group", true);
+      btnDiv.append("button")
+            .attr("type", "button")
+            .attr("class", "btn btn-default dropdown-toggle btn-xs")
+            .attr("data-toggle", "dropdown")
+            .html("<span class=\"caret\"></span>");
+      var ul = btnDiv.append("ul")
+            .attr("class", "dropdown-menu")
+            .attr("style", "min-width:10px;")
+            .attr("role", "menu");
+      ul.append("li")
+        .append("a")
+        .attr("style", "padding:1px;")
+        .attr("href", "#")
+        .html("<span class=\"glyphicon glyphicon-ok text-success\"></span>")
+        .on("click", function(d) {
+          console.log("clicked!");
+          console.log(dom);
+          dom
+             .classed("text-success", true)
+             .classed("text-danger", false)
+        });
+      ul.append("li")
+        .append("a")
+        .attr("style", "padding:1px;")
+        .attr("href", "#")
+        .html("<span class=\"glyphicon glyphicon-remove text-danger\"></span>")
+        .on("click", function(d) {
+          dom
+             .classed("text-danger", true)
+             .classed("text-success", false)
+        });*/
+
      },
      error: function(j, t, e) { console.log(e); }
   });
