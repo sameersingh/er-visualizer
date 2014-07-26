@@ -94,6 +94,78 @@ class MongoIO(host: String = "localhost", port: Int) {
     buffer.coll.createIndex(MongoDBObject("entity" -> 1))
   }
 
+  def loadGeoLocation(fname: String) {
+
+    def filter(split: Array[String]): Boolean = {
+      (split(0).startsWith("m.") && split(2).startsWith("m."))
+    }
+
+    def cleanValue(value: String): String = value
+
+    val buffer = new MongoInsertBuffer(db("geoLocation"), 100000)
+    val source = io.Source.fromInputStream(new GZIPInputStream(new FileInputStream(fname)))
+    for (l <- source.getLines()) {
+      val split = l.split("\\t")
+      split(0) = stripRDF(split(0))
+      split(2) = stripRDF(split(2))
+      if (filter(split)) {
+        val d = MongoDBObject("entity" -> split(0), "geo" -> cleanValue(split(2)))
+        buffer.insert(d)
+      }
+    }
+    source.close()
+    buffer.forceInsert()
+    buffer.coll.createIndex(MongoDBObject("entity" -> 1))
+  }
+
+  def loadLongitude(fname: String) {
+
+    def filter(split: Array[String]): Boolean = {
+      (split(0).startsWith("m.") && split(2).startsWith("m."))
+    }
+
+    def cleanValue(value: String): Double = value.drop(1).dropRight(1).toDouble
+
+    val buffer = new MongoInsertBuffer(db("geoLongitude"), 100000)
+    val source = io.Source.fromInputStream(new GZIPInputStream(new FileInputStream(fname)))
+    for (l <- source.getLines()) {
+      val split = l.split("\\t")
+      split(0) = stripRDF(split(0))
+      //split(2) = stripRDF(split(2))
+      if (filter(split)) {
+        val d = MongoDBObject("geo" -> split(0), "longitude" -> cleanValue(split(2)))
+        buffer.insert(d)
+      }
+    }
+    source.close()
+    buffer.forceInsert()
+    buffer.coll.createIndex(MongoDBObject("geo" -> 1))
+  }
+
+  def loadLatitude(fname: String) {
+
+    def filter(split: Array[String]): Boolean = {
+      (split(0).startsWith("m.") && split(2).startsWith("m."))
+    }
+
+    def cleanValue(value: String): Double = value.drop(1).dropRight(1).toDouble
+
+    val buffer = new MongoInsertBuffer(db("geoLatitude"), 100000)
+    val source = io.Source.fromInputStream(new GZIPInputStream(new FileInputStream(fname)))
+    for (l <- source.getLines()) {
+      val split = l.split("\\t")
+      split(0) = stripRDF(split(0))
+      //split(2) = stripRDF(split(2))
+      if (filter(split)) {
+        val d = MongoDBObject("geo" -> split(0), "latitude" -> cleanValue(split(2)))
+        buffer.insert(d)
+      }
+    }
+    source.close()
+    buffer.forceInsert()
+    buffer.coll.createIndex(MongoDBObject("geo" -> 1))
+  }
+
   def loadEntityDescription(fname: String) {
 
     def filter(split: Array[String]): Boolean = {
@@ -196,19 +268,31 @@ object LoadMongo extends MongoIO("localhost", 27017) {
 
   def main(args: Array[String]) {
     print("Writing names... ")
-    this.loadEntityNames(baseDir + "type.object.name.gz")
+    //this.loadEntityNames(baseDir + "type.object.name.gz")
     println("done.")
 
     print("Writing images... ")
-    this.loadEntityImages(baseDir + "common.topic.image.gz")
+    //this.loadEntityImages(baseDir + "common.topic.image.gz")
     println("done.")
 
     print("Writing description... ")
-    this.loadEntityDescription(baseDir + "common.topic.description.gz")
+    //this.loadEntityDescription(baseDir + "common.topic.description.gz")
     println("done.")
 
     print("Writing types... ")
-    this.loadEntityTypes(baseDir + "common.topic.notable_types.gz")
+    //this.loadEntityTypes(baseDir + "common.topic.notable_types.gz")
+    println("done.")
+
+    print("Writing locations... ")
+    this.loadGeoLocation(baseDir + "location.location.geolocation.gz")
+    println("done.")
+
+    print("Writing longitudes... ")
+    this.loadLongitude(baseDir + "location.geocode.longitude.gz")
+    println("done.")
+
+    print("Writing latitudes... ")
+    this.loadLatitude(baseDir + "location.geocode.latitude.name.gz")
     println("done.")
   }
 }
