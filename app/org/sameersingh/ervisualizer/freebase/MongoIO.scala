@@ -166,6 +166,29 @@ class MongoIO(host: String = "localhost", port: Int) {
     buffer.coll.createIndex(MongoDBObject("geo" -> 1))
   }
 
+  def loadEntityIds(fname: String) {
+
+    def filter(split: Array[String]): Boolean = {
+      (split(0).startsWith("m.") && split(2).startsWith("\"") && split(2).endsWith("\"") && !split(2).startsWith("\"/user") && !split(2).startsWith("\"/soft"))
+    }
+
+    def cleanValue(value: String): String = value.drop(1).dropRight(4)
+
+    val buffer = new MongoInsertBuffer(db("entityIds"), 10000)
+    val source = io.Source.fromInputStream(new GZIPInputStream(new FileInputStream(fname)))
+    for (l <- source.getLines()) {
+      val split = l.split("\\t")
+      split(0) = stripRDF(split(0))
+      if (filter(split)) {
+        val d = MongoDBObject("entity" -> split(0), "id" -> cleanValue(split(2)))
+        buffer.insert(d)
+      }
+    }
+    source.close()
+    buffer.forceInsert()
+    buffer.coll.createIndex(MongoDBObject("entity" -> 1))
+  }
+
   def loadEntityDescription(fname: String) {
 
     def filter(split: Array[String]): Boolean = {
@@ -215,11 +238,12 @@ class MongoIO(host: String = "localhost", port: Int) {
 
   def readFromDB(mids: Seq[String],
                  collName: String,
-                 value: DBObject => String): scala.collection.Map[String, String] = {
+                 value: DBObject => String,
+                 queryId: String = "entity"): scala.collection.Map[String, String] = {
     val coll = db(collName)
     val result = new mutable.HashMap[String, String]
     for (mid <- mids) {
-      coll.findOne("entity" $eq mid).foreach(o => result(mid) = value(o))
+      coll.findOne(queryId $eq mid).foreach(o => result(mid) = value(o))
     }
     result
   }
@@ -257,7 +281,7 @@ class MongoIO(host: String = "localhost", port: Int) {
       //println(store.entityFreebase(mid))
       //println("---------------------")
       index += 1
-      if(index % (numEnts/100) == 0) print(".")
+      if (index % (numEnts / 100) == 0) print(".")
     }
     println
   }
@@ -267,6 +291,10 @@ object LoadMongo extends MongoIO("localhost", 27017) {
   val baseDir = "/home/sameer/data/freebase/"
 
   def main(args: Array[String]) {
+    print("Writing ids... ")
+    this.loadEntityIds(baseDir + "type.object.id.gz")
+    println("done.")
+
     print("Writing names... ")
     //this.loadEntityNames(baseDir + "type.object.name.gz")
     println("done.")
