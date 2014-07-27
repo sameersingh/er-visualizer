@@ -121,7 +121,7 @@ class MongoIO(host: String = "localhost", port: Int) {
   def loadLongitude(fname: String) {
 
     def filter(split: Array[String]): Boolean = {
-      (split(0).startsWith("m.") && split(2).startsWith("m."))
+      split(0).startsWith("m.") //&& split(2).startsWith("m."))
     }
 
     def cleanValue(value: String): Double = value.drop(1).dropRight(1).toDouble
@@ -145,7 +145,7 @@ class MongoIO(host: String = "localhost", port: Int) {
   def loadLatitude(fname: String) {
 
     def filter(split: Array[String]): Boolean = {
-      (split(0).startsWith("m.") && split(2).startsWith("m."))
+      split(0).startsWith("m.") //&& split(2).startsWith("m."))
     }
 
     def cleanValue(value: String): Double = value.drop(1).dropRight(1).toDouble
@@ -292,7 +292,7 @@ object LoadMongo extends MongoIO("localhost", 27017) {
 
   def main(args: Array[String]) {
     print("Writing ids... ")
-    this.loadEntityIds(baseDir + "type.object.id.gz")
+    // this.loadEntityIds(baseDir + "type.object.id.gz")
     println("done.")
 
     print("Writing names... ")
@@ -312,7 +312,7 @@ object LoadMongo extends MongoIO("localhost", 27017) {
     println("done.")
 
     print("Writing locations... ")
-    this.loadGeoLocation(baseDir + "location.location.geolocation.gz")
+    // this.loadGeoLocation(baseDir + "location.location.geolocation.gz")
     println("done.")
 
     print("Writing longitudes... ")
@@ -320,7 +320,7 @@ object LoadMongo extends MongoIO("localhost", 27017) {
     println("done.")
 
     print("Writing latitudes... ")
-    this.loadLatitude(baseDir + "location.geocode.latitude.name.gz")
+    this.loadLatitude(baseDir + "location.geocode.latitude.gz")
     println("done.")
   }
 }
