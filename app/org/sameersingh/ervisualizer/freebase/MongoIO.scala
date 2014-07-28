@@ -263,7 +263,7 @@ class MongoIO(host: String = "localhost", port: Int) {
     val typeColl = db("entityTypes")
     val geoColl = db("geoLocation")
     val geoLongColl = db("geoLatitude")
-    val geoLatiColl = db("geoLongtitude")
+    val geoLatiColl = db("geoLongitude")
     var index = 0
     val numEnts = store.entityIds.size
     for (mid <- store.entityIds) {
