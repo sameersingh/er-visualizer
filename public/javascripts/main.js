@@ -23,6 +23,7 @@ var nerTags = {
 var svg = 0;
 var link = 0, entitySel = {};
 var force = 0;
+var zoom = 0;
 
 function getAllLinks() {
     $.ajax({
@@ -68,7 +69,7 @@ function start() {
         .append("line")
         .attr("class", "relation")
         .attr("id", function(d) { return d.source.id + "-" + d.target.id; })
-        .style("stroke-width", function(d) { return 3 + Math.sqrt(20*d.popularity); })
+        .style("stroke-width", function(d) { return 2 + 8*d.popularity; })
         .on("click", function(e) { selectRelation(e); d3.event.stopPropagation(); })
         .on("mouseover", function(d) {
            d3.select(this).classed("hover", true);
@@ -103,15 +104,16 @@ function start() {
     .classed("locEnt", function(d) {return d.nerTag == nerTags.location; })
     .classed("orgEnt", function(d) {return d.nerTag == nerTags.organization; })
     // .classed("miscEnt", function(d) {return d.nerTag == "MISC"; })
-    .attr("r", function(d) { return 15+(25*d.popularity); })
-    .append("title")
-    .text(function(e) { return e.name; });
+    .attr("r", function(d) { return 10+(40*d.popularity); })
+    // .append("title")
+    // .text(function(e) { return e.name; });
   node
     .append("text")
-    .attr("x", function(d) { return 15+(25*d.popularity)+5; })
-    .attr("y", function(d) { return 15+(25*d.popularity)+5; })
+    .attr("x", function(d) { return 10+(40*d.popularity)+5; })
+    .attr("y", function(d) { return 10+(40*d.popularity)+5; })
     .attr("dy", ".35em")
     .style("z-index", "-10")
+    .style("font-size", "20")
     .attr("visibility", "hidden")
     .text(function(e) { return e.name; });
   //entitySelEnter
@@ -138,12 +140,13 @@ function hideLabel(d) {
 
 function run() {
     width = $(".canvas").width();
-    height = $(".canvas").height(),
+    height = $(".canvas").height();
+    zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomFunc)
     svg = d3.select(".canvas").append("svg")
             .attr("width", width)
             .attr("height", height)
             .append("g")
-                .call(d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoom))
+                .call(zoom)
                 //.on("mousedown.zoom", null)
                 //.on("touchstart.zoom", null)
                 //.on("touchmove.zoom", null)
@@ -172,8 +175,11 @@ function run() {
     // end of run()
 }
 
-function zoom() {
+function zoomFunc() {
   svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  var text_size = 20/zoom.scale();
+  d3.selectAll("text")
+    .style("font-size",text_size + "px");
 }
 
 function tick() {
@@ -660,12 +666,6 @@ function displayProv(prov, dom) {
        dom.append("span")
            .text(sent.slice(currIndex, sent.length));
       // buttons
-             /*
-              <div class="btn-group">
-                <button type="button" class="btn btn-default">Left</button>
-                <button type="button" class="btn btn-default">Middle</button>
-                <button type="button" class="btn btn-default">Right</button>
-              </div>*/
       var btnDiv = dom.append("div").classed("btn-group", true);
       btnDiv.append("button")
         .attr("type", "button")
@@ -685,41 +685,6 @@ function displayProv(prov, dom) {
              .classed("text-success", false)
              .classed("text-danger", true)
         });
-
-      /*
-      var btnDiv = dom.append("div").classed("btn-group", true);
-      btnDiv.append("button")
-            .attr("type", "button")
-            .attr("class", "btn btn-default dropdown-toggle btn-xs")
-            .attr("data-toggle", "dropdown")
-            .html("<span class=\"caret\"></span>");
-      var ul = btnDiv.append("ul")
-            .attr("class", "dropdown-menu")
-            .attr("style", "min-width:10px;")
-            .attr("role", "menu");
-      ul.append("li")
-        .append("a")
-        .attr("style", "padding:1px;")
-        .attr("href", "#")
-        .html("<span class=\"glyphicon glyphicon-ok text-success\"></span>")
-        .on("click", function(d) {
-          console.log("clicked!");
-          console.log(dom);
-          dom
-             .classed("text-success", true)
-             .classed("text-danger", false)
-        });
-      ul.append("li")
-        .append("a")
-        .attr("style", "padding:1px;")
-        .attr("href", "#")
-        .html("<span class=\"glyphicon glyphicon-remove text-danger\"></span>")
-        .on("click", function(d) {
-          dom
-             .classed("text-danger", true)
-             .classed("text-success", false)
-        });*/
-
      },
      error: function(j, t, e) { console.log(e); }
   });
