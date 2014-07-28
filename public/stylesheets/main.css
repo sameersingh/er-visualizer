@@ -1,7 +1,7 @@
 .relation {
-  stroke: #000;
+  stroke: #444;
   stroke-width: 5px;
-  opacity: 0.3;
+  opacity: 0.2;
   stroke-linecap: round;
 }
 
@@ -37,8 +37,8 @@
 
 path {
   stroke: #444444;
-  stroke-width: 0.25px;
-  fill: white;
+  stroke-width: 0.5px;
+  fill: #eeeeee;
 }
 
 body, html {

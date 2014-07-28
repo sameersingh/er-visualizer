@@ -188,7 +188,7 @@ function run() {
               .size([width, height])
               .on("tick", tick);
 
-      d3.json("/assets/data/world-110m.json", function(error, topology) {
+      d3.json("/assets/data/world-50m.json", function(error, topology) {
           svg.selectAll("path")
             .data(topojson.feature(topology, topology.objects.countries)
                 .features)
@@ -204,7 +204,9 @@ function zoomFunc() {
   svg.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
   var text_size = 20/zoom.scale();
   d3.selectAll("text")
-    .style("font-size",text_size + "px");
+    .style("font-size",text_size + "px")
+    .attr("x", function(d) { return (5+(45*d.popularity)+5)/zoom.scale(); })
+    .attr("y", function(d) { return (5+(45*d.popularity)+5)/zoom.scale(); });
   d3.selectAll("circle")
     .attr("r", function(d) { return (5+(45*d.popularity))/zoom.scale(); })
     .style("stroke-width", (1.0/zoom.scale()) + "px")
