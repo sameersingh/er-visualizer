@@ -30,7 +30,8 @@ object Application extends Controller {
 
   def document(docId: String) = Action {
     println("doc: " + docId)
-    Ok(Json.prettyPrint(Json.toJson(db.document(docId))))
+    SeeOther("http://allafrica.com/stories/%s.html" format(docId))
+    //Ok(Json.prettyPrint(Json.toJson(db.document(docId))))
   }
 
   def sentence(docId: String, sid: Int) = Action {
@@ -40,7 +41,7 @@ object Application extends Controller {
 
   def entityHeaders = Action {
     println("Entity Headers")
-    Ok(Json.toJson(db.entityIds.map(id => db.entityHeader(id))))
+    Ok(Json.toJson(db.entityIds.filter(id => db.relations(id).size>0).map(id => db.entityHeader(id))))
   }
 
   def entityInfo(id: String) = Action {
