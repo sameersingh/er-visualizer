@@ -30,7 +30,7 @@ case class RelationFreebase(sourceId: String, targetId: String, rels: Seq[String
 
 case class RelationText(sourceId: String, targetId: String, provenances: Seq[Provenance])
 
-case class RelModelProvenances(sourceId: String, targetId: String, relType: String, provenances: Seq[Provenance])
+case class RelModelProvenances(sourceId: String, targetId: String, relType: String, provenances: Seq[Provenance], confidence: Double = 1.0)
 
 object RelationUtils {
   def emptyFreebase(sid: String, tid: String) = RelationFreebase(sid, tid, Seq.empty)

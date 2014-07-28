@@ -292,7 +292,7 @@ class ReadMultiROutput(val baseDir: String, val filelist: String, val minScore: 
         val a1 = findClosestProvenance(db, rm.arg1, trueProvenances)
         val a2 = findClosestProvenance(db, rm.arg2, trueProvenances)
         for (arg1P <- a1; arg2P <- a2) {
-          val p = Provenance(fid, sentId, arg1P._2.tokPos ++ arg2P._2.tokPos)
+          val p = Provenance(fid, sentId, arg1P._2.tokPos ++ arg2P._2.tokPos, rm.score)
           // add to db
           val rid = if(arg1P._1 < arg2P._1) arg1P._1 -> arg2P._1 else arg2P._1 -> arg1P._1
           val rel = rm.relation

@@ -19,6 +19,14 @@ class D2DDB {
       db._relationFreebase(rid) = RelationFreebase(rid._1, rid._2, Seq.empty)
       db._relationHeader(rid) = RelationHeader(rid._1, rid._2, rt.provenances.size.toDouble / maxProvenances)
     }
+    val minScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).min
+    val maxScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).max
+    for ((pair, relMap) <- db._relationProvenances) {
+      for ((r, rmps) <- relMap) {
+        relMap(r) = RelModelProvenances(rmps.sourceId, rmps.targetId, rmps.relType, rmps.provenances,
+          math.sqrt(rmps.provenances.map(p => (math.log(p.confidence) - minScore) / maxScore).max)) //sum / rmps.provenances.size.toDouble)
+      }
+    }
   }
 
   def readDB: DB = {

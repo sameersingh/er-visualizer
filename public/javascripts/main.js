@@ -1,7 +1,9 @@
 var width = 1200, //$(".canvas").parent().width(),
     height = 650; // $(".canvas").parent().height();
 
-var color = d3.scale.category10();
+var color = d3.scale.linear()
+                .domain([0, 1])
+                .range(["red", "green"]);
 
 var data = {
     entityArr: [],
@@ -91,7 +93,7 @@ function start() {
                     selectEntity(d);
                     d3.event.stopPropagation();
                 })
-                .call(force.drag)
+                //.call(force.drag)
                 .on("mouseover", showLabel)
                 .on("mouseout", hideLabel);
   node
@@ -142,17 +144,17 @@ function run() {
             .attr("height", height)
             .append("g")
                 .call(d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoom))
-                .on("mousedown.zoom", null)
-                .on("touchstart.zoom", null)
-                .on("touchmove.zoom", null)
-                .on("touchend.zoom", null)
+                //.on("mousedown.zoom", null)
+                //.on("touchstart.zoom", null)
+                //.on("touchmove.zoom", null)
+                //.on("touchend.zoom", null)
               .append("g")
             .on("click", unselect);
 
     svg.append("rect")
         .attr("class", "overlay")
-        .attr("width", width)
-        .attr("height", height)
+        .attr("width", width*10)
+        .attr("height", height*10)
 
     entitySel = svg.selectAll(".node");
     link = svg.selectAll(".link");
@@ -553,11 +555,13 @@ function displayTypeProvs(e, types) {
                       .append("div")
                       .attr("class", "panel panel-default typeProv");
       // heading
-      textPanel.append("div")
-               .attr("class", "panel-heading")
-               .append("h4")
+      var panelHeading = textPanel.append("div")
+               .attr("class", "panel-heading");
+      var h4 = panelHeading.append("h4")
                .attr("class", "panel-title")
-               .append("a")
+      var div = h4.append("span")
+        .attr("class", "glyphicon glyphicon-stop");
+      h4.append("a")
                .attr("data-toggle", "collapse")
                .attr("data-parent", "#accordian")
                .attr("href", function(d) {return '#'+d.type.replace(/:/g, "_");})
@@ -570,20 +574,20 @@ function displayTypeProvs(e, types) {
                .attr("class", "list-group provListGroup")
                .attr("id", function(d) {return d.type.replace(/:/g, "_")+'List';})
                .each(function(p) {
-                 getAndDisplayTypeProv(p.src, p.type, d3.select(this));
+                 getAndDisplayTypeProv(p.src, p.type, d3.select(this), div);
                });
     } else {
       console.log("etPs obsolete: " + e.id + ", curr: " + data.currEnt.id);
     }
 }
 
-function getAndDisplayTypeProv(e, type, dom) {
+function getAndDisplayTypeProv(e, type, dom, status) {
     if(e == data.currEnt) {
         $.ajax({
            type: "GET",
            url: '/entity/typeprov/'+e.id+'/'+type,
            success: function(d) {
-             displayTypeProv(e, type, dom, d);
+             displayTypeProv(e, type, dom, d, status);
            },
            error: function(j, t, e) { console.log(e); }
         });
@@ -593,19 +597,23 @@ function getAndDisplayTypeProv(e, type, dom) {
            url: '/relation/typeprov/'+e.source.id+'/'+e.target.id+'/'+type,
            success: function(d) {
              //console.log(d);
-             displayTypeProv(e, type, dom, d);
+             displayTypeProv(e, type, dom, d, status);
            },
            error: function(j, t, e) { console.log(e); }
         });
     }
 }
 
-function displayTypeProv(e, type, dom, tp) {
+function displayTypeProv(e, type, dom, tp, status) {
     if(data.currEnt == e || data.currLink == e) {
       console.log("disp etp: " + e + ", "+ type);
       //console.log(tp);
       var typeProvList = dom;
       typeProvList.text("");
+      // color is according to confidence
+      if(tp.confidence)
+        status.attr("style", "color:"+color(tp.confidence)+";");
+      else status.remove();
       typeProvList.selectAll("li")
         .data(tp.provenances)
         .enter()
@@ -664,8 +672,6 @@ function displayProv(prov, dom) {
         .attr("class", "btn btn-default btn-xs")
         .html("<span class=\"glyphicon glyphicon-ok text-success\"></span>")
         .on("click", function(d) {
-          console.log("clicked!");
-          console.log(dom);
           dom
              .classed("text-success", true)
              .classed("text-danger", false)
@@ -675,8 +681,6 @@ function displayProv(prov, dom) {
         .attr("class", "btn btn-default btn-xs")
         .html("<span class=\"glyphicon glyphicon-remove text-danger\"></span>")
         .on("click", function(d) {
-          console.log("clicked!");
-          console.log(dom);
           dom
              .classed("text-success", false)
              .classed("text-danger", true)
