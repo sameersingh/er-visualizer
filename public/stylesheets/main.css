@@ -1,14 +1,14 @@
 .relation {
   stroke: #000;
   stroke-width: 5px;
-  opacity: 0.2;
+  opacity: 0.3;
   stroke-linecap: round;
 }
 
 .entity {
   stroke: #000;
   stroke-width: 1.5px;
-  opacity: 0.2;
+  opacity: 0.3;
 }
 
 .perEnt {
@@ -33,6 +33,12 @@
 
 .hover {
   opacity: 1.0;
+}
+
+path {
+  stroke: #444444;
+  stroke-width: 0.25px;
+  fill: white;
 }
 
 body, html {

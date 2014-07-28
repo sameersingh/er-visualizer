@@ -24,6 +24,7 @@ var svg = 0;
 var link = 0, entitySel = {};
 var force = 0;
 var zoom = 0;
+var projection = 0;
 
 function getAllLinks() {
     $.ajax({
@@ -88,7 +89,14 @@ function start() {
   var entitySelEnter = entitySel.enter();
   var node = entitySelEnter
                 .append("g").attr("class", "node")
-                .attr("id", function(e) { return e.id; })
+                .attr("id", function(d) {
+                  if(d.geo.length == 2) {
+                    d.fixed = true;
+                    d.x = projection([d.geo[0],d.geo[1]])[0];
+                    d.y = projection([d.geo[0],d.geo[1]])[1];
+                  }
+                  return d.id;
+                })
                 .on("click", function(d) {
                     if (d3.event.defaultPrevented) return; // ignore drag
                     selectEntity(d);
@@ -104,13 +112,14 @@ function start() {
     .classed("locEnt", function(d) {return d.nerTag == nerTags.location; })
     .classed("orgEnt", function(d) {return d.nerTag == nerTags.organization; })
     // .classed("miscEnt", function(d) {return d.nerTag == "MISC"; })
-    .attr("r", function(d) { return 10+(40*d.popularity); })
+    .attr("r", function(d) { return 5+(45*d.popularity); })
+    .style("fill", function(d) { if(d.geo.length==2) return "red";})
     // .append("title")
     // .text(function(e) { return e.name; });
   node
     .append("text")
-    .attr("x", function(d) { return 10+(40*d.popularity)+5; })
-    .attr("y", function(d) { return 10+(40*d.popularity)+5; })
+    .attr("x", function(d) { return 5+(45*d.popularity)+5; })
+    .attr("y", function(d) { return 5+(45*d.popularity)+5; })
     .attr("dy", ".35em")
     .style("z-index", "-10")
     .style("font-size", "20")
@@ -141,6 +150,14 @@ function hideLabel(d) {
 function run() {
     width = $(".canvas").width();
     height = $(".canvas").height();
+
+    projection = d3.geo.mercator()
+        .center([0, 5 ])
+        .scale(900)
+        .rotate([0,0]);
+    var path = d3.geo.path()
+        .projection(projection);
+
     zoom = d3.behavior.zoom().scaleExtent([0.1, 10]).on("zoom", zoomFunc)
     svg = d3.select(".canvas").append("svg")
             .attr("width", width)
@@ -170,8 +187,16 @@ function run() {
               .linkDistance(100)
               .size([width, height])
               .on("tick", tick);
-    //start();
-    getAllEntities();
+
+      d3.json("/assets/data/world-110m.json", function(error, topology) {
+          svg.selectAll("path")
+            .data(topojson.feature(topology, topology.objects.countries)
+                .features)
+          .enter()
+            .append("path")
+            .attr("d", path)
+          getAllEntities();
+      });
     // end of run()
 }
 
@@ -212,12 +237,12 @@ function updateEntPosition(e, cx, cy) {
 
 function unselect() {
     if(data.currEnt != -1) {
-       data.currEnt.fixed = false;
+       //data.currEnt.fixed = false;
        data.currEnt = -1;
     }
     if(data.currLink != -1) {
-      data.currLink.source.fixed = false;
-      data.currLink.target.fixed = false;
+      //data.currLink.source.fixed = false;
+      //data.currLink.target.fixed = false;
       data.currLink = -1;
     }
     d3.selectAll(".selected").classed("selected", false);
@@ -236,7 +261,7 @@ function selectEntity(d) {
         d3.selectAll(".selected").classed("selected", false);
         var circle = d3.select("#"+d.id).select("circle");
         circle.classed("selected", true);
-        data.currEnt.fixed = true;
+        //data.currEnt.fixed = true;
         var cx = (width/2)-100;
         var cy = height/2;
         //updateEntPosition(data.currEnt, cx, cy);
@@ -268,8 +293,8 @@ function selectRelation(d) {
 
         var cx = (width/2)-100;
         var cy = height/2;
-        d.source.fixed = true;
-        d.target.fixed = true;
+        //d.source.fixed = true;
+        //d.target.fixed = true;
         //updateEntPosition(d.source, cx, cy+75);
         //updateEntPosition(d.target, cx, cy-75);
 

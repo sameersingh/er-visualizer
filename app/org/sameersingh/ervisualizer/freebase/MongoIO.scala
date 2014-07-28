@@ -5,7 +5,7 @@ import java.util.zip.GZIPInputStream
 import java.io.FileInputStream
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable
-import org.sameersingh.ervisualizer.data.{EntityFreebase, EntityInfo, InMemoryDB}
+import org.sameersingh.ervisualizer.data.{EntityHeader, EntityFreebase, EntityInfo, InMemoryDB}
 
 /**
  * Created by sameer on 7/11/14.
@@ -261,13 +261,25 @@ class MongoIO(host: String = "localhost", port: Int) {
     val imgColl = db("entityImages")
     val descColl = db("entityDescription")
     val typeColl = db("entityTypes")
+    val geoColl = db("geoLocation")
+    val geoLongColl = db("geoLatitude")
+    val geoLatiColl = db("geoLongtitude")
     var index = 0
     val numEnts = store.entityIds.size
     for (mid <- store.entityIds) {
-      // info
-      // TODO: query mongo
-      val info = new mutable.HashMap[String, String]
       val queryID = mid.replace('_', '.')
+      // header
+      geoColl.findOne("entity" $eq queryID).map(o => o.get("geo").toString).foreach(geo => {
+        geoLongColl.findOne("geo" $eq geo).map(o => o.get("longitude").toString.toDouble).foreach(longitude => {
+          geoLatiColl.findOne("geo" $eq geo).map(o => o.get("latitude").toString.toDouble).foreach(latitude => {
+            val eh = store.entityHeader(mid)
+            print("g")
+            store._entityHeader(mid) = EntityHeader(eh.id, eh.name, eh.nerTag, eh.popularity, Seq(longitude, latitude))
+          })
+        })
+      })
+      // info
+      val info = new mutable.HashMap[String, String]
       info("/mid") = "/" + mid.replace('_', '/')
       nameColl.findOne("entity" $eq queryID).map(o => o.get("name").toString).foreach(v => info("Name") = v)
       imgColl.findOne("entity" $eq queryID).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = "/" + v.replace('.', '/'))
