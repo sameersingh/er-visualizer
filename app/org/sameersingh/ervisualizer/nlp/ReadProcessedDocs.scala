@@ -265,13 +265,17 @@ object ReadProcessedDocs extends App {
   val mongo = new MongoIO("localhost", 27017)
   mongo.updateDB(db._1.asInstanceOf[InMemoryDB])
   println("Writing Mongo")
+  val entityHeaderWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(baseDir + "/d2d.ent.head"), "UTF-8"))
   val entityInfoWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(baseDir + "/d2d.ent.info"), "UTF-8"))
   val entityFreebaseWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(baseDir + "/d2d.ent.freebase"), "UTF-8"))
   import org.sameersingh.ervisualizer.data.JsonWrites._
   for(mid <- db._1.entityIds) {
+    entityHeaderWriter.println(Json.toJson(db._1.entityHeader(mid)))
     entityInfoWriter.println(Json.toJson(db._1.entityInfo(mid)))
     entityFreebaseWriter.println(Json.toJson(db._1.entityFreebase(mid)))
   }
+  entityHeaderWriter.flush()
+  entityHeaderWriter.close()
   entityInfoWriter.flush()
   entityInfoWriter.close()
   entityFreebaseWriter.flush()
