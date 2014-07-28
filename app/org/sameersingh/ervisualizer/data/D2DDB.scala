@@ -3,6 +3,8 @@ package org.sameersingh.ervisualizer.data
 import org.sameersingh.ervisualizer.nlp.{ReadMultiROutput, ReadProcessedDocs}
 import com.typesafe.config.ConfigFactory
 import org.sameersingh.ervisualizer.freebase.MongoIO
+import scala.collection.mutable
+import play.api.libs.json.Json
 
 /**
  * Created by sameer on 7/20/14.
@@ -29,6 +31,28 @@ class D2DDB {
     }
   }
 
+  def readFromMongoJson(baseDir: String, db: InMemoryDB) {
+    val ehf = io.Source.fromFile(baseDir + "/d2d.ent.head", "UTF-8").getLines()
+    val eif = io.Source.fromFile(baseDir + "/d2d.ent.info", "UTF-8").getLines()
+    val eff = io.Source.fromFile(baseDir + "/d2d.ent.freebase", "UTF-8").getLines()
+    import JsonReads._
+    for(ehl <- ehf; eil = eif.next(); efl = eff.next()) {
+      val eh = Json.fromJson[EntityHeader](Json.parse(ehl)).get
+      val ei = Json.fromJson[EntityInfo](Json.parse(eil)).get
+      val ef = Json.fromJson[EntityFreebase](Json.parse(efl)).get
+      assert(eh.id == ei.id)
+      assert(eh.id == ef.id)
+      val mid = eh.id
+      if(db._entityHeader.contains(mid)) {
+        db._entityHeader(mid) = eh
+        db._entityInfo(mid) = ei
+        db._entityFreebase(mid) = ef
+      }
+    }
+    assert(eif.isEmpty)
+    assert(eff.isEmpty)
+  }
+
   def readDB: DB = {
     // read raw documents and entity links
     println("Read raw docs")
@@ -42,6 +66,7 @@ class D2DDB {
     println("Read mongo info")
     val mongo = new MongoIO("localhost", 27017)
     if(cfg.getBoolean("nlp.data.mongo")) mongo.updateDB(db.asInstanceOf[InMemoryDB])
+    else readFromMongoJson(baseDir, db.asInstanceOf[InMemoryDB])
 
     // read relations and convert that to provenances
     println("Read relations")
