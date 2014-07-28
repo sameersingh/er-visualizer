@@ -41,7 +41,7 @@ class D2DDB {
     // fill entity info with freebase info
     println("Read mongo info")
     val mongo = new MongoIO("localhost", 27017)
-    //mongo.updateDB(db.asInstanceOf[InMemoryDB])
+    if(cfg.getBoolean("nlp.data.mongo")) mongo.updateDB(db.asInstanceOf[InMemoryDB])
 
     // read relations and convert that to provenances
     println("Read relations")

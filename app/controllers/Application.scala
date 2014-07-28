@@ -34,7 +34,7 @@ object Application extends Controller {
   }
 
   def sentence(docId: String, sid: Int) = Action {
-    println("sen: " + docId + ", " + sid)
+    // println("sen: " + docId + ", " + sid)
     Ok(Json.toJson(db.document(docId).sents(sid)))
   }
 
