@@ -205,6 +205,10 @@ function zoomFunc() {
   var text_size = 20/zoom.scale();
   d3.selectAll("text")
     .style("font-size",text_size + "px");
+  d3.selectAll("circle")
+    .attr("r", function(d) { return (5+(45*d.popularity))/zoom.scale(); })
+    .style("stroke-width", (1.0/zoom.scale()) + "px")
+  link.style("stroke-width", function(d) { return (2 + 8*d.popularity)/zoom.scale(); })
 }
 
 function tick() {
