@@ -148,7 +148,7 @@ class ReadProcessedDocs(val baseDir: String, val filelist: String) {
     val sentences = new mutable.HashMap[(String, Int), mutable.HashSet[String]]
 
     def +=(m: Mention) {
-      val mid = m.wiki.get._1.drop(1).replaceAll("/", "_")
+      val mid = m.wiki.get._1.drop(1).replaceFirst("/", "_")
       mentions.getOrElseUpdate(mid, new ArrayBuffer) += m
       sentences.getOrElseUpdate(m.docId -> m.sentId, new mutable.HashSet) += mid
     }
