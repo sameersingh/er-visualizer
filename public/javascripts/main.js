@@ -549,7 +549,7 @@ function getAndDisplayProvenances(d) {
              .attr("data-toggle", "collapse")
              .attr("data-parent", "#accordian")
              .attr("href", "#allTextPanel")
-             .text("All Sentences");
+             .html("All Sentences <span class=\"caret\"></span>");
     // body
     textPanel.append("div")
              .attr("class", "panel-collapse collapse")
@@ -611,7 +611,7 @@ function displayTypeProvs(e, types) {
                .attr("data-toggle", "collapse")
                .attr("data-parent", "#accordian")
                .attr("href", function(d) {return '#'+d.type.replace(/:/g, "_");})
-               .text(function(d) {return d.type;});
+               .html(function(d) {return d.type + " <span class=\"caret\"></span>";});
       // body
       textPanel.append("div")
                .attr("class", "panel-collapse collapse")
