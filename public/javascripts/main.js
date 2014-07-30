@@ -70,7 +70,7 @@ function start() {
         .append("line")
         .attr("class", "relation")
         .attr("id", function(d) { return d.source.id + "-" + d.target.id; })
-        .style("stroke-width", function(d) { return 2 + 8*d.popularity; })
+        .style("stroke-width", function(d) { return strokeWidth(d); })
         .on("click", function(e) { selectRelation(e); d3.event.stopPropagation(); })
         .on("mouseover", function(d) {
            d3.select(this).classed("hover", true);
@@ -112,14 +112,14 @@ function start() {
     .classed("locEnt", function(d) {return d.nerTag == nerTags.location; })
     .classed("orgEnt", function(d) {return d.nerTag == nerTags.organization; })
     // .classed("miscEnt", function(d) {return d.nerTag == "MISC"; })
-    .attr("r", function(d) { return 5+(45*d.popularity); })
+    .attr("r", function(d) { return radius(d); })
     .style("fill", function(d) { if(d.geo.length==2) return "red";})
     // .append("title")
     // .text(function(e) { return e.name; });
   node
     .append("text")
-    .attr("x", function(d) { return 5+(45*d.popularity)+5; })
-    .attr("y", function(d) { return 5+(45*d.popularity)+5; })
+    .attr("x", function(d) { return radius(d)+5; })
+    .attr("y", function(d) { return radius(d)+5; })
     .attr("dy", ".35em")
     .style("z-index", "-10")
     .style("font-size", "20")
@@ -133,6 +133,14 @@ function start() {
   force.start();
 
   initTypeahead(data);
+}
+
+function strokeWidth(d) {
+  return 2 + 8*Math.pow(d.popularity,1.5);
+}
+
+function radius(d) {
+  return 5+(30*Math.pow(d.popularity,0.5));
 }
 
 function showLabel(d) {
@@ -182,9 +190,9 @@ function run() {
     force = d3.layout.force()
               .nodes(data.entityArr)
               .links(data.links)
-              .charge(-2500)
-              .gravity(0.5)
-              .linkDistance(100)
+              .charge(-500)
+              .gravity(0.1)
+              .linkDistance(10)
               .size([width, height])
               .on("tick", tick);
 
@@ -205,12 +213,12 @@ function zoomFunc() {
   var text_size = 20/zoom.scale();
   d3.selectAll("text")
     .style("font-size",text_size + "px")
-    .attr("x", function(d) { return (5+(45*d.popularity)+5)/zoom.scale(); })
-    .attr("y", function(d) { return (5+(45*d.popularity)+5)/zoom.scale(); });
+    .attr("x", function(d) { return (radius(d)+5)/zoom.scale(); })
+    .attr("y", function(d) { return (radius(d)+5)/zoom.scale(); });
   d3.selectAll("circle")
-    .attr("r", function(d) { return (5+(45*d.popularity))/zoom.scale(); })
+    .attr("r", function(d) { return radius(d)/zoom.scale(); })
     .style("stroke-width", (1.0/zoom.scale()) + "px")
-  link.style("stroke-width", function(d) { return (2 + 8*d.popularity)/zoom.scale(); })
+  link.style("stroke-width", function(d) { return strokeWidth(d)/zoom.scale(); })
 }
 
 function tick() {
@@ -584,6 +592,7 @@ function displayTypeProvs(e, types) {
       // console.log(types);
       // console.log(pairs);
       var accordion = d3.select('#accordion');
+      accordion.append("p").text("");
       // add all text panel
       var textPanel = accordion
                       .selectAll(".typeProv")
