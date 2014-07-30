@@ -53,12 +53,12 @@ class D2DDB {
     assert(eff.isEmpty)
   }
 
-  def readDB: DB = {
+  def readDB(filelistSuffix: Option[String] = None): DB = {
     // read raw documents and entity links
     println("Read raw docs")
     val cfg = ConfigFactory.load()
     val baseDir = cfg.getString("nlp.data.baseDir")
-    val filelist = cfg.getString("nlp.data.filelist")
+    val filelist = if(filelistSuffix.isDefined) "d2d.filelist." + filelistSuffix.get else cfg.getString("nlp.data.filelist")
     val processedDocReader = new ReadProcessedDocs(baseDir, filelist)
     val (db, einfo) = processedDocReader.readAllDocs
 

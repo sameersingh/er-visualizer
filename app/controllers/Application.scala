@@ -16,7 +16,7 @@ object Application extends Controller {
 
   def init() {
     // _db = InMemoryDB.readFromTSV("public/data/test/")
-    _db = D2DDB.readDB
+    _db = D2DDB.readDB()
     println(db)
   }
 
@@ -25,12 +25,17 @@ object Application extends Controller {
   import org.sameersingh.ervisualizer.data.JsonWrites._
 
   def index = Action {
-    Ok(views.html.index("Your new application is ready."))
+    Ok(views.html.index("UW - default"))
+  }
+
+  def reset(name: String) = Action {
+    _db = D2DDB.readDB(Some(name))
+    Ok(views.html.index("UW - " + name))
   }
 
   def document(docId: String) = Action {
     println("doc: " + docId)
-    SeeOther("http://allafrica.com/stories/%s.html" format(docId))
+    SeeOther("http://allafrica.com/stories/%s.html?viewall=1" format(docId.take(12)))
     //Ok(Json.prettyPrint(Json.toJson(db.document(docId))))
   }
 
