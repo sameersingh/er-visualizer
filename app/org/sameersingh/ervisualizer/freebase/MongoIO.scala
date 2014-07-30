@@ -267,7 +267,7 @@ class MongoIO(host: String = "localhost", port: Int) {
     var index = 0
     val numEnts = store.entityIds.size
     for (mid <- store.entityIds) {
-      val queryID = mid.replace('_', '.')
+      val queryID = mid.replaceFirst("_", ".")
       // header
       geoColl.findOne("entity" $eq queryID).map(o => o.get("geo").toString).foreach(geo => {
         geoLongColl.findOne("geo" $eq geo).map(o => o.get("longitude").toString.toDouble).foreach(longitude => {
@@ -280,7 +280,7 @@ class MongoIO(host: String = "localhost", port: Int) {
       })
       // info
       val info = new mutable.HashMap[String, String]
-      info("/mid") = "/" + mid.replace('_', '/')
+      info("/mid") = "/" + mid.replaceFirst("_", "/")
       nameColl.findOne("entity" $eq queryID).map(o => o.get("name").toString).foreach(v => info("Name") = v)
       imgColl.findOne("entity" $eq queryID).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = "/" + v.replace('.', '/'))
       descColl.findOne("entity" $eq queryID).map(o => o.get("desc").toString).foreach(v => info("/common/topic/description") = v)
