@@ -3,7 +3,7 @@
 function test() {
     $.ajax({
        type: "GET",
-       url: '/document',
+       url: '/kba/documents/test',
        success: function(d) {
         console.log(d);
        },

@@ -8,13 +8,12 @@ import play.api.libs.functional.syntax._
 
 object ApplicationKBA extends Controller {
 
-  private var _db: DB = null
+  private var _db: KBADB = null
 
   def db = _db
 
   def init() {
-    // _db = InMemoryDB.readFromTSV("public/data/test/")
-    //_db = D2DDB.readDB()
+    _db = KBADB.readDB
   }
 
   init();
@@ -24,14 +23,9 @@ object ApplicationKBA extends Controller {
   def index = Action {
     Ok(views.html.indexkba("UW TRECKBA - default"))
   }
-
-  def reset(name: String) = Action {
-    //_db = D2DDB.readDB(Some(name))
-    Ok(views.html.index("UW TRECKBA - " + name))
-  }
-
-  def document() = Action {
-    Ok("successful received call")
+ 
+  def documents(entityId: String) = Action {
+    Ok(Json.toJson(db.documents(entityId)))
   }
 
 }

@@ -32,8 +32,5 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 ### KBA stuff
 
-# Home page
 GET     /kba                           controllers.ApplicationKBA.index
-GET     /kba/db/:name                   controllers.ApplicationKBA.reset(name: String)
-
-GET /kba/document                   controllers.ApplicationKBA.document
+GET /kba/documents/:eid                   controllers.ApplicationKBA.documents(eid: String)
