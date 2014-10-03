@@ -23,6 +23,10 @@ object ApplicationKBA extends Controller {
   def index = Action {
     Ok(views.html.indexkba("UW TRECKBA - default"))
   }
+
+  def entities = Action {
+    Ok(Json.toJson(db.entities))
+  }
  
   def documents(entityId: String) = Action {
     Ok(Json.toJson(db.documents(entityId)))

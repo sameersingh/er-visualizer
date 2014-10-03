@@ -6,6 +6,7 @@
 <html>
     <head>
         <title>@title</title>
+        <script src="@routes.Assets.at("javascripts/underscore-min.js")" type="text/javascript" charset="utf-8"></script>
         <script src="@routes.Assets.at("javascripts/jquery-1.9.0.min.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/colorbrewer.js")" type="text/javascript" charset="utf-8"></script>
         <script src="@routes.Assets.at("javascripts/d3/d3.v3.min.js")" type="text/javascript" charset="utf-8"></script>
@@ -17,10 +18,12 @@
         <link rel="stylesheet" href="@routes.Assets.at("stylesheets/nv.d3.css")">
         <script src="@routes.Assets.at("javascripts/d3/nv.d3.js")" type="text/javascript"></script>
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-        <script src="@routes.Assets.at("javascripts/d3/stream_layers.js")" type="text/javascript"></script>
         <script src="@routes.Assets.at("javascripts/main-kba.js")" type="text/javascript"></script>
     </head>
     <body class="container">
+        <div id="entity" class="centerContent form-group">
+            <input class="typeahead form-control" type="text" placeholder="Entity Name">
+        </div>
         <div id="chart" class='with-3d-shadow with-transitions'>
             <svg style="height: 500px;"></svg>
         </div>
