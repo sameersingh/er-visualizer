@@ -21,12 +21,20 @@
         <script src="@routes.Assets.at("javascripts/main-kba.js")" type="text/javascript"></script>
     </head>
     <body class="container">
-        <div id="entity" class="centerContent form-group">
-            <input class="typeahead form-control" type="text" placeholder="Entity Name">
+        <div class="center">
+            <div id="entity" class="centerContent">
+                <input class="typeahead" type="text" placeholder="Entity Name">
+            </div>
         </div>
-        <div id="chart" class='with-3d-shadow with-transitions'>
-            <svg style="height: 500px;"></svg>
+        <p class="space" />
+        <div id="staleness" class='with-3d-shadow with-transitions chart'>
+            <svg></svg>
         </div>
+        <p class="space" />
+        <div id="relevance" class='with-3d-shadow with-transitions chart'>
+            <svg></svg>
+        </div>
+
         <script>
           run();
         </script>
