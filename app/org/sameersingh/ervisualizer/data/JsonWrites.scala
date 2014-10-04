@@ -56,8 +56,8 @@ object JsonWrites {
   (JsPath \ "timestamp").write[Long] and
   (JsPath \ "relevance").write[Int] and
   (JsPath \ "score").write[Int] and
-  (JsPath \ "lambdas" \ "li").write[StalenessKba] and
-  (JsPath \ "lambdas" \ "lijs").write[Seq[StalenessKba]]
+  (JsPath \ "ci").write[Int] and
+  (JsPath \ "lambdas").write[Seq[StalenessKba]]
   )(unlift(DocumentKba.unapply))
 
   implicit val entityKbaWrites = Json.writes[EntityKba]
@@ -101,8 +101,8 @@ object JsonReads {
   (JsPath \ "timestamp").read[Long] and
   (JsPath \ "relevance").read[Int] and
   (JsPath \ "score").read[Int] and
-  (JsPath \ "lambdas" \ "li").read[StalenessKba] and
-  (JsPath \ "lambdas" \ "lijs").read[Seq[StalenessKba]]
+  (JsPath \ "ci").read[Int] and
+  (JsPath \ "lambdas").read[Seq[StalenessKba]]
   )(DocumentKba.apply _)
 
   implicit val entityKbaReads = Json.reads[EntityKba]

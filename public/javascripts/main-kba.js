@@ -3,17 +3,23 @@ var parseDate = d3.time.format('%x')
 var entities = []
 
 function parseData(d) {
-    var data = _.flatten(d.map(function(e, i) {
-      lis = [e.lambdas.li.dec, e.lambdas.li.inc];
-      return lis.map(function(li, j) {
-        return {x: e.timestamp, y: li};
+    var clusters = Math.max.apply(null, _.pluck(d, "ci"))
+    var data = []
+    for (i=0; i < clusters; i++) {
+      data[i] = []
+    }
+    d.map(function(e,i) {
+      e.lambdas.map(function (c, i) {
+        data[c.cj-1].push({x: e.timestamp, y: c.dec})
+        data[c.cj-1].push({x: e.timestamp, y: c.inc})
       });
-    }));
-    var datum = [{
-      key: 'C',
-      values: data
-    }];
-    return datum;    
+    });
+    return data.map(function(cluster, i) {
+      return {
+        key: "C" + (i+1),
+        values: cluster
+      };
+    });
 }
 
 function getStaleness(e) {

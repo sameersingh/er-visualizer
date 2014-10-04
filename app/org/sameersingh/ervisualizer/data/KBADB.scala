@@ -26,6 +26,7 @@ class KBADB {
     val cfg = ConfigFactory.load()
     
     // read entities files
+    println("reading entities file")
     val entitiesFileName = cfg.getString("nlp.kba.entitiesFile")
     val entitiesFile = io.Source.fromFile(entitiesFileName, "UTF-8")
     for (line <- entitiesFile.getLines()) {
@@ -33,12 +34,15 @@ class KBADB {
       db._entities += EntityKba(split(0).trim(), split(1).trim())
     }
     entitiesFile.close()
+    println("read entities file")
 
     // read staleness files
     val stalenessBaseDir = cfg.getString("nlp.kba.stalenessBaseDir")
     val stalenessInputFiles = new File(stalenessBaseDir).listFiles();
+    println("reading staleness files")
     for (file <- stalenessInputFiles) {
       if (!file.isDirectory()) {
+        println("reading file " + file.getName())
         val sf = io.Source.fromFile(file, "UTF-8")
         // TODO how to do this more efficiently? ask Sameer
         val sfAsString = sf.getLines.mkString
@@ -47,8 +51,10 @@ class KBADB {
         val entityName = file.getName().replace(".json", "")
         db._documentsPerEntity.put(entityName, docArray)
         sf.close()
+        println("reading file " + file.getName())
       }
     }
+    println("read staleness files")
     db
   }
 }
