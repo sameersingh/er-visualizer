@@ -93,7 +93,7 @@ class KBADB {
         println("read file " + file.getName())
       }
     }
-    println("read staleness files")
+    println("read embedding files")
     db
   }
 }

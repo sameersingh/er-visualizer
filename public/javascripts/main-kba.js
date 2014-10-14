@@ -72,10 +72,15 @@ function getDocuments(e) {
   });
 }
 
+function renderModal(d) {
+  wordCloud(d);
+  $('#wordcloud').modal();
+}
+
 function onRelevanceClick(entity, timestamp) {
   d3.json('/kba/wordcloud/' + entity + '/' + timestamp, function(error, d) {
     if (!error) {
-      wordCloud(d);
+      renderModal(d);
     }
   });
 }
@@ -83,7 +88,7 @@ function onRelevanceClick(entity, timestamp) {
 function onClusterClick(entity, clusterid, timestamp) {
   d3.json('/kba/wordcloud/' + entity + '/' + (clusterid + 1) + '/' + timestamp, function(error, d) {
     if (!error) {
-      wordCloud(d);
+      renderModal(d);
     }
   });
 }
@@ -142,11 +147,12 @@ function initTypeahead() {
 }
 
 function wordCloud(data) {
+  var words = data.map(function(d) {
+                return {text: d.t, size: 10 + (d.p / 1000) * 19};
+              });
   var fill = d3.scale.category20();
   d3.layout.cloud().size([300, 300])
-      .words(data.map(function(d) {
-        return {text: d.t, size: 10 + Math.random() * 90};
-      }))
+      .words(words)
       .padding(5)
       .rotate(function() { return ~~(Math.random() * 2) * 90; })
       .font("Impact")
@@ -155,7 +161,8 @@ function wordCloud(data) {
       .start();
 
   function draw(words) {
-    d3.select("body").append("svg")
+    d3.select("#wordcloud-body svg").remove();
+    d3.select("#wordcloud-body").append("svg")
         .attr("width", 300)
         .attr("height", 300)
       .append("g")
