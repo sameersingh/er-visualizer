@@ -32,4 +32,12 @@ object ApplicationKBA extends Controller {
     Ok(Json.toJson(db.documents(entityId)))
   }
 
+  def clusterWordCloud(entityId: String, clusterId: Int, timestamp: Long) = Action {
+    Ok(Json.toJson(db.clusterWordCloud(entityId, clusterId, timestamp)))
+  }
+
+  def documentWordCloud(entityId: String, timestamp: Long) = Action {
+    Ok(Json.toJson(db.documentWordCloud(entityId, timestamp)))
+  }
+
 }

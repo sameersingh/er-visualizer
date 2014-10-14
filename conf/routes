@@ -35,3 +35,5 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 GET     /kba                              controllers.ApplicationKBA.index
 GET /kba/entities                         controllers.ApplicationKBA.entities
 GET /kba/documents/:eid                   controllers.ApplicationKBA.documents(eid: String)
+GET /kba/wordcloud/:eid/:cid/:timestamp   controllers.ApplicationKBA.clusterWordCloud(eid: String, cid: Int, timestamp: Long)
+GET /kba/wordcloud/:eid/:timestamp        controllers.ApplicationKBA.documentWordCloud(eid: String, timestamp: Long)

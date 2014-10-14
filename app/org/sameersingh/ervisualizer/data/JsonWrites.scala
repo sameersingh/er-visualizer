@@ -16,6 +16,9 @@ import org.sameersingh.ervisualizer.data.RelationHeader
 import org.sameersingh.ervisualizer.data.RelationText
 import org.sameersingh.ervisualizer.data.DocumentKba
 import org.sameersingh.ervisualizer.data.EntityKba
+import org.sameersingh.ervisualizer.data.WordKba
+import org.sameersingh.ervisualizer.data.EmbeddingKba
+import org.sameersingh.ervisualizer.data.ClusterKba
 
 /**
  * Created by sameer on 7/20/14.
@@ -62,6 +65,8 @@ object JsonWrites {
 
   implicit val entityKbaWrites = Json.writes[EntityKba]
 
+  implicit val wordKbaWrites = Json.writes[WordKba]
+
 }
 
 object JsonReads {
@@ -106,5 +111,19 @@ object JsonReads {
   )(DocumentKba.apply _)
 
   implicit val entityKbaReads = Json.reads[EntityKba]
-  
+
+  implicit val wordKbaReads = Json.reads[WordKba]
+
+  implicit val clusterKbaReads: Reads[ClusterKba] = (
+  (JsPath \ "cj").read[Int] and  
+  (JsPath \ "cj_emb").read[Seq[WordKba]]
+  )(ClusterKba.apply _)
+
+  implicit val embeddingKbaReads: Reads[EmbeddingKba] = (
+  (JsPath \ "streamid").read[String] and  
+  (JsPath \ "timestamp").read[Long] and
+  (JsPath \ "di").read[Seq[WordKba]] and
+  (JsPath \ "clusters").read[Seq[ClusterKba]]
+  )(EmbeddingKba.apply _)
+
 }

@@ -1,6 +1,8 @@
 
-var parseDate = d3.time.format('%x')
-var entities = []
+var parseDate = d3.time.format('%x');
+var entities = [];
+var relevanceChart;
+var stalenessChart;
 
 function parseData(d) {
     var clusters = Math.max.apply(null, _.pluck(d, "ci"))
@@ -44,39 +46,49 @@ function parseData(d) {
     return [staleness, relevance]
 }
 
+function registerEvent(chartSrc, chartDst) {
+  //chartSrc.dispatch.on("brush", function(evt) {
+    //console.log("brushhhh event");
+    //chartDst.dispatch.brush(evt);
+  //});  
+}
+
 function getDocuments(e) {
+  var entity  = e.id;
   d3.json('/kba/documents/' + e.id, function(error, d) {
     if (!error) {
       var data = parseData(d);
-      stalenessChart(data[0]);
-      relevanceChart(data[1]);
-  }
+      relevanceChart = timeChart('#relevance', 'd', data[1]);
+      relevanceChart.lines.dispatch.on('elementClick', function(e) {
+        onRelevanceClick(entity, e.point.x);
+      });
+      stalenessChart = timeChart('#staleness', ',.2f', data[0]);
+      stalenessChart.lines.dispatch.on('elementClick', function(e) {
+        onClusterClick(entity, e.point.series, e.point.x);
+      });
+      //registerEvent(relevanceChart, stalenessChart);
+      //registerEvent(stalenessChart, relevanceChart);
+    }
   });
 }
 
-function relevanceChart(data) {
-  var chart = nv.models.stackedAreaChart();  
-  chart.xAxis.tickFormat(function(d) {
-    return parseDate(new Date(d * 1000))
+function onRelevanceClick(entity, timestamp) {
+  d3.json('/kba/wordcloud/' + entity + '/' + timestamp, function(error, d) {
+    if (!error) {
+      wordCloud(d);
+    }
   });
-/*  chart.x2Axis.tickFormat(function(d) {
-    return parseDate(new Date(d * 1000))
-  });
-*/
-  chart.yAxis.tickFormat(d3.format('d'));
-//  chart.y2Axis.tickFormat(d3.format('d'));
-
-  nv.addGraph(function() {
-    d3.select('#relevance svg')
-            .datum(data)
-            .transition().duration(500)
-            .call(chart);
-    nv.utils.windowResize(chart.update);
-    return chart;
-  });           
 }
 
-function stalenessChart(data) {
+function onClusterClick(entity, clusterid, timestamp) {
+  d3.json('/kba/wordcloud/' + entity + '/' + (clusterid + 1) + '/' + timestamp, function(error, d) {
+    if (!error) {
+      wordCloud(d);
+    }
+  });
+}
+
+function timeChart(id, format, data) {
   var chart = nv.models.lineWithFocusChart();  
   chart.xAxis.tickFormat(function(d) {
     return parseDate(new Date(d * 1000))
@@ -84,17 +96,22 @@ function stalenessChart(data) {
   chart.x2Axis.tickFormat(function(d) {
     return parseDate(new Date(d * 1000))
   });
-  chart.yAxis.tickFormat(d3.format(',.2f'));
-  chart.y2Axis.tickFormat(d3.format(',.2f'));
+  chart.yAxis.tickFormat(d3.format(format));
+  chart.y2Axis.tickFormat(d3.format(format));
 
   nv.addGraph(function() {
-    d3.select('#staleness svg')
+    d3.select(id + ' svg')
             .datum(data)
             .transition().duration(500)
             .call(chart);
     nv.utils.windowResize(chart.update);
     return chart;
-  });           
+  });
+  // remove tooltips
+  chart.tooltips(false);
+  chart.lines.dispatch.on('elementMouseover.tooltip', null);
+  chart.lines.dispatch.on('elementMouseout.tooltip', null);
+  return chart;         
 }
 
 function initTypeahead() {
@@ -124,13 +141,11 @@ function initTypeahead() {
         });
 }
 
-function wordCloud() {
+function wordCloud(data) {
   var fill = d3.scale.category20();
   d3.layout.cloud().size([300, 300])
-      .words([
-        "Hello", "world", "normally", "you", "want", "more", "words",
-        "than", "this"].map(function(d) {
-        return {text: d, size: 10 + Math.random() * 90};
+      .words(data.map(function(d) {
+        return {text: d.t, size: 10 + Math.random() * 90};
       }))
       .padding(5)
       .rotate(function() { return ~~(Math.random() * 2) * 90; })
@@ -156,12 +171,8 @@ function wordCloud() {
           return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
         })
         .text(function(d) { return d.text; });
+  }
 }
-
-
-}
-
-
 
 function run() {
   //wordCloud();
