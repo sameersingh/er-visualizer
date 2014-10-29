@@ -35,6 +35,7 @@ class KBADB {
     val entitiesFile = io.Source.fromFile(entitiesFileName, "UTF-8")
     for (line <- entitiesFile.getLines()) {
       val split = line.split("\\t")
+      //println(split)
       db._entities += EntityKba(split(0).trim(), split(1).trim())
     }
     entitiesFile.close()

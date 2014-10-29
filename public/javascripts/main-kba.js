@@ -1,32 +1,51 @@
 
 var parseDate = d3.time.format('%x');
 var entities = [];
-var relevanceChart;
-var stalenessChart;
+//var scale = 604800; // per week
+var scale = 86400; // day
 
 function parseData(d) {
     var clusters = Math.max.apply(null, _.pluck(d, "ci"))
-    var data = []
+    var data = [];
     for (i=0; i < clusters; i++) {
-      data[i] = []
+      data[i] = [];
     }
-    var vitals = []
-    var non_vitals = []
-    var vitals_count = 0
-    var non_vitals_count = 0
+
+    var maxTimestamp = 0;
+    var minTimestamp = 999999999999;
 
     d.map(function(e,i) {
-      if (e.relevance == 2) {
-        vitals.push({x: e.timestamp, y: ++vitals_count})
-        non_vitals.push({x: e.timestamp, y: non_vitals_count})
-      } else {
-        vitals.push({x: e.timestamp, y: vitals_count})
-        non_vitals.push({x: e.timestamp, y: ++non_vitals_count})
+      if (e.timestamp > maxTimestamp) {
+        maxTimestamp = e.timestamp;
+      }
+      if (e.timestamp < minTimestamp) {
+        minTimestamp = e.timestamp;
       }
       e.lambdas.map(function (c, i) {
-        data[c.cj-1].push({x: e.timestamp, y: c.dec})
-        data[c.cj-1].push({x: e.timestamp, y: c.inc})
+        data[c.cj-1].push({x: e.timestamp, y: c.dec});
+        data[c.cj-1].push({x: e.timestamp, y: c.inc});
       });
+    });
+
+    var bins = Math.round((maxTimestamp - minTimestamp) / scale);
+    console.log(bins);
+
+    xs = []
+    vitals = []
+    non_vitals = []
+    for (i=0; i < bins; i++) {
+      xs.push(Math.round(minTimestamp + (scale * i)));
+      vitals.push(0);
+      non_vitals.push(0);
+    }
+    
+    d.map(function(e,i) {
+      var bin = Math.round((e.timestamp - minTimestamp) / scale);
+      if (e.relevance == 2) {
+          vitals[bin] += 1;
+      } else {
+          non_vitals[bin] += 1;
+      }
     });
 
     var staleness = data.map(function(cluster, i) {
@@ -36,35 +55,49 @@ function parseData(d) {
       };
     });
 
+    vitals_values = [];
+    non_vitals_values = [];
+    for (i=0; i < bins; i++) {
+      vitals_values.push({x : xs[i], y: vitals[i]});
+      non_vitals_values.push({x: xs[i], y: non_vitals[i]});
+    }
+
     var relevance = [ {
         key: "Vital",
-        values: vitals
+        values: vitals_values
       }, {
         key: "Non-Vital",
-        values: non_vitals
+        values: non_vitals_values
       }];
     return [staleness, relevance]
 }
 
-function registerEvent(chartSrc, chartDst) {
-  //chartSrc.dispatch.on("brush", function(evt) {
-    //console.log("brushhhh event");
-    //chartDst.dispatch.brush(evt);
-  //});  
+function registerEvent(src, dst) {
+  src.dispatch.on("brush", function(evt) {
+    //dst.brushExtent(evt.extent);
+    //var oldTransition = dst.transitionDuration();
+    //dst.transitionDuration(0); 
+    //dst.dispatch.brush();
+    //dst.transitionDuration(oldTransition);
+  });
 }
+
 
 function getDocuments(e) {
   var entity  = e.id;
   d3.json('/kba/documents/' + e.id, function(error, d) {
     if (!error) {
       var data = parseData(d);
-      relevanceChart = timeChart('#relevance', 'd', data[1]);
-      relevanceChart.lines.dispatch.on('elementClick', function(e) {
-        onRelevanceClick(entity, e.point.x);
-      });
-      stalenessChart = timeChart('#staleness', ',.2f', data[0]);
+      var relevanceChart = timeChart('#relevance', 'd', data[1]);
+      relevanceChart.yAxis.axisLabel('number of documents').axisLabelDistance(40);
+      //relevanceChart.lines.dispatch.on('elementClick', function(e) {
+        //onRelevanceClick(entity, e.point.x);
+      //});
+      var stalenessChart = timeChart('#staleness', ',.2f', data[0]);
+      stalenessChart.yAxis.axisLabel('staleness').axisLabelDistance(40);
+      //stalenessChart.interpolate("basis");
       stalenessChart.lines.dispatch.on('elementClick', function(e) {
-        onClusterClick(entity, e.point.series, e.point.x);
+        onClusterClick(entity, e.series.key.charAt(1), e.point.x);
       });
       //registerEvent(relevanceChart, stalenessChart);
       //registerEvent(stalenessChart, relevanceChart);
@@ -86,7 +119,7 @@ function onRelevanceClick(entity, timestamp) {
 }
 
 function onClusterClick(entity, clusterid, timestamp) {
-  d3.json('/kba/wordcloud/' + entity + '/' + (clusterid + 1) + '/' + timestamp, function(error, d) {
+  d3.json('/kba/wordcloud/' + entity + '/' + clusterid + '/' + timestamp, function(error, d) {
     if (!error) {
       renderModal(d);
     }
@@ -96,15 +129,17 @@ function onClusterClick(entity, clusterid, timestamp) {
 function timeChart(id, format, data) {
   var chart = nv.models.lineWithFocusChart();  
   chart.xAxis.tickFormat(function(d) {
-    return parseDate(new Date(d * 1000))
+    return parseDate(new Date(d * 1000));
   });
   chart.x2Axis.tickFormat(function(d) {
-    return parseDate(new Date(d * 1000))
+    return parseDate(new Date(d * 1000));
   });
   chart.yAxis.tickFormat(d3.format(format));
   chart.y2Axis.tickFormat(d3.format(format));
 
   nv.addGraph(function() {
+    d3.select(id + ' svg').remove();
+    d3.select(id).append('svg');
     d3.select(id + ' svg')
             .datum(data)
             .transition().duration(500)
@@ -116,6 +151,7 @@ function timeChart(id, format, data) {
   chart.tooltips(false);
   chart.lines.dispatch.on('elementMouseover.tooltip', null);
   chart.lines.dispatch.on('elementMouseout.tooltip', null);
+  //chart.color(['#8c510a','#bf812d','#dfc27d','#f6e8c3','#c7eae5','#80cdc1','#35978f','#01665e']);
   return chart;         
 }
 
