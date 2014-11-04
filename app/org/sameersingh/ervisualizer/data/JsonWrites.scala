@@ -2,23 +2,6 @@ package org.sameersingh.ervisualizer.data
 
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import org.sameersingh.ervisualizer.data.RelModelProvenances
-import org.sameersingh.ervisualizer.data.RelationFreebase
-import org.sameersingh.ervisualizer.data.Provenance
-import org.sameersingh.ervisualizer.data.EntityHeader
-import org.sameersingh.ervisualizer.data.Sentence
-import org.sameersingh.ervisualizer.data.EntityText
-import org.sameersingh.ervisualizer.data.EntityFreebase
-import org.sameersingh.ervisualizer.data.TypeModelProvenances
-import org.sameersingh.ervisualizer.data.EntityInfo
-import org.sameersingh.ervisualizer.data.Document
-import org.sameersingh.ervisualizer.data.RelationHeader
-import org.sameersingh.ervisualizer.data.RelationText
-import org.sameersingh.ervisualizer.data.DocumentKba
-import org.sameersingh.ervisualizer.data.EntityKba
-import org.sameersingh.ervisualizer.data.WordKba
-import org.sameersingh.ervisualizer.data.EmbeddingKba
-import org.sameersingh.ervisualizer.data.ClusterKba
 
 /**
  * Created by sameer on 7/20/14.
