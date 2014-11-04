@@ -5593,7 +5593,7 @@ button.close {
   overflow: hidden;
 }
 
-body.modal-open,
+/* body.modal-open, */
 .modal-open .navbar-fixed-top,
 .modal-open .navbar-fixed-bottom {
   margin-right: 15px;
@@ -5645,6 +5645,8 @@ body.modal-open,
   -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
           box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
   background-clip: padding-box;
+  width: 350px;
+  height: 350px;
 }
 
 .modal-backdrop {

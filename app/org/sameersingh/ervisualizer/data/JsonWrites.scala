@@ -1,6 +1,7 @@
 package org.sameersingh.ervisualizer.data
 
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import org.sameersingh.ervisualizer.data.RelModelProvenances
 import org.sameersingh.ervisualizer.data.RelationFreebase
 import org.sameersingh.ervisualizer.data.Provenance
@@ -13,6 +14,11 @@ import org.sameersingh.ervisualizer.data.EntityInfo
 import org.sameersingh.ervisualizer.data.Document
 import org.sameersingh.ervisualizer.data.RelationHeader
 import org.sameersingh.ervisualizer.data.RelationText
+import org.sameersingh.ervisualizer.data.DocumentKba
+import org.sameersingh.ervisualizer.data.EntityKba
+import org.sameersingh.ervisualizer.data.WordKba
+import org.sameersingh.ervisualizer.data.EmbeddingKba
+import org.sameersingh.ervisualizer.data.ClusterKba
 
 /**
  * Created by sameer on 7/20/14.
@@ -46,6 +52,21 @@ object JsonWrites {
   implicit val relationTextWrites = Json.writes[RelationText]
   implicit val relationProvWrites = Json.writes[RelModelProvenances]
 
+  implicit val stalenessKbaWrites = Json.writes[StalenessKba]
+
+  implicit val docKbaWrites: Writes[DocumentKba] = (
+  (JsPath \ "streamid").write[String] and  
+  (JsPath \ "timestamp").write[Long] and
+  (JsPath \ "relevance").write[Int] and
+  (JsPath \ "score").write[Int] and
+  (JsPath \ "ci").write[Int] and
+  (JsPath \ "lambdas").write[Seq[StalenessKba]]
+  )(unlift(DocumentKba.unapply))
+
+  implicit val entityKbaWrites = Json.writes[EntityKba]
+
+  implicit val wordKbaWrites = Json.writes[WordKba]
+
 }
 
 object JsonReads {
@@ -59,6 +80,7 @@ object JsonReads {
       Json.fromJson[Seq[Seq[Int]]](json).flatMap(seqs => JsSuccess(seqs.map(seq => seq(0) -> seq(1))))
     }
   }
+
   implicit val provReads = {
     implicit val seqIntPairReadsImplicit = seqIntPairReads
     Json.reads[Provenance]
@@ -76,5 +98,32 @@ object JsonReads {
   implicit val relationFreebaseReads = Json.reads[RelationFreebase]
   implicit val relationTextReads = Json.reads[RelationText]
   implicit val relationProvReads = Json.reads[RelModelProvenances]
+
+  implicit val stalenessKbaReads = Json.reads[StalenessKba]
+
+  implicit val docKbaReads: Reads[DocumentKba] = (
+  (JsPath \ "streamid").read[String] and  
+  (JsPath \ "timestamp").read[Long] and
+  (JsPath \ "relevance").read[Int] and
+  (JsPath \ "score").read[Int] and
+  (JsPath \ "ci").read[Int] and
+  (JsPath \ "lambdas").read[Seq[StalenessKba]]
+  )(DocumentKba.apply _)
+
+  implicit val entityKbaReads = Json.reads[EntityKba]
+
+  implicit val wordKbaReads = Json.reads[WordKba]
+
+  implicit val clusterKbaReads: Reads[ClusterKba] = (
+  (JsPath \ "cj").read[Int] and  
+  (JsPath \ "cj_emb").read[Seq[WordKba]]
+  )(ClusterKba.apply _)
+
+  implicit val embeddingKbaReads: Reads[EmbeddingKba] = (
+  (JsPath \ "streamid").read[String] and  
+  (JsPath \ "timestamp").read[Long] and
+  (JsPath \ "di").read[Seq[WordKba]] and
+  (JsPath \ "clusters").read[Seq[ClusterKba]]
+  )(EmbeddingKba.apply _)
 
 }
