@@ -35,6 +35,12 @@ object JsonWrites {
   implicit val relationTextWrites = Json.writes[RelationText]
   implicit val relationProvWrites = Json.writes[RelModelProvenances]
 
+  implicit val wordWrites = Json.writes[Word]
+  implicit val clusterWrites = Json.writes[Cluster]
+  implicit val stalenessWrites = Json.writes[Staleness]
+  implicit val documentWrites = Json.writes[Doc]
+  implicit val entityWrites = Json.writes[Entity]
+
   implicit val stalenessKbaWrites = Json.writes[StalenessKba]
 
   implicit val docKbaWrites: Writes[DocumentKba] = (
@@ -81,6 +87,12 @@ object JsonReads {
   implicit val relationFreebaseReads = Json.reads[RelationFreebase]
   implicit val relationTextReads = Json.reads[RelationText]
   implicit val relationProvReads = Json.reads[RelModelProvenances]
+
+  implicit val wordReads = Json.reads[Word]
+  implicit val clusterReads = Json.reads[Cluster]
+  implicit val stalenessReads = Json.reads[Staleness]
+  implicit val documentReads = Json.reads[Doc]
+  implicit val entityReads = Json.reads[Entity]
 
   implicit val stalenessKbaReads = Json.reads[StalenessKba]
 
