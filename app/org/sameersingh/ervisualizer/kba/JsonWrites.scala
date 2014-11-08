@@ -1,4 +1,4 @@
-package org.sameersingh.ervisualizer.data
+package org.sameersingh.ervisualizer.kba
 
 import org.sameersingh.ervisualizer.kba._
 import play.api.libs.json._
@@ -18,29 +18,6 @@ object JsonWrites {
       Json.toJson(o.map(p => Json.toJson(Seq(p._1, p._2))))
     }
   }
-  implicit val provWrites = {
-    implicit val seqIntPairWritesImplicit = seqIntPairWrites
-    Json.writes[Provenance]
-  }
-  implicit val senWrites = Json.writes[Sentence]
-  implicit val docWrites = Json.writes[Document]
-
-  implicit val entityHeaderWrites = Json.writes[EntityHeader]
-  implicit val entityInfoWrites = Json.writes[EntityInfo]
-  implicit val entityFbWrites = Json.writes[EntityFreebase]
-  implicit val entityTxtWrites = Json.writes[EntityText]
-  implicit val entityTypeProvWrites = Json.writes[TypeModelProvenances]
-
-  implicit val relationHeaderWrites = Json.writes[RelationHeader]
-  implicit val relationFreebaseWrites = Json.writes[RelationFreebase]
-  implicit val relationTextWrites = Json.writes[RelationText]
-  implicit val relationProvWrites = Json.writes[RelModelProvenances]
-
-  implicit val wordWrites = Json.writes[Word]
-  implicit val clusterWrites = Json.writes[Cluster]
-  implicit val stalenessWrites = Json.writes[Staleness]
-  implicit val documentWrites = Json.writes[Doc]
-  implicit val entityWrites = Json.writes[Entity]
 
   implicit val stalenessKbaWrites = Json.writes[StalenessKba]
 
@@ -70,24 +47,6 @@ object JsonReads {
       Json.fromJson[Seq[Seq[Int]]](json).flatMap(seqs => JsSuccess(seqs.map(seq => seq(0) -> seq(1))))
     }
   }
-
-  implicit val provReads = {
-    implicit val seqIntPairReadsImplicit = seqIntPairReads
-    Json.reads[Provenance]
-  }
-  implicit val senReads = Json.reads[Sentence]
-  implicit val docReads = Json.reads[Document]
-
-  implicit val entityHeaderReads = Json.reads[EntityHeader]
-  implicit val entityInfoReads = Json.reads[EntityInfo]
-  implicit val entityFbReads = Json.reads[EntityFreebase]
-  implicit val entityTxtReads = Json.reads[EntityText]
-  implicit val entityTypeProvReads = Json.reads[TypeModelProvenances]
-
-  implicit val relationHeaderReads = Json.reads[RelationHeader]
-  implicit val relationFreebaseReads = Json.reads[RelationFreebase]
-  implicit val relationTextReads = Json.reads[RelationText]
-  implicit val relationProvReads = Json.reads[RelModelProvenances]
 
   implicit val wordReads = Json.reads[Word]
   implicit val clusterReads = Json.reads[Cluster]

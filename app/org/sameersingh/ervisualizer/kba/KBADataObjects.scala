@@ -1,4 +1,4 @@
-package org.sameersingh.ervisualizer.data
+package org.sameersingh.ervisualizer.kba
 
 /**
  * @author nacho
@@ -15,3 +15,14 @@ case class ClusterKba(cj: Int, cj_emb: Seq[WordKba])
 case class EmbeddingKba(id: String, timestamp: Long, di: Seq[WordKba], clusters: Seq[ClusterKba])
 
 case class WordKba(t: String, p: Int)
+
+// For non-KBA staleness visualization
+case class Word(w : String, c: Double)
+
+case class Cluster(id: Int, words: Seq[Word])
+
+case class Staleness(value : Double, time : Long)
+
+case class Doc(id: String, time : Long)
+
+case class Entity(id: String, staleness: Seq[Staleness], docs: Seq[Doc], clusters: Seq[Cluster])

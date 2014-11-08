@@ -1,4 +1,5 @@
-package org.sameersingh.ervisualizer.nlp
+package org.sameersingh.ervisualizer.kba
+
 import com.typesafe.config.ConfigFactory
 
 

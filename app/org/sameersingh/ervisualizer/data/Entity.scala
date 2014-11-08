@@ -39,13 +39,3 @@ object RelationUtils {
 
   def emptyRelProvenance(sid: String, tid: String, rt: String) = RelModelProvenances(sid, tid, rt, Seq.empty)
 }
-
-case class Word(w : String, c: Double)
-
-case class Cluster(id: Int, words: Seq[Word])
-
-case class Staleness(value : Double, time : Long)
-
-case class Doc(id: String, time : Long)
-
-case class Entity(id: String, staleness: Seq[Staleness], docs: Seq[Doc], clusters: Seq[Cluster])

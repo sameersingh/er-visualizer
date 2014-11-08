@@ -82,3 +82,15 @@ class D2DDB {
 }
 
 object D2DDB extends D2DDB
+
+object StalenessReader {
+  import org.sameersingh.ervisualizer.kba.JsonReads._
+  import org.sameersingh.ervisualizer.kba._
+  def main(args: Array[String]): Unit = {
+    val inputfile =
+    for(line <- io.Source.fromFile("/home/sameer/data/d2d/demo2015/nov/nigeria_dataset_v04.staleness.values.txt").getLines()) {
+      val e = Json.fromJson[Entity](Json.parse(line)).get
+      println(e)
+    }
+  }
+}

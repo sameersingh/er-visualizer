@@ -1,11 +1,13 @@
-package org.sameersingh.ervisualizer.data
-
-import scala.collection.mutable.{HashMap, ArrayBuffer}
-import com.typesafe.config.ConfigFactory
-import scala.collection.mutable
-import play.api.libs.json.Json
+package org.sameersingh.ervisualizer.kba
 
 import java.io.File
+
+import com.typesafe.config.ConfigFactory
+import play.api.libs.json.Json
+
+import scala.collection.mutable.{ArrayBuffer, HashMap}
+
+import JsonReads._
 
 /**
  * Created by nacho.
@@ -50,7 +52,6 @@ class KBADB {
         println("reading file " + file.getName())
         val sf = io.Source.fromFile(file, "UTF-8")
         // for(l <- sf.getLines.filter(l => random.nextDouble > 0.1))
-        import JsonReads._
         val docArray = new ArrayBuffer[DocumentKba]
         for (l <- sf.getLines) {
           val doc = Json.fromJson[DocumentKba](Json.parse(l)).get
@@ -73,7 +74,6 @@ class KBADB {
       if (!file.isDirectory()) {
         println("reading file " + file.getName())
         val sf = io.Source.fromFile(file, "UTF-8")
-        import JsonReads._
         val embeddings = new ArrayBuffer[EmbeddingKba]
         for (l <- sf.getLines) {
           val embedding = Json.fromJson[EmbeddingKba](Json.parse(l)).get

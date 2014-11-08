@@ -1,5 +1,6 @@
 package controllers
 
+import org.sameersingh.ervisualizer.kba.KBADB
 import play.api._
 import play.api.mvc._
 import org.sameersingh.ervisualizer.data._
