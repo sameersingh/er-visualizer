@@ -16,11 +16,24 @@
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <script src="@routes.Assets.at("javascripts/main.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/kba.js")" type="text/javascript"></script>
     </head>
     <body class="container">
         <div class="center">
             <div id="entityEntry" class="centerContent form-group">
                 <input class="typeahead form-control" type="text" placeholder="Entity Name">
+            </div>
+        </div>
+        <div class="kbaWindow panel panel-default">
+            <div class="panel-heading clearfix">
+                <button type="button pull-right" class="close" onclick="d3.select('.kbaWindow').style('visibility', 'hidden')">
+                    <span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+                </button>
+                <h4  id="kbaWindowHeading" class="panel-title pull-left" style="padding-top: 7.5px;">Context Representation</h4>
+            </div>
+            <div class="panel-body">
+                <div class="panel panel-default" id="kba">
+                </div>
             </div>
         </div>
         <div class="provWindow panel panel-default">
@@ -30,7 +43,6 @@
                 </button>
                 <h4  id="provWindowHeading" class="panel-title pull-left" style="padding-top: 7.5px;">Provenance</h4>
             </div>
-
             <div class="panel-body">
                 <div class="panel-group" id="accordion">
                 </div>

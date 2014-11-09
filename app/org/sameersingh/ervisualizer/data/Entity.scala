@@ -17,6 +17,10 @@ case class TypeModelProvenances(id: String, entityType: String, provenances: Seq
 object EntityUtils {
   def emptyInfo(eid: String) = EntityInfo(eid, Map.empty)
 
+  def emptyText(eid: String) = EntityText(eid, Seq.empty)
+
+  def emptyKBA(eid: String) = org.sameersingh.ervisualizer.kba.Entity(eid, Seq.empty, Seq.empty, Seq.empty)
+
   def emptyFreebase(eid: String) = EntityFreebase(eid, Seq.empty)
 
   def emptyProvenance(eid: String) = EntityText(eid, Seq.empty)

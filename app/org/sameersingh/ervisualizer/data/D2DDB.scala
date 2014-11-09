@@ -64,9 +64,10 @@ class D2DDB {
 
     // fill entity info with freebase info
     println("Read mongo info")
-    val mongo = new MongoIO("localhost", 27017)
-    if(cfg.getBoolean("nlp.data.mongo")) mongo.updateDB(db.asInstanceOf[InMemoryDB])
-    else readFromMongoJson(baseDir, db.asInstanceOf[InMemoryDB])
+    if(cfg.getBoolean("nlp.data.mongo")) {
+      val mongo = new MongoIO("localhost", 27017)
+      mongo.updateDB(db.asInstanceOf[InMemoryDB])
+    } else readFromMongoJson(baseDir, db.asInstanceOf[InMemoryDB])
 
     // read relations and convert that to provenances
     println("Read relations")
@@ -83,14 +84,3 @@ class D2DDB {
 
 object D2DDB extends D2DDB
 
-object StalenessReader {
-  import org.sameersingh.ervisualizer.kba.JsonReads._
-  import org.sameersingh.ervisualizer.kba._
-  def main(args: Array[String]): Unit = {
-    val inputfile =
-    for(line <- io.Source.fromFile("/home/sameer/data/d2d/demo2015/nov/nigeria_dataset_v04.staleness.values.txt").getLines()) {
-      val e = Json.fromJson[Entity](Json.parse(line)).get
-      println(e)
-    }
-  }
-}

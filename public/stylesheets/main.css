@@ -74,6 +74,20 @@ body, html {
   margin-right:0px;*/
 }
 
+.kbaWindow {
+  float:right;
+  width:50%;
+  position:absolute;
+  bottom:0;
+  z-index:100;
+  visibility: hidden;
+  left: 25%;
+  overflow:auto;
+  max-height: 170px;
+  /*margin-left: 60%;
+  margin-right:0px;*/
+}
+
 #infoBoxPanel {
   max-height: 200px;
   overflow:auto;
@@ -214,4 +228,12 @@ body, html {
 
 .gist {
   font-size: 14px;
+}
+
+.wordwrap {
+   white-space: pre-wrap;      /* CSS3 */
+   white-space: -moz-pre-wrap; /* Firefox */
+   white-space: -pre-wrap;     /* Opera <7 */
+   white-space: -o-pre-wrap;   /* Opera 7 */
+   word-wrap: break-word;      /* IE */
 }

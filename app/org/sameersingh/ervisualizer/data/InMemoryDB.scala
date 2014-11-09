@@ -4,6 +4,8 @@ import scala.collection.mutable.{ArrayBuffer, HashMap, LinkedHashMap}
 import scala.io.Source
 import java.io.PrintWriter
 
+import org.sameersingh.ervisualizer.kba
+
 /**
  * @author sameer
  * @since 6/10/14.
@@ -23,6 +25,7 @@ class InMemoryDB extends DB {
   val _entityInfo = new HashMap[String, EntityInfo]
   val _entityFreebase = new HashMap[String, EntityFreebase]
   val _entityText = new HashMap[String, EntityText]
+  val _entityKBA = new HashMap[String, kba.Entity]
   val _entityTypePredictions = new HashMap[String, Seq[String]]
   val _entityTypeProvenances = new HashMap[String, HashMap[String, TypeModelProvenances]]
   val _docEntityProvenances = new HashMap[(String, Int), HashMap[String, Seq[Provenance]]]
@@ -36,6 +39,8 @@ class InMemoryDB extends DB {
   override def entityFreebase(id: String): EntityFreebase = _entityFreebase.getOrElse(id, EntityUtils.emptyFreebase(id))
 
   override def entityText(id: String): EntityText = _entityText.getOrElse(id, EntityUtils.emptyProvenance(id))
+
+  override def entityKBA(id: String): kba.Entity = _entityKBA.getOrElse(id, EntityUtils.emptyKBA(id))
 
   override def entityTypePredictions(id: String): Seq[String] = _entityTypePredictions.getOrElse(id, Seq.empty)
 

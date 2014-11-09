@@ -1,12 +1,8 @@
 package controllers
 
-import play.api._
 import play.api.mvc._
 import org.sameersingh.ervisualizer.data._
-import play.api.libs.json.{JsValue, Writes, Json}
-import play.api.libs.functional.syntax._
-import org.sameersingh.ervisualizer.data.EntityHeader
-import org.sameersingh.ervisualizer.data.EntityInfo
+import play.api.libs.json.Json
 
 object Application extends Controller {
 
@@ -15,8 +11,7 @@ object Application extends Controller {
   def db = _db
 
   def init() {
-    // _db = InMemoryDB.readFromTSV("public/data/test/")
-    _db = D2DDB.readDB()
+    _db = NLPReader.read
     println(db)
   }
 
@@ -46,12 +41,18 @@ object Application extends Controller {
 
   def entityHeaders = Action {
     println("Entity Headers")
-    Ok(Json.toJson(db.entityIds.filter(id => db.relations(id).size>0).map(id => db.entityHeader(id))))
+    // Ok(Json.toJson(db.entityIds.filter(id => db.relations(id).size>0).map(id => db.entityHeader(id))))
+    Ok(Json.toJson(db.entityIds.map(id => db.entityHeader(id))))
   }
 
   def entityInfo(id: String) = Action {
     println("eInfo: " + id)
     Ok(Json.toJson(db.entityInfo(id)))
+  }
+
+  def entityKBA(id: String) = Action {
+    println("eKBA: " + id)
+    Ok(Json.toJson(db.entityKBA(id)))
   }
 
   def entityFreebase(id: String) = Action {
@@ -90,17 +91,17 @@ object Application extends Controller {
   }
 
   def relationText(sid: String, tid: String) = Action {
-    println("RelFreebase: " + (sid -> tid))
+    println("RelText: " + (sid -> tid))
     Ok(Json.toJson(db.relationText(sid, tid)))
   }
 
   def relationPredictions(sid: String, tid: String) = Action {
-    println("RelFreebase: " + (sid -> tid))
+    println("RelPred: " + (sid -> tid))
     Ok(Json.toJson(db.relationPredictions(sid, tid)))
   }
 
   def relationProvenances(sid: String, tid: String, rtype: String) = Action {
-    println("RelFreebase: " + (sid -> tid))
+    println("RelProv: " + (sid -> tid))
     Ok(Json.toJson(db.relationProvenances(sid, tid, rtype)))
   }
 

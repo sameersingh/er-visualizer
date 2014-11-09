@@ -340,6 +340,11 @@ function hideAllBoxes() {
             d3.select(this).style("visibility", "hidden");
             d3.select("#accordion").text("");
         });
+    d3.select(".kbaWindow").transition().style("opacity", "0.0")
+        .each("end", function() {
+            d3.select(this).style("visibility", "hidden");
+            d3.select("#kba").text("");
+        });
 }
 
 function showAllBoxes(onFinish) {
@@ -359,6 +364,11 @@ function showAllBoxes(onFinish) {
         .each("start", function() {
             d3.select(this).style("visibility", "visible");
             d3.select("#accordion").text("");
+        });
+    d3.select(".kbaWindow").transition().style("opacity", "1.0")
+        .each("start", function() {
+            d3.select(this).style("visibility", "visible");
+            d3.select("#kba").text("");
         });
 }
 
@@ -559,11 +569,22 @@ function getAndDisplayProvenances(d) {
              .attr("id", "allTextList")
              .text("Loading...");
     if(isEntity) {
+      getEntityCmd(d, 'kba', displayEntityKBA);
       getEntityCmd(d, 'text', displayEntityText);
       getEntityCmd(d, 'types', displayTypeProvs);
     } else {
       getRelCmd(d, 'text', displayEntityText);
       getRelCmd(d, 'types', displayTypeProvs);
+    }
+}
+
+function displayEntityKBA(e, kba) {
+    if(data.currEnt == e || data.currLink == e ) {
+      console.log("disp ekba: " + e.id);
+      var divKBA = d3.select('#kba');
+      renderKBA(divKBA, kba);
+    } else {
+      console.log("ekba obsolete: " + e.id + ", curr: " + data.currEnt.id);
     }
 }
 

@@ -24,6 +24,8 @@ trait DB {
 
   def entityText(id: String): EntityText
 
+  def entityKBA(id: String): org.sameersingh.ervisualizer.kba.Entity
+
   def entityTypePredictions(id: String): Seq[String]
 
   def entityTypeProvenances(id: String, etype: String): TypeModelProvenances
