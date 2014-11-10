@@ -1,5 +1,7 @@
 package org.sameersingh.ervisualizer.data
 
+import java.io.{FileOutputStream, OutputStreamWriter, PrintWriter}
+
 import com.typesafe.config.ConfigFactory
 import nlp_serde.{Mention, Entity}
 import nlp_serde.readers.PerLineJsonReader
@@ -98,6 +100,7 @@ class NLPReader {
       */
     }
     // entity header
+    val maxMentions = einfo.mentions.values.map(_.size).max
     for (eid <- db.entityIds) {
       if (!einfo.mentions.contains(eid)) {
         println(s"Cannot find $eid in the documents..")
@@ -106,7 +109,7 @@ class NLPReader {
       val ments = einfo.mentions.getOrElse(eid, Seq.empty)
       val name = if(ments.isEmpty) "unknown" else ments.map(_.text).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
       val ner = if(ments.isEmpty) "O" else ments.flatMap(_.ner.toSeq).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
-      db._entityHeader(eid) = EntityHeader(eid, name, ner, ments.size.toDouble + 1)
+      db._entityHeader(eid) = EntityHeader(eid, name, ner, ments.size.toDouble/maxMentions)
     }
   }
 
@@ -122,13 +125,51 @@ class NLPReader {
     }
   }
 
-  def readFreebaseInfo(db: InMemoryDB): Unit = {
-    val mongo = new MongoIO(port = 27017)
-    mongo.updateDB(db)
+  def readFreebaseInfo(db: InMemoryDB, freebaseDir: String): Unit = {
+    val cfg = ConfigFactory.load()
+    val useMongo = cfg.getBoolean("nlp.data.mongo")
+    if(useMongo) {
+      val mongo = new MongoIO(port = 27017)
+      mongo.updateDB(db)
+      println("Writing Mongo")
+      val entityHeaderWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/d2d.ent.head"), "UTF-8"))
+      val entityInfoWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/d2d.ent.info"), "UTF-8"))
+      val entityFreebaseWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/d2d.ent.freebase"), "UTF-8"))
+      import org.sameersingh.ervisualizer.data.JsonWrites._
+      for(mid <- db.entityIds) {
+        entityHeaderWriter.println(Json.toJson(db.entityHeader(mid)))
+        entityInfoWriter.println(Json.toJson(db.entityInfo(mid)))
+        entityFreebaseWriter.println(Json.toJson(db.entityFreebase(mid)))
+      }
+      entityHeaderWriter.flush()
+      entityHeaderWriter.close()
+      entityInfoWriter.flush()
+      entityInfoWriter.close()
+      entityFreebaseWriter.flush()
+      entityFreebaseWriter.close()
+      // write as well
+    } else {
+      val ehf = io.Source.fromFile(freebaseDir + "/d2d.ent.head", "UTF-8").getLines()
+      val eif = io.Source.fromFile(freebaseDir + "/d2d.ent.info", "UTF-8").getLines()
+      val eff = io.Source.fromFile(freebaseDir + "/d2d.ent.freebase", "UTF-8").getLines()
+      import JsonReads._
+      for(ehl <- ehf; eil = eif.next(); efl = eff.next()) {
+        val eh = Json.fromJson[EntityHeader](Json.parse(ehl)).get
+        val ei = Json.fromJson[EntityInfo](Json.parse(eil)).get
+        val ef = Json.fromJson[EntityFreebase](Json.parse(efl)).get
+        assert(eh.id == ei.id)
+        assert(eh.id == ef.id)
+        val mid = eh.id
+        if(db._entityHeader.contains(mid)) {
+          db._entityHeader(mid) = eh
+          db._entityInfo(mid) = ei
+          db._entityFreebase(mid) = ef
+        }
+      }
+      assert(eif.isEmpty)
+      assert(eff.isEmpty)
+    }
     /*
-    val _entityInfo = new HashMap[String, EntityInfo]
-    val _entityFreebase = new HashMap[String, EntityFreebase]
-
     val _relationHeader = new HashMap[(String, String), RelationHeader]
     val _relationFreebase = new HashMap[(String, String), RelationFreebase]
     */
@@ -140,7 +181,7 @@ class NLPReader {
     val baseDir = cfg.getString("nlp.data.baseDir") //.replaceAll(" ", "\\ ")
     readStaleness(baseDir + "/nigeria_dataset_v04.staleness.json", db)
     readDocs(baseDir + "/nigeria_dataset_v04.nlp.lrf.json.gz", db)
-    readFreebaseInfo(db)
+    readFreebaseInfo(db, baseDir + "/freebase")
     db
   }
 
