@@ -285,6 +285,10 @@ class MongoIO(host: String = "localhost", port: Int) {
       imgColl.findOne("entity" $eq queryID).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = "/" + v.replace('.', '/'))
       descColl.findOne("entity" $eq queryID).map(o => o.get("desc").toString).foreach(v => info("/common/topic/description") = v)
       store._entityInfo(mid) = EntityInfo(mid, info.toMap)
+      info.get("Name").foreach(name => {
+        val eh = store.entityHeader(mid)
+        store._entityHeader(mid) = EntityHeader(eh.id, name, eh.nerTag, eh.popularity, eh.geo)
+      })
       // freebase
       store._entityFreebase(mid) = EntityFreebase(mid, typeColl.find("entity" $eq queryID).map(o => o.get("type").toString).map(imgID => nameColl.findOne("entity" $eq imgID).map(_.get("name").toString)).flatten.toSeq)
       // print it
