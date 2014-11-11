@@ -415,7 +415,8 @@ function displayEntityInfo(e, info) {
           d3.select('#infoBoxPanelHeading')
             .append("a")
             .text("Read more on Freebase")
-            .attr("href", "http://www.freebase.com" + info.freebaseInfo[key]);
+            .attr("href", "http://www.freebase.com" + info.freebaseInfo[key])
+            .attr("target", "_blank");
         }
         if(key == "/common/topic/image") {
             // image
