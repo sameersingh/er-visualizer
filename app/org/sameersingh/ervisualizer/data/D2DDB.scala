@@ -129,9 +129,9 @@ class SummaTextToHTML(text: String) {
       |<html>
       |<head>
       |  <title>UW Summa</title>
-      |  <script src="javascripts/listCollapse.js" type="text/javascript" language="javascript1.2"></script>
-      |  <link href="javascripts/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-      |  <script src="javascripts/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+      |  <script src="../../../javascripts/listCollapse.js" type="text/javascript" language="javascript1.2"></script>
+      |  <link href="../../../javascripts/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+      |  <script src="../../../javascripts/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
       |</head>
       |<body onload="compactMenu('root',false,'');">
       |<div class="container">
@@ -179,7 +179,7 @@ object SummaTextToHTML {
                  |	7-27-2014	Samagu 's Islamic community is very small and it is unusual for an immigrant to show up and stay for several weeks without family or business ties .
                  |	7-28-2014	Source 18 , located in the University of Benin , reports that several of the more radical Islamic students have left resigned from the university to apparently return to Saudi Arabia , yet they are still staying at their hotel in Benin City .""".stripMargin
     val summa = new SummaTextToHTML(text)
-    val output = "public/summa.html"
+    val output = "public/html/summa/janara/summa.html"
     val writer = new PrintWriter(output)
     writer.println(summa.html)
     writer.flush()
