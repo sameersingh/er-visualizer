@@ -62,10 +62,10 @@ body, html {
 
 .provWindow {
   float:right;
-  width:33%;
+  width:20%;
   position:absolute;
-  right:10px;
-  top:10px;
+  right:5px;
+  top:5px;
   z-index:100;
   visibility: hidden;
   overflow:auto;
@@ -76,12 +76,12 @@ body, html {
 
 .kbaWindow {
   float:right;
-  width:50%;
+  width:58%;
   position:absolute;
   bottom:0;
   z-index:100;
   visibility: hidden;
-  left: 25%;
+  left: 21%;
   overflow:auto;
   max-height: 170px;
   /*margin-left: 60%;
@@ -144,8 +144,8 @@ body, html {
   width: 20%;
   float: left;
   position:absolute;
-  top:10px;
-  left:10px;
+  top:5px;
+  left:5px;
   visibility: hidden;
   overflow:auto;
   max-height: 100%;
