@@ -87,7 +87,7 @@ object Application extends Controller {
 
   def relationKBA(sid: String, tid: String) = Action {
     println("rKBA: " + sid -> tid)
-    Ok(Json.toJson(db.entityKBA(sid)))
+    Ok(Json.toJson(db.relationKBA(sid, tid)))
   }
 
   def relationFreebase(sid: String, tid: String) = Action {

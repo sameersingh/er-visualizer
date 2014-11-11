@@ -40,6 +40,8 @@ trait DB {
 
   def relationText(sid: String, tid: String): RelationText
 
+  def relationKBA(sid: String, tid: String): org.sameersingh.ervisualizer.kba.Entity
+
   def relationPredictions(sid: String, tid: String): Seq[String]
 
   def relationProvenances(sid: String, tid: String, rtype: String): RelModelProvenances

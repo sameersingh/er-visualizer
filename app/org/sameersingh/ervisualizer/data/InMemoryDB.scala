@@ -54,6 +54,7 @@ class InMemoryDB extends DB {
   val _relationHeader = new HashMap[(String, String), RelationHeader]
   val _relationFreebase = new HashMap[(String, String), RelationFreebase]
   val _relationText = new HashMap[(String, String), RelationText]
+  val _relationKBA = new HashMap[(String, String), kba.Entity]
   val _relationPredictions = new HashMap[(String, String), Set[String]]
   val _relationProvenances = new HashMap[(String, String), HashMap[String, RelModelProvenances]]
 
@@ -64,6 +65,8 @@ class InMemoryDB extends DB {
   override def relationFreebase(sid: String, tid: String): RelationFreebase = _relationFreebase.getOrElse(sid -> tid, RelationUtils.emptyFreebase(sid, tid))
 
   override def relationText(sid: String, tid: String): RelationText = _relationText.getOrElse(sid -> tid, RelationUtils.emptyProvenance(sid, tid))
+
+  override def relationKBA(sid: String, tid: String): kba.Entity = _relationKBA.getOrElse(sid -> tid, EntityUtils.emptyKBA(sid + "|" + tid))
 
   override def relationPredictions(sid: String, tid: String): Seq[String] = _relationPredictions.getOrElse(sid -> tid, Set.empty).toSeq
 

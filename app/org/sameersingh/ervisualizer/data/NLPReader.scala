@@ -139,10 +139,19 @@ class NLPReader {
     db._entityIds.clear()
     for (line <- io.Source.fromFile(stalenessFile).getLines()) {
       val e = Json.fromJson[kba.Entity](Json.parse(line)).get
-      val id = convertFbIdToId(e.id)
-      db._entityIds += id
-      assert(!db._entityKBA.contains(id))
-      db._entityKBA(id) = e
+      if(e.id.contains("|")) {
+        val ids = e.id.split("|").map(s => convertFbIdToId(s))
+        assert(ids.size == 2)
+        val rid = ids(0) -> ids(1)
+        db._relationIds += rid
+        assert(!db._relationKBA.contains(rid))
+        db._relationKBA(rid) = e
+      } else {
+        val id = convertFbIdToId(e.id)
+        db._entityIds += id
+        assert(!db._entityKBA.contains(id))
+        db._entityKBA(id) = e
+      }
     }
   }
 
@@ -201,7 +210,7 @@ class NLPReader {
       case (rid, map) => map.provenances.size
     }).max.toDouble
     for ((rid, rt) <- db._relationText) {
-      db._relationIds += rid
+      if (!db._relationKBA.contains(rid)) db._relationIds += rid
       // TODO read from freebase
       db._relationFreebase(rid) = RelationFreebase(rid._1, rid._2, Seq.empty)
       db._relationHeader(rid) = RelationHeader(rid._1, rid._2, rt.provenances.size.toDouble / maxProvenances)
