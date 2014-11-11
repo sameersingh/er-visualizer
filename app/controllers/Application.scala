@@ -85,6 +85,11 @@ object Application extends Controller {
     Ok(Json.toJson(db.relationIds.map(id => db.relationHeader(id._1, id._2))))
   }
 
+  def relationKBA(sid: String, tid: String) = Action {
+    println("rKBA: " + sid -> tid)
+    Ok(Json.toJson(db.entityKBA(sid)))
+  }
+
   def relationFreebase(sid: String, tid: String) = Action {
     println("RelFreebase: " + (sid -> tid))
     Ok(Json.toJson(db.relationFreebase(sid, tid)))

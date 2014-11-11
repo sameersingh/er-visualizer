@@ -573,6 +573,7 @@ function getAndDisplayProvenances(d) {
       getEntityCmd(d, 'text', displayEntityText);
       getEntityCmd(d, 'types', displayTypeProvs);
     } else {
+      getRelCmd(d, 'kba', displayEntityKBA);
       getRelCmd(d, 'text', displayEntityText);
       getRelCmd(d, 'types', displayTypeProvs);
     }
