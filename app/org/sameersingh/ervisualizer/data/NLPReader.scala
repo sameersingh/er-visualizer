@@ -139,9 +139,9 @@ class NLPReader {
     db._entityIds.clear()
     for (line <- io.Source.fromFile(stalenessFile).getLines()) {
       val e = Json.fromJson[kba.Entity](Json.parse(line)).get
-      if(e.id.contains("|")) {
-        val ids = e.id.split("|").map(s => convertFbIdToId(s))
-        assert(ids.size == 2)
+      if(e.id.contains("\\|")) {
+        val ids = e.id.split("\\|").map(s => convertFbIdToId(s))
+        assert(ids.size == 2, s"More than 2 I in id?: ${e.id}: ${ids.mkString(", ")}")
         val rid = ids(0) -> ids(1)
         db._relationIds += rid
         assert(!db._relationKBA.contains(rid))
