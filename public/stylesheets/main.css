@@ -83,9 +83,14 @@ body, html {
   visibility: hidden;
   left: 21%;
   overflow:auto;
-  max-height: 170px;
+  max-height: 270px;
+  margin-bottom: 5px;
   /*margin-left: 60%;
   margin-right:0px;*/
+}
+
+.kbaPanel {
+  border: 0px;
 }
 
 #infoBoxPanel {
@@ -99,6 +104,10 @@ body, html {
 
 .prov-item {
   padding: 3px;
+}
+
+.provPanelBody {
+  padding: 5px;
 }
 
 .docId {

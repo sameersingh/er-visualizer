@@ -140,7 +140,7 @@ function strokeWidth(d) {
 }
 
 function radius(d) {
-  return 5+(30*Math.pow(d.popularity,0.5));
+  return 2+(40*Math.pow(d.popularity,0.5));
 }
 
 function showLabel(d) {
@@ -550,7 +550,7 @@ function getAndDisplayProvenances(d) {
     // add all text panel
     var textPanel = accordian
                         .append("div")
-                        .attr("class", "panel panel-default");
+                        .attr("class", "panel panel-default allSentencesPanel");
     // heading
     textPanel.append("div")
              .attr("class", "panel-heading")

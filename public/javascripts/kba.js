@@ -3,8 +3,8 @@ Rendering KBA related info (staleness and word clusters) in the ER visualizer
 */
 function renderKBA(div, kba) {
     console.log(kba);
-    var divStaleness = div.append("div");
-    var divClusters = div.append("div");
+    var divStaleness = div.append("div").attr('id', 'divStaleness');
+    var divClusters = div.append("div").attr('id', 'divClusters');
     renderStaleness(divStaleness, kba);
     renderClusters(divClusters, kba);
 }
@@ -58,7 +58,7 @@ function renderStaleness(div, kba) {
       .attr("fill", "#eeeeee")
       .attr("stroke", "#444444")
       .append("title")
-      .text(function(d) { return d.id; })
+      .text(function(d) { return d.id + "(" + new Date(d.time).toDateString() + ")"; })
 }
 
 /**
@@ -80,8 +80,16 @@ function renderClusters(div, kba) {
       .append("div")
       .attr("class", "panel panel-default")
       .style("color", function(d) { return colors(d.id);})
-      .style("margin-bottom", "0px")
-      .style("width", "20%")
+      .style("margin", "5px")
+      .style("padding", "5px")
+      //.style("width", "20%")
       .style("float", "left")
-      .text(function(d) { return d.words.map(function(w) { return ' '+ w.w; }); });
+      .selectAll('span')
+      .data(function(d) { return d.words; })
+      .enter()
+      .append("span")
+      .html(function(w) {return w.w + '<br>';})
+      .style("font-size", function(w) {return });
+
+      //.text(function(d) { return d.words.map(function(w) { return ' '+ w.w; }); });
 }

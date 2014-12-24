@@ -30,8 +30,8 @@ object Application extends Controller {
 
   def document(docId: String) = Action {
     println("doc: " + docId)
-    SeeOther("http://allafrica.com/stories/%s.html?viewall=1" format(docId.take(12)))
-    //Ok(Json.prettyPrint(Json.toJson(db.document(docId))))
+    //SeeOther("http://allafrica.com/stories/%s.html?viewall=1" format(docId.take(12)))
+    Ok(Json.prettyPrint(Json.toJson(db.document(docId))))
   }
 
   def sentence(docId: String, sid: Int) = Action {
