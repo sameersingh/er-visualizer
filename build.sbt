@@ -23,3 +23,5 @@ libraryDependencies += "org.mongodb" %% "casbah" % "2.7.2"
 libraryDependencies += "multirexperiments" %% "multirexperiments" % "0.1"
 
 libraryDependencies += "org.sameersingh.nlp_serde" % "nlp_serde" % "0.0.1"
+
+javaOptions += "-Xmx16G"
