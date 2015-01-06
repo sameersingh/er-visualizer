@@ -1,5 +1,6 @@
 package org.sameersingh.ervisualizer.data
 
+import scala.collection.mutable
 import scala.collection.mutable.{ArrayBuffer, HashMap, LinkedHashMap}
 import scala.io.Source
 import java.io.PrintWriter
@@ -21,6 +22,7 @@ class InMemoryDB extends DB {
 
   // Entities
   val _entityIds = new ArrayBuffer[String]
+  val _relevantEntityIds = new mutable.LinkedHashSet[String]
   val _entityHeader = new HashMap[String, EntityHeader]
   val _entityInfo = new HashMap[String, EntityInfo]
   val _entityFreebase = new HashMap[String, EntityFreebase]
@@ -31,6 +33,8 @@ class InMemoryDB extends DB {
   val _docEntityProvenances = new HashMap[(String, Int), HashMap[String, Seq[Provenance]]]
 
   override def entityIds: Seq[String] = _entityIds
+
+  override def relevantEntityIds: Iterator[String] = _relevantEntityIds.iterator
 
   override def entityHeader(id: String): EntityHeader = _entityHeader(id)
 
@@ -50,15 +54,18 @@ class InMemoryDB extends DB {
   override def docEntityProvenances(docId: String, sentId: Int): Seq[(String, Seq[Provenance])] = _docEntityProvenances.getOrElse(docId -> sentId, Seq.empty).toSeq
 
   // Relations
-  val _relationIds = new ArrayBuffer[(String, String)]
-  val _relationHeader = new HashMap[(String, String), RelationHeader]
+  // val _relationIds = new ArrayBuffer[(String, String)]
+  val _relevantRelationIds = new mutable.LinkedHashSet[(String, String)]
+  val _relationHeader = new LinkedHashMap[(String, String), RelationHeader]
   val _relationFreebase = new HashMap[(String, String), RelationFreebase]
   val _relationText = new HashMap[(String, String), RelationText]
   val _relationKBA = new HashMap[(String, String), kba.Entity]
   val _relationPredictions = new HashMap[(String, String), Set[String]]
   val _relationProvenances = new HashMap[(String, String), HashMap[String, RelModelProvenances]]
 
-  override def relationIds: Seq[(String, String)] = _relationIds
+  override def relationIds: Seq[(String, String)] = _relationHeader.keysIterator.toSeq
+
+  override def relevantRelationIds: Iterator[(String, String)] = _relevantRelationIds.iterator
 
   override def relationHeader(sid: String, tid: String): RelationHeader = _relationHeader(sid -> tid)
 
@@ -73,20 +80,16 @@ class InMemoryDB extends DB {
   override def relationProvenances(sid: String, tid: String, etype: String): RelModelProvenances =
     _relationProvenances.getOrElse(sid -> tid, new HashMap).getOrElse(etype, RelationUtils.emptyRelProvenance(sid, tid, etype))
 
-  def clear() = {
-    _entityIds.clear()
-    _entityKBA.clear()
-    _entityFreebase.clear()
-    _entityHeader.clear()
-    _entityInfo.clear()
+  def clearTextEvidence() = {
+    _documents.clear()
+    _docEntityProvenances.clear()
+
+    _relevantEntityIds.clear()
     _entityText.clear()
     _entityTypePredictions.clear()
     _entityTypeProvenances.clear()
 
-    _relationIds.clear()
-    _relationKBA.clear()
-    _relationFreebase.clear()
-    _relationHeader.clear()
+    _relevantRelationIds.clear()
     _relationPredictions.clear()
     _relationProvenances.clear()
     _relationText.clear()
@@ -202,7 +205,7 @@ object InMemoryDB {
     // ids and header and freebase types
     for ((eh, eft) <- readTSVFile[(RelationHeader, RelationFreebase)](dir + "/" + Files.relationInfo, parseRelationInfo)) {
       val id = eh.sourceId -> eh.targetId
-      db._relationIds += id
+      // db._relationIds += id
       db._relationHeader(id) = eh
       db._relationFreebase(id) = eft
     }
