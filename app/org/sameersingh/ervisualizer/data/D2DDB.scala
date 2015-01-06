@@ -13,6 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * Created by sameer on 7/20/14.
  */
+/*
 class D2DDB {
 
   def addRelationInfo(db: InMemoryDB) {
@@ -87,7 +88,7 @@ class D2DDB {
 }
 
 object D2DDB extends D2DDB
-
+*/
 class SummaTextToHTML(text: String) {
 
   case class TreeNode(text: String, children: ArrayBuffer[TreeNode]) {

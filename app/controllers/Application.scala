@@ -11,7 +11,7 @@ object Application extends Controller {
   def db = _db
 
   def init() {
-    _db = NLPReader.read
+    _db = NLPReader.read(None)
     println(db)
   }
 
@@ -24,7 +24,7 @@ object Application extends Controller {
   }
 
   def reset(name: String) = Action {
-    _db = D2DDB.readDB(Some(name))
+    _db = NLPReader.read(Some(name))
     Ok(views.html.index("UW - " + name))
   }
 
