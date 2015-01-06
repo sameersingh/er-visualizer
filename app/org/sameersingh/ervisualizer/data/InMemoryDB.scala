@@ -73,6 +73,24 @@ class InMemoryDB extends DB {
   override def relationProvenances(sid: String, tid: String, etype: String): RelModelProvenances =
     _relationProvenances.getOrElse(sid -> tid, new HashMap).getOrElse(etype, RelationUtils.emptyRelProvenance(sid, tid, etype))
 
+  def clear() = {
+    _entityIds.clear()
+    _entityKBA.clear()
+    _entityFreebase.clear()
+    _entityHeader.clear()
+    _entityInfo.clear()
+    _entityText.clear()
+    _entityTypePredictions.clear()
+    _entityTypeProvenances.clear()
+
+    _relationIds.clear()
+    _relationKBA.clear()
+    _relationFreebase.clear()
+    _relationHeader.clear()
+    _relationPredictions.clear()
+    _relationProvenances.clear()
+    _relationText.clear()
+  }
 }
 
 object InMemoryDB {
