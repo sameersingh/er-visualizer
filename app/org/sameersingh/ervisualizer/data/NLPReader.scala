@@ -251,14 +251,32 @@ class NLPReader {
       db._relationFreebase(rid) = RelationFreebase(rid._1, rid._2, Seq.empty)
       db._relationHeader(rid) = RelationHeader(rid._1, rid._2, rt.provenances.size.toDouble / maxProvenances)
     }
-    val minScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).min
-    val maxScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).max
+    // val minScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).min
+    // val maxScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).max
+    val maxProvs = db._relationProvenances.values.flatten.map(_._2.provenances.size).max
     for ((pair, relMap) <- db._relationProvenances) {
       for ((r, rmps) <- relMap) {
         relMap(r) = RelModelProvenances(rmps.sourceId, rmps.targetId, rmps.relType, rmps.provenances,
-          math.sqrt(rmps.provenances.map(p => (math.log(p.confidence) - minScore) / maxScore).max)) //sum / rmps.provenances.size.toDouble)
+          math.sqrt(rmps.provenances.size.toDouble / maxProvs))
+          //math.sqrt(rmps.provenances.map(p => (math.log(p.confidence) - minScore) / maxScore).max)) //sum / rmps.provenances.size.toDouble)
       }
     }
+  }
+
+  /*
+  * remove all the non-location entities that don't participate in relations
+  */
+  def removeSingletonEntities(db: InMemoryDB): Unit = {
+    println("Removing singleton entities")
+    val entsToRemove = new ArrayBuffer[String]
+    for(eid <- db.relevantEntityIds) {
+      val location = !db.entityHeader(eid).geo.isEmpty // nerTag == "LOCATION"
+      if(!location) {
+        val relations = db.relations(eid)
+        if (relations.size == 0) entsToRemove += eid
+      }
+    }
+    for(eid <- entsToRemove) db._relevantEntityIds -= eid
   }
 
   def read(db: DB, word: Option[String] = None): Unit = db match {
@@ -270,6 +288,7 @@ class NLPReader {
       else
         readDocs(baseDir + "/docs.nlp.flr.json.gz", inDB, None)
       addRelationInfo(inDB)
+      removeSingletonEntities(inDB)
     }
   }
 
