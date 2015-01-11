@@ -11,11 +11,12 @@ object Application extends Controller {
   def db = _db
 
   def init() {
-    _db = NLPReader.read(None)
+    _db = EntityInfoReader.read()
+    NLPReader.read(_db, Some("drug"))
     println(db)
   }
 
-  init();
+  init()
 
   import org.sameersingh.ervisualizer.data.JsonWrites._
 
@@ -24,7 +25,7 @@ object Application extends Controller {
   }
 
   def reset(name: String) = Action {
-    _db = NLPReader.read(Some(name))
+    NLPReader.read(_db, Some(name))
     Ok(views.html.index("UW - " + name))
   }
 
@@ -42,7 +43,7 @@ object Application extends Controller {
   def entityHeaders = Action {
     println("Entity Headers")
     // Ok(Json.toJson(db.entityIds.filter(id => db.relations(id).size>0).map(id => db.entityHeader(id))))
-    Ok(Json.toJson(db.entityIds.map(id => db.entityHeader(id))))
+    Ok(Json.toJson(db.relevantEntityIds.map(id => db.entityHeader(id)).toSeq))
   }
 
   def entityInfo(id: String) = Action {
@@ -82,7 +83,7 @@ object Application extends Controller {
 
   def relationHeaders = Action {
     println("Relation Headers")
-    Ok(Json.toJson(db.relationIds.map(id => db.relationHeader(id._1, id._2))))
+    Ok(Json.toJson(db.relevantRelationIds.map(id => db.relationHeader(id._1, id._2)).toSeq))
   }
 
   def relationKBA(sid: String, tid: String) = Action {

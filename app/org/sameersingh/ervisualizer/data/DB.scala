@@ -16,6 +16,8 @@ trait DB {
 
   def entityIds: Seq[String]
 
+  def relevantEntityIds: Iterator[String]
+
   def entityHeader(id: String): EntityHeader
 
   def entityInfo(id: String): EntityInfo
@@ -31,6 +33,8 @@ trait DB {
   def entityTypeProvenances(id: String, etype: String): TypeModelProvenances
 
   def relationIds: Seq[(String, String)]
+
+  def relevantRelationIds: Iterator[(String, String)]
 
   def relations(sourceId: String): Seq[(String, String)] = relationIds.filter(id => id._1 == sourceId || id._2 == sourceId)
 
