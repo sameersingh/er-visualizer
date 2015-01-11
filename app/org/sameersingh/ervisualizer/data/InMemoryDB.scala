@@ -27,7 +27,6 @@ class InMemoryDB extends DB {
   val _entityInfo = new HashMap[String, EntityInfo]
   val _entityFreebase = new HashMap[String, EntityFreebase]
   val _entityText = new HashMap[String, EntityText]
-  val _entityKBA = new HashMap[String, kba.Entity]
   val _entityTypePredictions = new HashMap[String, Seq[String]]
   val _entityTypeProvenances = new HashMap[String, HashMap[String, TypeModelProvenances]]
   val _docEntityProvenances = new HashMap[(String, Int), HashMap[String, Seq[Provenance]]]
@@ -44,8 +43,6 @@ class InMemoryDB extends DB {
 
   override def entityText(id: String): EntityText = _entityText.getOrElse(id, EntityUtils.emptyProvenance(id))
 
-  override def entityKBA(id: String): kba.Entity = _entityKBA.getOrElse(id, EntityUtils.emptyKBA(id))
-
   override def entityTypePredictions(id: String): Seq[String] = _entityTypePredictions.getOrElse(id, Seq.empty)
 
   override def entityTypeProvenances(id: String, etype: String): TypeModelProvenances =
@@ -59,7 +56,6 @@ class InMemoryDB extends DB {
   val _relationHeader = new LinkedHashMap[(String, String), RelationHeader]
   val _relationFreebase = new HashMap[(String, String), RelationFreebase]
   val _relationText = new HashMap[(String, String), RelationText]
-  val _relationKBA = new HashMap[(String, String), kba.Entity]
   val _relationPredictions = new HashMap[(String, String), Set[String]]
   val _relationProvenances = new HashMap[(String, String), HashMap[String, RelModelProvenances]]
 
@@ -72,8 +68,6 @@ class InMemoryDB extends DB {
   override def relationFreebase(sid: String, tid: String): RelationFreebase = _relationFreebase.getOrElse(sid -> tid, RelationUtils.emptyFreebase(sid, tid))
 
   override def relationText(sid: String, tid: String): RelationText = _relationText.getOrElse(sid -> tid, RelationUtils.emptyProvenance(sid, tid))
-
-  override def relationKBA(sid: String, tid: String): kba.Entity = _relationKBA.getOrElse(sid -> tid, EntityUtils.emptyKBA(sid + "|" + tid))
 
   override def relationPredictions(sid: String, tid: String): Seq[String] = _relationPredictions.getOrElse(sid -> tid, Set.empty).toSeq
 

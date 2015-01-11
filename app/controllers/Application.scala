@@ -1,18 +1,29 @@
 package controllers
 
+import org.sameersingh.ervisualizer.kba.{EntityKBAReader, KBAStore}
 import play.api.mvc._
 import org.sameersingh.ervisualizer.data._
 import play.api.libs.json.Json
 
+import scala.collection.mutable
+
 object Application extends Controller {
 
-  private var _db: DB = null
+  private val _db: mutable.Map[String,DB] = new mutable.HashMap[String,DB]
+  private var _entKBA: KBAStore = null
 
-  def db = _db
+  def db(name: String = "drug") = _db.getOrElseUpdate(name, {
+    val result = EntityInfoReader.read()
+    NLPReader.read(result, Some(name))
+    result
+  })
+
+  def db: DB = db("drug")
+
+  def entKBA = _entKBA
 
   def init() {
-    _db = EntityInfoReader.read()
-    NLPReader.read(_db, Some("drug"))
+    _entKBA = EntityKBAReader.read()
     println(db)
   }
 
@@ -25,7 +36,7 @@ object Application extends Controller {
   }
 
   def reset(name: String) = Action {
-    NLPReader.read(_db, Some(name))
+    db(name)
     Ok(views.html.index("UW - " + name))
   }
 
@@ -53,7 +64,7 @@ object Application extends Controller {
 
   def entityKBA(id: String) = Action {
     println("eKBA: " + id)
-    Ok(Json.toJson(db.entityKBA(id)))
+    Ok(Json.toJson(entKBA.entityKBA(id)))
   }
 
   def entityFreebase(id: String) = Action {
@@ -88,7 +99,7 @@ object Application extends Controller {
 
   def relationKBA(sid: String, tid: String) = Action {
     println("rKBA: " + sid -> tid)
-    Ok(Json.toJson(db.relationKBA(sid, tid)))
+    Ok(Json.toJson(entKBA.relationKBA(sid, tid)))
   }
 
   def relationFreebase(sid: String, tid: String) = Action {

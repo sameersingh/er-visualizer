@@ -26,8 +26,6 @@ trait DB {
 
   def entityText(id: String): EntityText
 
-  def entityKBA(id: String): org.sameersingh.ervisualizer.kba.Entity
-
   def entityTypePredictions(id: String): Seq[String]
 
   def entityTypeProvenances(id: String, etype: String): TypeModelProvenances
@@ -43,8 +41,6 @@ trait DB {
   def relationFreebase(sid: String, tid: String): RelationFreebase
 
   def relationText(sid: String, tid: String): RelationText
-
-  def relationKBA(sid: String, tid: String): org.sameersingh.ervisualizer.kba.Entity
 
   def relationPredictions(sid: String, tid: String): Seq[String]
 

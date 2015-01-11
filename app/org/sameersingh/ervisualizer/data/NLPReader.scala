@@ -6,7 +6,6 @@ import com.typesafe.config.ConfigFactory
 import nlp_serde.{FileUtil, Mention, Entity}
 import nlp_serde.readers.PerLineJsonReader
 import org.sameersingh.ervisualizer.freebase.MongoIO
-import org.sameersingh.ervisualizer.kba
 import play.api.libs.json.Json
 
 import scala.collection.mutable
@@ -67,40 +66,6 @@ object FreebaseReader {
       }
       assert(eif.isEmpty)
       assert(eff.isEmpty)
-    }
-  }
-}
-
-object StalenessReader {
-
-  /*
-  * add relationIds, and fill entityKBA and relationKBA
-  */
-  def readStaleness(stalenessFile: String, db: InMemoryDB): Unit = {
-    import org.sameersingh.ervisualizer.kba.JsonReads._
-    println("Reading staleness")
-    for (line <- FileUtil.inputSource(stalenessFile, true).getLines()) {
-      val e = Json.fromJson[kba.Entity](Json.parse(line)).get
-      if(e.id.contains("|")) {
-        val ids = e.id.split("\\|").map(s => FreebaseReader.convertFbIdToId(s))
-        assert(ids.size == 2, s"More than 2 I in id?: ${e.id}: ${ids.mkString(", ")}")
-        val rid = ids(0) -> ids(1)
-        // db._relationIds += rid
-        db._relationKBA(rid) = e
-      } else {
-        val id = FreebaseReader.convertFbIdToId(e.id)
-        db._entityKBA(id) = e
-      }
-    }
-  }
-
-  import org.sameersingh.ervisualizer.kba.JsonReads._
-  import org.sameersingh.ervisualizer.kba
-
-  def main(args: Array[String]): Unit = {
-    for (line <- io.Source.fromFile("data/d2d/docs.staleness.json").getLines()) {
-      val e = Json.fromJson[kba.Entity](Json.parse(line)).get
-      println(e)
     }
   }
 }
@@ -297,7 +262,7 @@ object EntityInfoReader {
     val db = new InMemoryDB
     val cfg = ConfigFactory.load()
     val baseDir = cfg.getString("nlp.data.baseDir") //.replaceAll(" ", "\\ ")
-    StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db)
+    //StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db)
     FreebaseReader.readFreebaseInfo(db, baseDir + "/freebase")
     db
   }
