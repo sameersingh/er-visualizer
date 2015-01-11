@@ -9,16 +9,17 @@ import scala.collection.mutable
 
 object Application extends Controller {
 
+  val defaultDBName = "drug"
   private val _db: mutable.Map[String,DB] = new mutable.HashMap[String,DB]
   private var _entKBA: KBAStore = null
 
-  def db(name: String = "drug") = _db.getOrElseUpdate(name, {
+  def db(name: Option[String] = None) = _db.getOrElseUpdate(name.getOrElse(defaultDBName), {
     val result = EntityInfoReader.read()
-    NLPReader.read(result, Some(name))
+    NLPReader.read(result, Some(name.getOrElse(defaultDBName)))
     result
   })
 
-  def db: DB = db("drug")
+  def db: DB = db(None)
 
   def entKBA = _entKBA
 
@@ -31,35 +32,11 @@ object Application extends Controller {
 
   import org.sameersingh.ervisualizer.data.JsonWrites._
 
-  def index = Action {
-    Ok(views.html.index("UW - default"))
-  }
+  def index = reset(defaultDBName)
 
   def reset(name: String) = Action {
-    db(name)
-    Ok(views.html.index("UW - " + name))
-  }
-
-  def document(docId: String) = Action {
-    println("doc: " + docId)
-    //SeeOther("http://allafrica.com/stories/%s.html?viewall=1" format(docId.take(12)))
-    Ok(Json.prettyPrint(Json.toJson(db.document(docId))))
-  }
-
-  def sentence(docId: String, sid: Int) = Action {
-    // println("sen: " + docId + ", " + sid)
-    Ok(Json.toJson(db.document(docId).sents(sid)))
-  }
-
-  def entityHeaders = Action {
-    println("Entity Headers")
-    // Ok(Json.toJson(db.entityIds.filter(id => db.relations(id).size>0).map(id => db.entityHeader(id))))
-    Ok(Json.toJson(db.relevantEntityIds.map(id => db.entityHeader(id)).toSeq))
-  }
-
-  def entityInfo(id: String) = Action {
-    println("eInfo: " + id)
-    Ok(Json.toJson(db.entityInfo(id)))
+    db(Some(name))
+    Ok(views.html.index("UW - " + name, name))
   }
 
   def entityKBA(id: String) = Action {
@@ -67,59 +44,81 @@ object Application extends Controller {
     Ok(Json.toJson(entKBA.entityKBA(id)))
   }
 
-  def entityFreebase(id: String) = Action {
-    println("eFb: " + id)
-    Ok(Json.toJson(db.entityFreebase(id)))
-  }
-
-  def entityText(id: String) = Action {
-    println("eTxt: " + id)
-    Ok(Json.toJson(db.entityText(id)))
-  }
-
-  def entityRelations(id: String) = Action {
-    println("eRels: " + id)
-    Ok(Json.toJson(db.relations(id)))
-  }
-
-  def entityTypes(id: String) = Action {
-    println("eT: " + id + ": " + db.entityTypePredictions(id).mkString(", "))
-    Ok(Json.toJson(db.entityTypePredictions(id)))
-  }
-
-  def entityTypeProv(id: String, etype: String) = Action {
-    println("eTP: " + id + ", " + etype)
-    Ok(Json.toJson(db.entityTypeProvenances(id, etype)))
-  }
-
-  def relationHeaders = Action {
-    println("Relation Headers")
-    Ok(Json.toJson(db.relevantRelationIds.map(id => db.relationHeader(id._1, id._2)).toSeq))
-  }
-
   def relationKBA(sid: String, tid: String) = Action {
     println("rKBA: " + sid -> tid)
     Ok(Json.toJson(entKBA.relationKBA(sid, tid)))
   }
 
-  def relationFreebase(sid: String, tid: String) = Action {
+  def document(docId: String, dbName: Option[String]) = Action {
+    println("doc: " + docId)
+    //SeeOther("http://allafrica.com/stories/%s.html?viewall=1" format(docId.take(12)))
+    Ok(Json.prettyPrint(Json.toJson(db(dbName).document(docId))))
+  }
+
+  def sentence(docId: String, sid: Int, dbName: Option[String]) = Action {
+    // println("sen: " + docId + ", " + sid)
+    Ok(Json.toJson(db(dbName).document(docId).sents(sid)))
+  }
+
+  def entityHeaders(dbName: Option[String]) = Action {
+    println("Entity Headers")
+    // Ok(Json.toJson(db(dbName).entityIds.filter(id => db(dbName).relations(id).size>0).map(id => db(dbName).entityHeader(id))))
+    Ok(Json.toJson(db(dbName).relevantEntityIds.map(id => db(dbName).entityHeader(id)).toSeq))
+  }
+
+  def entityInfo(id: String, dbName: Option[String]) = Action {
+    println("eInfo: " + id)
+    Ok(Json.toJson(db(dbName).entityInfo(id)))
+  }
+
+  def entityFreebase(id: String, dbName: Option[String]) = Action {
+    println("eFb: " + id)
+    Ok(Json.toJson(db(dbName).entityFreebase(id)))
+  }
+
+  def entityText(id: String, dbName: Option[String]) = Action {
+    println("eTxt: " + id)
+    Ok(Json.toJson(db(dbName).entityText(id)))
+  }
+
+  def entityRelations(id: String, dbName: Option[String]) = Action {
+    println("eRels: " + id)
+    Ok(Json.toJson(db(dbName).relations(id)))
+  }
+
+  def entityTypes(id: String, dbName: Option[String]) = Action {
+    println("eT: " + id + ": " + db(dbName).entityTypePredictions(id).mkString(", "))
+    Ok(Json.toJson(db(dbName).entityTypePredictions(id)))
+  }
+
+  def entityTypeProv(id: String, etype: String, dbName: Option[String]) = Action {
+    println("eTP: " + id + ", " + etype)
+    Ok(Json.toJson(db(dbName).entityTypeProvenances(id, etype)))
+  }
+
+  def relationHeaders(dbName: Option[String]) = Action {
+    println("Relation Headers")
+    Ok(Json.toJson(db(dbName).relevantRelationIds.map(id => db(dbName).relationHeader(id._1, id._2)).toSeq))
+  }
+
+  def relationFreebase(sid: String, tid: String, dbName: Option[String]) = Action {
     println("RelFreebase: " + (sid -> tid))
-    Ok(Json.toJson(db.relationFreebase(sid, tid)))
+    Ok(Json.toJson(db(dbName).relationFreebase(sid, tid)))
   }
 
-  def relationText(sid: String, tid: String) = Action {
+  def relationText(sid: String, tid: String, dbName: Option[String]) = Action {
     println("RelText: " + (sid -> tid))
-    Ok(Json.toJson(db.relationText(sid, tid)))
+    Ok(Json.toJson(db(dbName).relationText(sid, tid)))
   }
 
-  def relationPredictions(sid: String, tid: String) = Action {
+  def relationPredictions(sid: String, tid: String, dbName: Option[String]) = Action {
     println("RelPred: " + (sid -> tid))
-    Ok(Json.toJson(db.relationPredictions(sid, tid)))
+    Ok(Json.toJson(db(dbName).relationPredictions(sid, tid)))
   }
 
-  def relationProvenances(sid: String, tid: String, rtype: String) = Action {
+  def relationProvenances(sid: String, tid: String, rtype: String, dbName: Option[String]) = Action {
     println("RelProv: " + (sid -> tid))
-    Ok(Json.toJson(db.relationProvenances(sid, tid, rtype)))
+    Ok(Json.toJson(db(dbName).relationProvenances(sid, tid, rtype)))
   }
 
 

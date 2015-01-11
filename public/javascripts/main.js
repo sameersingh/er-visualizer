@@ -155,7 +155,7 @@ function hideLabel(d) {
     d3.select("#"+d.id).select("circle").classed("hover", false);
 }
 
-function run() {
+function run(db) {
     width = $(".canvas").width();
     height = $(".canvas").height();
 
