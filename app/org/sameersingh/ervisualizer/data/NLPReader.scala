@@ -64,7 +64,7 @@ class NLPReader {
               db._entityIds += id
               db._entityKBA(id) = EntityUtils.emptyKBA(id)
             }
-            val mentions = d.sentences.flatMap(_.mentions).filter(m => e.id == m.id)
+            val mentions = e.mids.map(id => d.mentions(id)).toSeq
             mentions.foreach(m => einfo +=(id, m))
             val provenances = mentions.map(m => {
               val startPos = d.sentences(m.sentenceId).tokens(m.toks._1 - 1).chars._1 - d.sentences(m.sentenceId).chars._1
@@ -113,10 +113,8 @@ class NLPReader {
         for (s <- d.sentences; r <- s.relations;
           m1 <- s.mentions.find(_.id == r.m1Id);
           m2 <- s.mentions.find(_.id == r.m2Id);
-          m1eid = m1.id;
-          m2eid = m2.id;
-          //m1eid <- m1.entityId;
-          //m2eid <- m2.entityId;
+          m1eid <- m1.entityId;
+          m2eid <- m2.entityId;
           e1 <- d.entities.find(_.id == m1eid);
           e2 <- d.entities.find(_.id == m2eid)) {
           for (e1id <- entityId(e1); e2id <- entityId(e2)) {
