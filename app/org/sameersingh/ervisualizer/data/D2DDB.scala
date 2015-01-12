@@ -146,9 +146,9 @@ class SummaTextToHTML(text: String) {
 
 object SummaTextToHTML {
   def main(args: Array[String]): Unit = {
-    val baseDir = "/Users/sameer/Google Drive/UW/D2D/D2D Nov 14/summa/"
+    val baseDir = "data/d2d/summa/"
     val fileName = if (args.isEmpty) "janara" else args(0)
-    val text = io.Source.fromFile(baseDir + fileName + ".summa").getLines().mkString("\n")
+    val text = io.Source.fromFile(baseDir + fileName + "/summa.txt").getLines().mkString("\n")
     val summa = new SummaTextToHTML(text)
     val output = "public/html/summa/" + fileName + ".html"
     val writer = new PrintWriter(output)
