@@ -10,6 +10,7 @@ import scala.collection.mutable
 object Application extends Controller {
 
   val defaultDBName = "drug"
+  val numProvenances = 10
   private val _db: mutable.Map[String,DB] = new mutable.HashMap[String,DB]
   private var _entKBA: KBAStore = null
 
@@ -78,6 +79,12 @@ object Application extends Controller {
 
   def entityText(id: String, dbName: Option[String]) = Action {
     println("eTxt: " + id)
+    //Ok(Json.toJson(db(dbName).entityText(id)))
+    Ok(Json.toJson(EntityText(id, db(dbName).entityText(id).provenances.take(numProvenances))))
+  }
+
+  def entityProvs(id: String, dbName: Option[String]) = Action {
+    println("eTxt: " + id)
     Ok(Json.toJson(db(dbName).entityText(id)))
   }
 
@@ -94,6 +101,7 @@ object Application extends Controller {
   def entityTypeProv(id: String, etype: String, dbName: Option[String]) = Action {
     println("eTP: " + id + ", " + etype)
     Ok(Json.toJson(db(dbName).entityTypeProvenances(id, etype)))
+    Ok(Json.toJson(TypeModelProvenances(id, etype, db(dbName).entityTypeProvenances(id, etype).provenances.take(numProvenances))))
   }
 
   def relationHeaders(dbName: Option[String]) = Action {
@@ -108,6 +116,11 @@ object Application extends Controller {
 
   def relationText(sid: String, tid: String, dbName: Option[String]) = Action {
     println("RelText: " + (sid -> tid))
+    Ok(Json.toJson(RelationText(sid, tid, db(dbName).relationText(sid, tid).provenances.take(numProvenances))))
+  }
+
+  def relationProvs(sid: String, tid: String, dbName: Option[String]) = Action {
+    println("RelText: " + (sid -> tid))
     Ok(Json.toJson(db(dbName).relationText(sid, tid)))
   }
 
@@ -118,7 +131,7 @@ object Application extends Controller {
 
   def relationProvenances(sid: String, tid: String, rtype: String, dbName: Option[String]) = Action {
     println("RelProv: " + (sid -> tid))
-    Ok(Json.toJson(db(dbName).relationProvenances(sid, tid, rtype)))
+    Ok(Json.toJson(RelModelProvenances(sid, tid, rtype, db(dbName).relationProvenances(sid, tid, rtype).provenances.take(numProvenances))))
   }
 
 

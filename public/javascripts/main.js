@@ -595,6 +595,7 @@ function displayEntityKBA(e, kba) {
 
 function displayEntityText(e, txt) {
     if(data.currEnt == e || data.currLink == e ) {
+      var isEntity = (data.currEnt == e);
       // console.log("disp etxt: " + e.id);
       var allTextList = d3.select('#allTextList');
       allTextList.text("");
@@ -606,6 +607,11 @@ function displayEntityText(e, txt) {
         .classed('prov-item', true)
         .text("Loading...")
         .each(function(d) { displayProv(d, d3.select(this)) });
+      allTextList.append("li")
+        .append("a")
+        .attr("href", if(isEntity) "/entity/provs/"+e.id+'?db='+dbName; else  "/relation/provs/"+e.source.id+"/"+e.target.id+'?db='+dbName;)
+        .attr("target", "_blank")
+        .html('<p class"text-right h5">See all</p>');
     } else {
       console.log("etxt obsolete: " + e.id + ", curr: " + data.currEnt.id);
     }
@@ -678,6 +684,7 @@ function getAndDisplayTypeProv(e, type, dom, status) {
 
 function displayTypeProv(e, type, dom, tp, status) {
     if(data.currEnt == e || data.currLink == e) {
+      var isEntity = (data.currEnt == e);
       console.log("disp etp: " + e + ", "+ type);
       //console.log(tp);
       var typeProvList = dom;
@@ -694,6 +701,11 @@ function displayTypeProv(e, type, dom, tp, status) {
         .classed('prov-item', true)
         .text("Loading...")
         .each(function(p) { displayProv(p, d3.select(this)) });
+      typeProvList.append("li")
+        .append("a")
+        .attr("href", if(isEntity) "/entity/provs/"+e.id+'?db='+dbName; else  "/relation/provs/"+e.source.id+"/"+e.target.id+'?db='+dbName;)
+        .attr("target", "_blank")
+        .html('<p class"text-right h5">See all</p>');
     } else {
       console.log("etxt obsolete: " + e + ", curr: " + data.currEnt.id);
     }
