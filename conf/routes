@@ -15,9 +15,9 @@ GET /entity/all             controllers.Application.entityHeaders(db: Option[Str
 GET /entity/info/:id        controllers.Application.entityInfo(id: String, db: Option[String])
 GET /entity/fb/:id        controllers.Application.entityFreebase(id: String, db: Option[String])
 GET /entity/rels/:id        controllers.Application.entityRelations(id: String, db: Option[String])
-GET /entity/text/:id        controllers.Application.entityText(id: String, db: Option[String])
 GET /entity/types/:id        controllers.Application.entityTypes(id: String, db: Option[String])
-GET /entity/typeprov/:id/:etype        controllers.Application.entityTypeProv(id: String, etype: String, db: Option[String])
+GET /entity/text/:id        controllers.Application.entityText(id: String, db: Option[String], limit: Option[Int])
+GET /entity/typeprov/:id/:etype        controllers.Application.entityTypeProv(id: String, etype: String, db: Option[String], limit: Option[Int])
 GET /entity/provs/:id        controllers.Application.entityProvs(id: String, db: Option[String])
 
 GET /entity/kba/:id        controllers.Application.entityKBA(id: String)
@@ -25,9 +25,9 @@ GET /entity/kba/:id        controllers.Application.entityKBA(id: String)
 # Relation Stuff
 GET /relation/all                       controllers.Application.relationHeaders(db: Option[String])
 GET /relation/fb/:sid/:tid        controllers.Application.relationFreebase(sid: String, tid: String, db: Option[String])
-GET /relation/text/:sid/:tid        controllers.Application.relationText(sid: String, tid: String, db: Option[String])
 GET /relation/types/:sid/:tid        controllers.Application.relationPredictions(sid: String, tid: String, db: Option[String])
-GET /relation/typeprov/:sid/:tid/:rtype        controllers.Application.relationProvenances(sid: String, tid: String, rtype: String, db: Option[String])
+GET /relation/text/:sid/:tid        controllers.Application.relationText(sid: String, tid: String, db: Option[String], limit: Option[Int])
+GET /relation/typeprov/:sid/:tid/:rtype        controllers.Application.relationProvenances(sid: String, tid: String, rtype: String, db: Option[String], limit: Option[Int])
 GET /relation/provs/:sid/:tid        controllers.Application.relationProvs(sid: String, tid: String, db: Option[String])
 
 GET /relation/kba/:sid/:tid        controllers.Application.relationKBA(sid: String, tid: String)

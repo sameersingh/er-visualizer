@@ -10,8 +10,7 @@ import scala.collection.mutable
 object Application extends Controller {
 
   val defaultDBName = "drug"
-  val numProvenances = 10
-  private val _db: mutable.Map[String,DB] = new mutable.HashMap[String,DB]
+  private val _db: mutable.Map[String, DB] = new mutable.HashMap[String, DB]
   private var _entKBA: KBAStore = null
 
   def db(name: Option[String] = None) = _db.getOrElseUpdate(name.getOrElse(defaultDBName), {
@@ -63,7 +62,6 @@ object Application extends Controller {
 
   def entityHeaders(dbName: Option[String]) = Action {
     println("Entity Headers")
-    // Ok(Json.toJson(db(dbName).entityIds.filter(id => db(dbName).relations(id).size>0).map(id => db(dbName).entityHeader(id))))
     Ok(Json.toJson(db(dbName).relevantEntityIds.map(id => db(dbName).entityHeader(id)).toSeq))
   }
 
@@ -77,10 +75,11 @@ object Application extends Controller {
     Ok(Json.toJson(db(dbName).entityFreebase(id)))
   }
 
-  def entityText(id: String, dbName: Option[String]) = Action {
+  def entityText(id: String, dbName: Option[String], limit: Option[Int]) = Action {
     println("eTxt: " + id)
-    //Ok(Json.toJson(db(dbName).entityText(id)))
-    Ok(Json.toJson(EntityText(id, db(dbName).entityText(id).provenances.take(numProvenances))))
+    if (limit.isDefined && limit.get > 0)
+      Ok(Json.toJson(EntityText(id, db(dbName).entityText(id).provenances.take(limit.get))))
+    else Ok (Json.toJson(db(dbName).entityText(id)))
   }
 
   def entityProvs(id: String, dbName: Option[String]) = Action {
@@ -99,10 +98,11 @@ object Application extends Controller {
     Ok(Json.toJson(db(dbName).entityTypePredictions(id)))
   }
 
-  def entityTypeProv(id: String, etype: String, dbName: Option[String]) = Action {
+  def entityTypeProv(id: String, etype: String, dbName: Option[String], limit: Option[Int]) = Action {
     println("eTP: " + id + ", " + etype)
-    Ok(Json.toJson(db(dbName).entityTypeProvenances(id, etype)))
-    Ok(Json.toJson(TypeModelProvenances(id, etype, db(dbName).entityTypeProvenances(id, etype).provenances.take(numProvenances))))
+    if (limit.isDefined && limit.get > 0)
+      Ok(Json.toJson(TypeModelProvenances(id, etype, db(dbName).entityTypeProvenances(id, etype).provenances.take(limit.get))))
+    else Ok(Json.toJson(db(dbName).entityTypeProvenances(id, etype)))
   }
 
   def relationHeaders(dbName: Option[String]) = Action {
@@ -115,14 +115,16 @@ object Application extends Controller {
     Ok(Json.toJson(db(dbName).relationFreebase(sid, tid)))
   }
 
-  def relationText(sid: String, tid: String, dbName: Option[String]) = Action {
+  def relationText(sid: String, tid: String, dbName: Option[String], limit: Option[Int]) = Action {
     println("RelText: " + (sid -> tid))
-    Ok(Json.toJson(RelationText(sid, tid, db(dbName).relationText(sid, tid).provenances.take(numProvenances))))
+    if (limit.isDefined && limit.get > 0)
+      Ok(Json.toJson(RelationText(sid, tid, db(dbName).relationText(sid, tid).provenances.take(limit.get))))
+    else Ok(Json.toJson(db(dbName).relationText(sid, tid)))
   }
 
   def relationProvs(sid: String, tid: String, dbName: Option[String]) = Action {
     println("RelText: " + (sid -> tid))
-    Ok(views.html.provs("Relation: %s -> %s ".format(sid, tid), Seq(sid,tid), dbName.getOrElse(defaultDBName)))
+    Ok(views.html.provs("Relation: %s -> %s ".format(sid, tid), Seq(sid, tid), dbName.getOrElse(defaultDBName)))
     //Ok(Json.toJson(db(dbName).relationText(sid, tid)))
   }
 
@@ -131,9 +133,11 @@ object Application extends Controller {
     Ok(Json.toJson(db(dbName).relationPredictions(sid, tid)))
   }
 
-  def relationProvenances(sid: String, tid: String, rtype: String, dbName: Option[String]) = Action {
+  def relationProvenances(sid: String, tid: String, rtype: String, dbName: Option[String], limit: Option[Int]) = Action {
     println("RelProv: " + (sid -> tid))
-    Ok(Json.toJson(RelModelProvenances(sid, tid, rtype, db(dbName).relationProvenances(sid, tid, rtype).provenances.take(numProvenances))))
+    if (limit.isDefined && limit.get > 0)
+      Ok(Json.toJson(RelModelProvenances(sid, tid, rtype, db(dbName).relationProvenances(sid, tid, rtype).provenances.take(limit.get))))
+    else Ok(Json.toJson(db(dbName).relationProvenances(sid, tid, rtype)))
   }
 
 

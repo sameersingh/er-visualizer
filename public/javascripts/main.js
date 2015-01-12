@@ -2,6 +2,7 @@ var width = 1200, //$(".canvas").parent().width(),
     height = 650; // $(".canvas").parent().height();
 
 var dbName = "drug";
+var provLimit = 10;
 
 var color = d3.scale.linear()
                 .domain([0, 1])
@@ -378,7 +379,7 @@ function showAllBoxes(onFinish) {
 function getEntityCmd(e, cmd, onFinish) {
     $.ajax({
        type: "GET",
-       url: '/entity/'+cmd+'/'+e.id+'?db='+dbName,
+       url: '/entity/'+cmd+'/'+e.id+'?db='+dbName+'&limit='+provLimit,
        success: function(d) { onFinish(e, d); },
        error: function(j, t, e) { console.log(e); }
     });
@@ -387,7 +388,7 @@ function getEntityCmd(e, cmd, onFinish) {
 function getRelCmd(l, cmd, onFinish) {
     $.ajax({
        type: "GET",
-       url: '/relation/'+cmd+'/'+l.source.id+'/'+l.target.id+'?db='+dbName,
+       url: '/relation/'+cmd+'/'+l.source.id+'/'+l.target.id+'?db='+dbName+'&limit='+provLimit,
        success: function(d) { onFinish(l, d); },
        error: function(j, t, e) { console.log(e); }
     });
@@ -666,7 +667,7 @@ function getAndDisplayTypeProv(e, type, dom, status) {
     if(e == data.currEnt) {
         $.ajax({
            type: "GET",
-           url: '/entity/typeprov/'+e.id+'/'+type+'?db='+dbName,
+           url: '/entity/typeprov/'+e.id+'/'+type+'?db='+dbName+'&limit='+provLimit,
            success: function(d) {
              displayTypeProv(e, type, dom, d, status);
            },
@@ -675,7 +676,7 @@ function getAndDisplayTypeProv(e, type, dom, status) {
     } else {
         $.ajax({
            type: "GET",
-           url: '/relation/typeprov/'+e.source.id+'/'+e.target.id+'/'+type+'?db='+dbName,
+           url: '/relation/typeprov/'+e.source.id+'/'+e.target.id+'/'+type+'?db='+dbName+'&limit='+provLimit,
            success: function(d) {
              //console.log(d);
              displayTypeProv(e, type, dom, d, status);
