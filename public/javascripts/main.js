@@ -613,7 +613,7 @@ function displayEntityText(e, txt) {
       else  provsCmd = "/relation/provs/"+e.source.id+"/"+e.target.id+'?db='+dbName;
       allTextList.append("li")
         .append("a")
-        .attr("href", if(isEntity) provsCmd)
+        .attr("href", provsCmd)
         .attr("target", "_blank")
         .html('<p class"text-right h5">See all</p>');
     } else {
