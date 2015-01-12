@@ -607,9 +607,12 @@ function displayEntityText(e, txt) {
         .classed('prov-item', true)
         .text("Loading...")
         .each(function(d) { displayProv(d, d3.select(this)) });
+      var provsCmd = "";
+      if(isEntity) provsCmd = "/entity/provs/"+e.id+'?db='+dbName;
+      else  provsCmd = "/relation/provs/"+e.source.id+"/"+e.target.id+'?db='+dbName;
       allTextList.append("li")
         .append("a")
-        .attr("href", if(isEntity) "/entity/provs/"+e.id+'?db='+dbName; else  "/relation/provs/"+e.source.id+"/"+e.target.id+'?db='+dbName;)
+        .attr("href", if(isEntity) provsCmd)
         .attr("target", "_blank")
         .html('<p class"text-right h5">See all</p>');
     } else {
@@ -701,9 +704,12 @@ function displayTypeProv(e, type, dom, tp, status) {
         .classed('prov-item', true)
         .text("Loading...")
         .each(function(p) { displayProv(p, d3.select(this)) });
+      var provsCmd = "";
+      if(isEntity) provsCmd = "/entity/provs/"+e.id+'?db='+dbName;
+      else  provsCmd = "/relation/provs/"+e.source.id+"/"+e.target.id+'?db='+dbName;
       typeProvList.append("li")
         .append("a")
-        .attr("href", if(isEntity) "/entity/provs/"+e.id+'?db='+dbName; else  "/relation/provs/"+e.source.id+"/"+e.target.id+'?db='+dbName;)
+        .attr("href", provsCmd)
         .attr("target", "_blank")
         .html('<p class"text-right h5">See all</p>');
     } else {
