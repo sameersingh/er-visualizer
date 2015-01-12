@@ -85,7 +85,8 @@ object Application extends Controller {
 
   def entityProvs(id: String, dbName: Option[String]) = Action {
     println("eTxt: " + id)
-    Ok(Json.toJson(db(dbName).entityText(id)))
+    Ok(views.html.provs("Entity " + id, Seq(id), dbName.getOrElse(defaultDBName)))
+    //Ok(Json.toJson(db(dbName).entityText(id)))
   }
 
   def entityRelations(id: String, dbName: Option[String]) = Action {
@@ -121,7 +122,8 @@ object Application extends Controller {
 
   def relationProvs(sid: String, tid: String, dbName: Option[String]) = Action {
     println("RelText: " + (sid -> tid))
-    Ok(Json.toJson(db(dbName).relationText(sid, tid)))
+    Ok(views.html.provs("Relation: %s -> %s ".format(sid, tid), Seq(sid,tid), dbName.getOrElse(defaultDBName)))
+    //Ok(Json.toJson(db(dbName).relationText(sid, tid)))
   }
 
   def relationPredictions(sid: String, tid: String, dbName: Option[String]) = Action {
