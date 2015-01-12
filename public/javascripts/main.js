@@ -1,6 +1,8 @@
 var width = 1200, //$(".canvas").parent().width(),
     height = 650; // $(".canvas").parent().height();
 
+var dbName = "drug";
+
 var color = d3.scale.linear()
                 .domain([0, 1])
                 .range(["red", "green"]);
@@ -29,7 +31,7 @@ var projection = 0;
 function getAllLinks() {
     $.ajax({
        type: "GET",
-       url: '/relation/all',
+       url: '/relation/all?db='+dbName,
        success: function(d) {
          while(data.links.length > 0) {
            data.links.pop();
@@ -49,7 +51,7 @@ function getAllLinks() {
 function getAllEntities() {
     $.ajax({
        type: "GET",
-       url: '/entity/all',
+       url: '/entity/all?db='+dbName,
        success: function(d) {
          while(data.entityArr.length > 0) {
            data.entityArr.pop();
@@ -158,6 +160,7 @@ function hideLabel(d) {
 function run(db) {
     width = $(".canvas").width();
     height = $(".canvas").height();
+    dbName = db;
 
     projection = d3.geo.mercator()
         .center([0, 5 ])
@@ -375,7 +378,7 @@ function showAllBoxes(onFinish) {
 function getEntityCmd(e, cmd, onFinish) {
     $.ajax({
        type: "GET",
-       url: '/entity/'+cmd+'/'+e.id,
+       url: '/entity/'+cmd+'/'+e.id+'?db='+dbName,
        success: function(d) { onFinish(e, d); },
        error: function(j, t, e) { console.log(e); }
     });
@@ -384,7 +387,7 @@ function getEntityCmd(e, cmd, onFinish) {
 function getRelCmd(l, cmd, onFinish) {
     $.ajax({
        type: "GET",
-       url: '/relation/'+cmd+'/'+l.source.id+'/'+l.target.id,
+       url: '/relation/'+cmd+'/'+l.source.id+'/'+l.target.id+'?db='+dbName,
        success: function(d) { onFinish(l, d); },
        error: function(j, t, e) { console.log(e); }
     });
@@ -654,7 +657,7 @@ function getAndDisplayTypeProv(e, type, dom, status) {
     if(e == data.currEnt) {
         $.ajax({
            type: "GET",
-           url: '/entity/typeprov/'+e.id+'/'+type,
+           url: '/entity/typeprov/'+e.id+'/'+type+'?db='+dbName,
            success: function(d) {
              displayTypeProv(e, type, dom, d, status);
            },
@@ -663,7 +666,7 @@ function getAndDisplayTypeProv(e, type, dom, status) {
     } else {
         $.ajax({
            type: "GET",
-           url: '/relation/typeprov/'+e.source.id+'/'+e.target.id+'/'+type,
+           url: '/relation/typeprov/'+e.source.id+'/'+e.target.id+'/'+type+'?db='+dbName,
            success: function(d) {
              //console.log(d);
              displayTypeProv(e, type, dom, d, status);
@@ -701,7 +704,7 @@ function displayProv(prov, dom) {
   //dom.text(JSON.stringify(prov));
   $.ajax({
      type: "GET",
-     url: '/docs/sentence/'+prov.docId+'/'+prov.sentId,
+     url: '/docs/sentence/'+prov.docId+'/'+prov.sentId+'?db='+dbName,
      success: function(d) {
        dom.text("");
        // docid
