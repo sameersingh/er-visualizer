@@ -7,6 +7,7 @@ import org.sameersingh.ervisualizer.kba
 import play.api.libs.json.Json
 
 import scala.collection.mutable.HashMap
+import scala.util.Random
 
 /**
  * @author sameer
@@ -34,7 +35,7 @@ object EntityKBAReader {
     val db = new InMemEntityKBA
     val cfg = ConfigFactory.load()
     val baseDir = cfg.getString("nlp.data.baseDir") //.replaceAll(" ", "\\ ")
-    StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db)
+    StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db, Some(500))
     db
   }
 }
@@ -42,14 +43,22 @@ object EntityKBAReader {
 
 object StalenessReader {
 
+  val random = new Random(0)
   /*
   * fill entityKBA and relationKBA
   */
-  def readStaleness(stalenessFile: String, db: InMemEntityKBA): Unit = {
+  def readStaleness(stalenessFile: String, db: InMemEntityKBA, maxPoints: Option[Int] = None): Unit = {
     import org.sameersingh.ervisualizer.kba.JsonReads._
     println("Reading staleness")
     for (line <- FileUtil.inputSource(stalenessFile, true).getLines()) {
-      val e = Json.fromJson[kba.Entity](Json.parse(line)).get
+      val oe = Json.fromJson[kba.Entity](Json.parse(line)).get
+      val e = if(maxPoints.isEmpty) oe
+      else {
+        val stalenessSampleProb = maxPoints.get.toDouble / oe.staleness.size.toDouble
+        val docSampleProb = maxPoints.get.toDouble / oe.docs.size.toDouble
+        kba.Entity(oe.id, oe.staleness.filter(s => random.nextDouble() < stalenessSampleProb),
+          oe.docs.filter(s => random.nextDouble() < docSampleProb), oe.clusters)
+      }
       if(e.id.contains("|")) {
         val ids = e.id.split("\\|").map(s => FreebaseReader.convertFbIdToId(s))
         assert(ids.size == 2, s"More than 2 I in id?: ${e.id}: ${ids.mkString(", ")}")
