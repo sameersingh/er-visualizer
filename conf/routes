@@ -5,6 +5,7 @@
 # Home page
 GET     /                           controllers.Application.index
 GET     /db/:name                   controllers.Application.reset(name: String)
+GET     /search                     controllers.Application.search
 
 # Docs etc.
 GET /docs/doc/:doc    controllers.Application.document(doc: String, db: Option[String])

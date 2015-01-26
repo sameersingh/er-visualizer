@@ -10,29 +10,38 @@ import scala.collection.mutable
 object Application extends Controller {
 
   val defaultDBName = "drug"
+
+  val _docs = new DocumentStore()
+  val _dbStore = new DBStore(_docs)
+
   private val _db: mutable.Map[String, DB] = new mutable.HashMap[String, DB]
   private var _entKBA: KBAStore = null
 
-  def db(name: Option[String] = None) = _db.getOrElseUpdate(name.getOrElse(defaultDBName), {
+  def dbId(id: String) = _dbStore.id(id)
+  def dbQueryId(query: String) = _dbStore.query(query)._1
+
+  def db(name: Option[String] = None) = _db.getOrElseUpdate(name.getOrElse(throw new Error("None as dbName")), {
     val result = EntityInfoReader.read()
-    NLPReader.read(result, Some(name.getOrElse(defaultDBName)))
+    //NLPReader.read(result, Some(name.getOrElse(defaultDBName)))
     result
   })
-
-  def db: DB = db(None)
 
   def entKBA = _entKBA
 
   def init() {
     _entKBA = EntityKBAReader.read()
-    println(db)
+    // TODO: initialize _docs
   }
 
   init()
 
   import org.sameersingh.ervisualizer.data.JsonWrites._
 
-  def index = reset(defaultDBName)
+  def index = search // reset(defaultDBName)
+
+  def search = Action {
+    Ok(views.html.search("UW Visualizer"))
+  }
 
   def reset(name: String) = Action {
     db(Some(name))
