@@ -1,5 +1,7 @@
 package org.sameersingh.ervisualizer.data
 
+import com.typesafe.scalalogging.slf4j.Logging
+
 import scala.collection.mutable
 import scala.collection.mutable.HashMap
 
@@ -7,7 +9,7 @@ import scala.collection.mutable.HashMap
  * @author sameer
  * @since 1/25/15.
  */
-class DBStore(docs: DocumentStore) {
+class DBStore(docs: DocumentStore) extends Logging {
   type Id = String
 
   val maxDBs = 100
@@ -22,7 +24,11 @@ class DBStore(docs: DocumentStore) {
     id -> odb.getOrElse({
       val docIds = docs.query(string)
       val result = EntityInfoReader.read()
-      //NLPReader.read(result, Some(name.getOrElse(defaultDBName)))
+      logger.info("Reading " + docIds.size + " docs.")
+      val inDB = result.asInstanceOf[InMemoryDB]
+      NLPReader.readDocs(docIds.map(id => docs(id)).iterator, inDB)
+      NLPReader.addRelationInfo(inDB)
+      NLPReader.removeSingletonEntities(inDB)
       if(dbMap.size == maxDBs) {
         val id = dbQueue.dequeue()
         dbMap.remove(id)

@@ -3,6 +3,7 @@ package org.sameersingh.ervisualizer.data
 import java.io.{FileOutputStream, OutputStreamWriter, PrintWriter}
 
 import com.typesafe.config.ConfigFactory
+import com.typesafe.scalalogging.slf4j.Logging
 import nlp_serde.{FileUtil, Mention, Entity}
 import nlp_serde.readers.PerLineJsonReader
 import org.sameersingh.ervisualizer.freebase.MongoIO
@@ -20,6 +21,7 @@ object FreebaseReader {
   def convertFbIdToId(mid: String): String = mid.drop(1).replaceFirst("/", "_")
 
   def convertIdToFbId(mid: String): String = "/" + mid.replaceFirst("_", "/")
+
   /*
   * add entityIds, and fill entityHeader, entityInfo and entityFreebase
   */
@@ -70,7 +72,7 @@ object FreebaseReader {
   }
 }
 
-class NLPReader {
+class NLPReader extends Logging {
 
   def entityId(e: Entity): Option[String] = {
     if (e.ner.get != "O" && e.freebaseIds.size > 0)
@@ -91,80 +93,87 @@ class NLPReader {
     }
   }
 
+  def readDocs(docsFile: String, db: InMemoryDB): Unit = {
+    val reader = new PerLineJsonReader()
+    readDocs(reader.read(docsFile), db)
+  }
+
   /*
    * Read the documents, and populate relevantEntityIds and provenances
    */
-  def readDocs(docsFile: String, db: InMemoryDB, word: Option[String]): Unit = {
-    println("Reading documents")
+  def readDocs(docs: Iterator[nlp_serde.Document], db: InMemoryDB): Unit = {
+    logger.info("Reading documents")
     db.clearTextEvidence()
     val dotEvery = 100
     val lineEvery = 1000
     var docIdx = 0
-    val reader = new PerLineJsonReader()
     val einfo = new EntityMentions
-    for (d <- reader.read(docsFile)) {
-      if(word.isEmpty || d.text.matches(".*\\b"+word.get.toLowerCase+"\\b.*")) {
-        // sentences
-        val sents = d.sentences.map(s => Sentence(d.id, s.idx, s.text))
-        db._documents(d.id) = Document(d.id, d.path.get, d.attrs.getOrElse("title", ""), "", d.text, sents)
-        // entities
-        for (e <- d.entities) {
-          for (id <- entityId(e)) {
-            db._relevantEntityIds += id
-            val mentions = e.mids.map(id => d.mentions(id)).toSeq
-            mentions.foreach(m => einfo +=(id, m))
-            val provenances = mentions.map(m => {
-              val startPos = d.sentences(m.sentenceId).tokens(m.toks._1 - 1).chars._1 - d.sentences(m.sentenceId).chars._1
-              val endPos = d.sentences(m.sentenceId).tokens(m.toks._2 - 2).chars._2 - d.sentences(m.sentenceId).chars._1
-              Provenance(d.id, m.sentenceId, Seq(startPos -> endPos))
-            }).distinct
-            val oldEText = db._entityText.getOrElse(id, EntityUtils.emptyText(id))
-            val etext = EntityText(id, provenances ++ oldEText.provenances)
-            db._entityText(id) = etext
-            for (p <- provenances) {
-              val map = db._docEntityProvenances.getOrElseUpdate(p.docId -> (p.sentId - 1), new mutable.HashMap)
-              map(id) = map.getOrElse(id, Seq.empty) ++ Seq(p)
+    for (d <- docs) {
+      // sentences
+      val sents = d.sentences.map(s => Sentence(d.id, s.idx, s.text))
+      db._documents(d.id) = Document(d.id, d.path.get, d.attrs.getOrElse("title", ""), "", d.text, sents)
+      // entities
+      for (e <- d.entities) {
+        for (id <- entityId(e); if (db._entityHeader.contains(id))) {
+          db._relevantEntityIds += id
+          val mentions = e.mids.map(id => d.mentions(id)).toSeq
+          mentions.foreach(m => einfo +=(id, m))
+          val provenances = mentions.map(m => {
+            val startPos = d.sentences(m.sentenceId).tokens(m.toks._1 - 1).chars._1 - d.sentences(m.sentenceId).chars._1
+            val endPos = d.sentences(m.sentenceId).tokens(m.toks._2 - 2).chars._2 - d.sentences(m.sentenceId).chars._1
+            Provenance(d.id, m.sentenceId, Seq(startPos -> endPos))
+          }).distinct
+          val oldEText = db._entityText.getOrElse(id, EntityUtils.emptyText(id))
+          val etext = EntityText(id, provenances ++ oldEText.provenances)
+          db._entityText(id) = etext
+          for (p <- provenances) {
+            val map = db._docEntityProvenances.getOrElseUpdate(p.docId -> (p.sentId - 1), new mutable.HashMap)
+            map(id) = map.getOrElse(id, Seq.empty) ++ Seq(p)
+          }
+          // Types
+          val types = new mutable.HashSet[String]()
+          val typeProvs = new mutable.HashMap[String, TypeModelProvenances]
+          for (m <- mentions) {
+            val figerStr = m.attrs.get("figer")
+            val figerPreds = figerStr.toSeq.filterNot(_.isEmpty).flatMap(str => {
+              str.split("[,\t]").map(str => {
+                val pair = str.split("@")
+                (normalizeType(pair(0)), pair(1).toDouble)
+              }).toSeq
+            })
+            val startPos = d.sentences(m.sentenceId).tokens(m.toks._1 - 1).chars._1 - d.sentences(m.sentenceId).chars._1
+            val endPos = d.sentences(m.sentenceId).tokens(m.toks._2 - 2).chars._2 - d.sentences(m.sentenceId).chars._1
+            // add to local data
+            types ++= figerPreds.map(_._1)
+            for (tc <- figerPreds; t = tc._1; c = tc._2) {
+              val prov = Provenance(d.id, m.sentenceId, Seq(startPos -> endPos), c)
+              typeProvs(t) = TypeModelProvenances(id, t, typeProvs.get(t).map(_.provenances).getOrElse(Seq.empty) ++ Seq(prov))
             }
-            // Types
-            val types = new mutable.HashSet[String]()
-            val typeProvs = new mutable.HashMap[String, TypeModelProvenances]
-            for (m <- mentions) {
-              val figerStr = m.attrs.get("figer")
-              val figerPreds = figerStr.toSeq.filterNot(_.isEmpty).flatMap(str => {
-                str.split("[,\t]").map(str => {
-                  val pair = str.split("@")
-                  (normalizeType(pair(0)), pair(1).toDouble)
-                }).toSeq
-              })
-              val startPos = d.sentences(m.sentenceId).tokens(m.toks._1 - 1).chars._1 - d.sentences(m.sentenceId).chars._1
-              val endPos = d.sentences(m.sentenceId).tokens(m.toks._2 - 2).chars._2 - d.sentences(m.sentenceId).chars._1
-              // add to local data
-              types ++= figerPreds.map(_._1)
-              for (tc <- figerPreds; t = tc._1; c = tc._2) {
-                val prov = Provenance(d.id, m.sentenceId, Seq(startPos -> endPos), c)
-                typeProvs(t) = TypeModelProvenances(id, t, typeProvs.get(t).map(_.provenances).getOrElse(Seq.empty) ++ Seq(prov))
-              }
-            }
-            // add to global data
-            if (!types.isEmpty) {
-              // println(s"$id: " + types.mkString(", "))
-              db._entityTypePredictions(id) = (db._entityTypePredictions.getOrElse(id, Seq.empty) ++ types.toSeq).distinct
-            }
-            for ((t, tmp) <- typeProvs) {
-              val map = db._entityTypeProvenances.getOrElseUpdate(id, new mutable.HashMap)
-              map(t) = TypeModelProvenances(id, t, map.get(t).map(_.provenances).getOrElse(Seq.empty) ++ tmp.provenances)
-            }
+          }
+          // add to global data
+          if (!types.isEmpty) {
+            // println(s"$id: " + types.mkString(", "))
+            db._entityTypePredictions(id) = (db._entityTypePredictions.getOrElse(id, Seq.empty) ++ types.toSeq).distinct
+          }
+          for ((t, tmp) <- typeProvs) {
+            val map = db._entityTypeProvenances.getOrElseUpdate(id, new mutable.HashMap)
+            map(t) = TypeModelProvenances(id, t, map.get(t).map(_.provenances).getOrElse(Seq.empty) ++ tmp.provenances)
           }
         }
         // relations
         for (s <- d.sentences; r <- s.relations;
-          m1 <- s.mentions.find(_.id == r.m1Id);
-          m2 <- s.mentions.find(_.id == r.m2Id);
-          m1eid <- m1.entityId;
-          m2eid <- m2.entityId;
-          e1 <- d.entities.find(_.id == m1eid);
-          e2 <- d.entities.find(_.id == m2eid)) {
-          for (e1id <- entityId(e1); e2id <- entityId(e2)) {
+             m1 = d.mentions(r.m1Id);
+             m2 = d.mentions(r.m2Id);
+             //m1 <- s.mentions.find(_.id == r.m1Id);
+             //m2 <- s.mentions.find(_.id == r.m2Id);
+             m1eid <- m1.entityId;
+             m2eid <- m2.entityId;
+             e1 = d.entity(m1eid); //.find(_.id == m1eid);
+             e2 = d.entity(m2eid)) {
+          //.find(_.id == m2eid)) {
+          assert(e1.id == m1eid, s"e1.id (${e1.id}) is not same as m1eid (${m1eid}), entities: ${d.entities.map(_.id).mkString(",")}")
+          assert(e2.id == m2eid, s"e2.id (${e2.id}) is not same as m1eid (${m2eid}), entities: ${d.entities.map(_.id).mkString(",")}")
+          for (e1id <- entityId(e1); e2id <- entityId(e2); if (db._entityHeader.contains(e1id)); if (db._entityHeader.contains(e2id))) {
             val startPos1 = s.tokens(m1.toks._1 - 1).chars._1 - s.chars._1
             val endPos1 = s.tokens(m1.toks._2 - 2).chars._2 - s.chars._1
             val startPos2 = s.tokens(m2.toks._1 - 1).chars._1 - s.chars._1
@@ -172,7 +181,7 @@ class NLPReader {
             val prov = Provenance(d.id, s.idx, Seq(startPos1 -> endPos1, startPos2 -> endPos2))
             val rid = if (e1id < e2id) e1id -> e2id else e2id -> e1id
             for (unnormRel <- r.relations; rel = normalizeType(unnormRel)) {
-              db._relevantRelationIds += rid
+              // db._relevantRelationIds += rid
               db._relationPredictions(rid) = db._relationPredictions.getOrElse(rid, Set.empty) ++ Seq(rel)
               val rt = db._relationText.getOrElse(rid, RelationText(rid._1, rid._2, Seq.empty))
               db._relationText(rid) = RelationText(rt.sourceId, rt.targetId, rt.provenances ++ Seq(prov))
@@ -183,15 +192,17 @@ class NLPReader {
         }
       }
       docIdx += 1
-      if(docIdx % dotEvery == 0) print(".")
-      if(docIdx % lineEvery == 0) println(": read " + docIdx + " docs")
+      if (docIdx % dotEvery == 0) print(".")
+      if (docIdx % lineEvery == 0) println(": read " + docIdx + " docs")
     }
     println(" Done.")
+    logger.info("Entities: " + db.entityIds.size)
+    logger.info("Relations: " + db._relationText.size)
     // entity header
     val maxMentions = einfo.mentions.values.map(_.size).max
     for (eid <- db.relevantEntityIds) {
       if (!einfo.mentions.contains(eid)) {
-        println(s"Cannot find $eid in the documents..")
+        logger.info(s"Cannot find $eid in the documents..")
         // System.exit(0)
       }
       val oh = db.entityHeader(eid)
@@ -221,7 +232,7 @@ class NLPReader {
       for ((r, rmps) <- relMap) {
         relMap(r) = RelModelProvenances(rmps.sourceId, rmps.targetId, rmps.relType, rmps.provenances,
           math.sqrt(rmps.provenances.size.toDouble / maxProvs))
-          //math.sqrt(rmps.provenances.map(p => (math.log(p.confidence) - minScore) / maxScore).max)) //sum / rmps.provenances.size.toDouble)
+        //math.sqrt(rmps.provenances.map(p => (math.log(p.confidence) - minScore) / maxScore).max)) //sum / rmps.provenances.size.toDouble)
       }
     }
   }
@@ -232,24 +243,21 @@ class NLPReader {
   def removeSingletonEntities(db: InMemoryDB): Unit = {
     println("Removing singleton entities")
     val entsToRemove = new ArrayBuffer[String]
-    for(eid <- db.relevantEntityIds) {
+    for (eid <- db.relevantEntityIds) {
       val location = !db.entityHeader(eid).geo.isEmpty // nerTag == "LOCATION"
-      if(!location) {
+      if (!location) {
         val relations = db.relations(eid)
         if (relations.size == 0) entsToRemove += eid
       }
     }
-    for(eid <- entsToRemove) db._relevantEntityIds -= eid
+    for (eid <- entsToRemove) db._relevantEntityIds -= eid
   }
 
-  def read(db: DB, word: Option[String] = None): Unit = db match {
+  def read(db: DB): Unit = db match {
     case inDB: InMemoryDB => {
       val cfg = ConfigFactory.load()
       val baseDir = cfg.getString("nlp.data.baseDir") //.replaceAll(" ", "\\ ")
-      if (word.isDefined)
-        readDocs(baseDir + "/" + word.get + ".docs.nlp.flr.json.gz", inDB, None)
-      else
-        readDocs(baseDir + "/docs.nlp.flr.json.gz", inDB, None)
+      readDocs(baseDir + "/docs.nlp.flr.json.gz", inDB)
       addRelationInfo(inDB)
       removeSingletonEntities(inDB)
     }

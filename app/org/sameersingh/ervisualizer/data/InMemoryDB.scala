@@ -52,7 +52,6 @@ class InMemoryDB extends DB {
 
   // Relations
   // val _relationIds = new ArrayBuffer[(String, String)]
-  val _relevantRelationIds = new mutable.LinkedHashSet[(String, String)]
   val _relationHeader = new LinkedHashMap[(String, String), RelationHeader]
   val _relationFreebase = new HashMap[(String, String), RelationFreebase]
   val _relationText = new HashMap[(String, String), RelationText]
@@ -61,7 +60,7 @@ class InMemoryDB extends DB {
 
   override def relationIds: Seq[(String, String)] = _relationHeader.keysIterator.toSeq
 
-  override def relevantRelationIds: Iterator[(String, String)] = _relevantRelationIds.iterator
+  override def relevantRelationIds: Iterator[(String, String)] = throw new Error("should not call relevant relations") //_relevantRelationIds.iterator
 
   override def relationHeader(sid: String, tid: String): RelationHeader = _relationHeader(sid -> tid)
 
@@ -83,7 +82,7 @@ class InMemoryDB extends DB {
     _entityTypePredictions.clear()
     _entityTypeProvenances.clear()
 
-    _relevantRelationIds.clear()
+    // _relevantRelationIds.clear()
     _relationPredictions.clear()
     _relationProvenances.clear()
     _relationText.clear()
