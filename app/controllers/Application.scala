@@ -30,7 +30,7 @@ object Application extends Controller {
 
   def init() {
     _entKBA = EntityKBAReader.read()
-    // TODO: initialize _docs
+    DocumentStore.readDocs(_docs)
   }
 
   init()
