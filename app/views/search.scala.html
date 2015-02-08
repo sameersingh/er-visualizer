@@ -32,9 +32,9 @@
             Select the documents to visualize by search for keywords, topics ("topic:"), or entities ("ent:").
             </p>
             <div class="input-group input-group-lg">
-              <input type="text" class="form-control" placeholder="Search for...">
+              <input id="queryInput" type="text" class="form-control" placeholder="Search for...">
               <span class="input-group-btn">
-                <a href="" class="btn btn-default">Go!</a>
+                <button type="button" class="btn btn-default" onclick="search();">Go!</a>
               </span>
             </div><!-- /input-group -->
         </div>
@@ -57,6 +57,10 @@
         </div>
 
         <script>
+
+        function search() {
+            location.href='/page?query=' + encodeURI(document.getElementById('queryInput').value);
+        }
 
         </script>
     </body>
