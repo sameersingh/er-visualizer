@@ -57,17 +57,17 @@ class DocumentStore {
     if(queryString.isEmpty) return docMap.keys
     for(q <- queryString.split("\\s")) {
       val ids = if(q.startsWith("topic:")) {
-        topicsMap.getOrElse(q.drop(6), Set.empty)
+        topicsMap.getOrElse(q.drop(6), Set.empty[Id])
       } else if(q.startsWith("ent:")) {
-        entitiesMap.getOrElse(q.drop(4).replaceAll("_", " "), Set.empty)
+        entitiesMap.getOrElse(q.drop(4).replaceAll("_", " "), Set.empty[Id])
       } else {
-        keywordsMap.getOrElse(q, Set.empty)
+        keywordsMap.getOrElse(q, Set.empty[Id])
       }
       if(results == null) {
         results = new mutable.HashSet[Id]()
         results ++= ids
       } else {
-        results --= ids
+        results.retain((i:Id) => ids(i))
       }
     }
     if(results == null) {
