@@ -35,7 +35,7 @@ object EntityKBAReader {
     val db = new InMemEntityKBA
     val cfg = ConfigFactory.load()
     val baseDir = cfg.getString("nlp.data.baseDir") //.replaceAll(" ", "\\ ")
-    //StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db, Some(500))
+    StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db, Some(100))
     db
   }
 }

@@ -105,7 +105,7 @@ object DocumentStore extends Logging {
     result
   }
 
-  def readDocs(store: DocumentStore, dir: String = "data/d2d/", maximum: Int = 1000): Unit = {
+  def readDocs(store: DocumentStore, dir: String = "data/d2d/"): Unit = {
     logger.info("Reading counts")
     store.keywords ++= readWords(dir + "/wcounts.txt.gz", 19)
     store.entities ++= readWords(dir + "/ecounts.txt.gz", 1)
@@ -120,7 +120,7 @@ object DocumentStore extends Logging {
     val dotEvery = 100
     val lineEvery = 1000
     var docIdx = 0
-    for(doc <- new PerLineJsonReader().read(docsFile).take(maximum)) {
+    for(doc <- new PerLineJsonReader().read(docsFile)) {
       store += doc
       // add topics
       titleTopics.get(doc.id).foreach(t => store.addTopic(doc, "title" + t))
