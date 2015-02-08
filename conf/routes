@@ -4,7 +4,8 @@
 
 # Home page
 GET     /                           controllers.Application.index
-GET     /db/:name                   controllers.Application.reset(name: String)
+GET     /page                       controllers.Application.page(query: Option[String])
+GET     /page/db/:db                controllers.Application.pageId(db: String)
 GET     /search                     controllers.Application.search
 
 # Docs etc.
