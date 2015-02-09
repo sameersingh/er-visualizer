@@ -26,6 +26,14 @@ class DocumentStore {
     // touch to instantiate maps
     d.mentions
     d.entity
+    d.sentences.foreach(s => {
+      s.depTree = None
+      s.parseTree = None
+      s.tokens.foreach(t => {
+        t.pos = None
+        t.ner = None
+      })
+    })
     d
   }
 
