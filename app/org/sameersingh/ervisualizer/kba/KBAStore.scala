@@ -50,6 +50,9 @@ object StalenessReader {
   def readStaleness(stalenessFile: String, db: InMemEntityKBA, maxPoints: Option[Int] = None): Unit = {
     import org.sameersingh.ervisualizer.kba.JsonReads._
     println("Reading staleness")
+    val dotEvery = 100
+    val lineEvery = 1000
+    var docIdx = 0
     for (line <- FileUtil.inputSource(stalenessFile, true).getLines()) {
       val oe = Json.fromJson[kba.Entity](Json.parse(line)).get
       val e = if(maxPoints.isEmpty) oe
@@ -69,6 +72,9 @@ object StalenessReader {
         val id = FreebaseReader.convertFbIdToId(e.id)
         db._entityKBA(id) = e
       }
+      docIdx += 1
+      if (docIdx % dotEvery == 0) print(".")
+      if (docIdx % lineEvery == 0) println(": read " + docIdx + " lines.")
     }
   }
 
