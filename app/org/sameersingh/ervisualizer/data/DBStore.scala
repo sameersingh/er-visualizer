@@ -12,7 +12,7 @@ import scala.collection.mutable.HashMap
 class DBStore(docs: DocumentStore) extends Logging {
   type Id = String
 
-  val maxDBs = 100
+  val maxDBs = 20
   val dbMap = new HashMap[Id, DB]
   val dbQueue = new mutable.Queue[Id]()
   val queryMap = new HashMap[String, Id]
@@ -29,8 +29,14 @@ class DBStore(docs: DocumentStore) extends Logging {
       NLPReader.readDocs(docIds.map(id => docs(id)).iterator, inDB)
       NLPReader.addRelationInfo(inDB)
       NLPReader.removeSingletonEntities(inDB)
-      if(dbMap.size == maxDBs) {
+      val freeMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) / (1024 * 1024 * 1024)
+      logger.info("Free memory  (Kbytes): " + Runtime.getRuntime().freeMemory() / 1024)
+      logger.info("Total memory (Kbytes): " + Runtime.getRuntime().totalMemory() / 1024)
+      logger.info("Max memory   (Kbytes): " + Runtime.getRuntime().maxMemory() / 1024)
+      logger.info("Free memory (GBs): " + freeMem + ", DBs: " + dbMap.size)
+      if(dbMap.size >=1 && (dbMap.size >= maxDBs || freeMem < 1)) {
         val id = dbQueue.dequeue()
+        logger.info("Dequeuing " + id + " for query: \"" + queryIdMap(id) + "\"")
         dbMap.remove(id)
       }
       dbQueue += id
