@@ -199,17 +199,19 @@ class NLPReader extends Logging {
     logger.info("Entities: " + db.entityIds.size)
     logger.info("Relations: " + db._relationText.size)
     // entity header
-    val maxMentions = einfo.mentions.values.map(_.size).max
-    for (eid <- db.relevantEntityIds) {
-      if (!einfo.mentions.contains(eid)) {
-        logger.info(s"Cannot find $eid in the documents..")
-        // System.exit(0)
+    if (einfo.mentions.size != 0) {
+      val maxMentions = einfo.mentions.values.map(_.size).max
+      for (eid <- db.relevantEntityIds) {
+        if (!einfo.mentions.contains(eid)) {
+          logger.info(s"Cannot find $eid in the documents..")
+          // System.exit(0)
+        }
+        val oh = db.entityHeader(eid)
+        val ments = einfo.mentions.getOrElse(eid, Seq.empty)
+        //val name = if (ments.isEmpty) "unknown" else ments.map(_.text).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
+        //val ner = if (ments.isEmpty) "O" else ments.flatMap(_.ner.toSeq).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
+        db._entityHeader(eid) = EntityHeader(eid, oh.name, oh.nerTag, ments.size.toDouble / maxMentions, oh.geo)
       }
-      val oh = db.entityHeader(eid)
-      val ments = einfo.mentions.getOrElse(eid, Seq.empty)
-      //val name = if (ments.isEmpty) "unknown" else ments.map(_.text).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
-      //val ner = if (ments.isEmpty) "O" else ments.flatMap(_.ner.toSeq).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
-      db._entityHeader(eid) = EntityHeader(eid, oh.name, oh.nerTag, ments.size.toDouble / maxMentions, oh.geo)
     }
   }
 
@@ -218,21 +220,23 @@ class NLPReader extends Logging {
   */
   def addRelationInfo(db: InMemoryDB) {
     println("Add relational info")
-    val maxProvenances = db._relationText.map({
-      case (rid, map) => map.provenances.size
-    }).max.toDouble
-    for ((rid, rt) <- db._relationText) {
-      db._relationFreebase(rid) = RelationFreebase(rid._1, rid._2, Seq.empty)
-      db._relationHeader(rid) = RelationHeader(rid._1, rid._2, rt.provenances.size.toDouble / maxProvenances)
-    }
-    // val minScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).min
-    // val maxScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).max
-    val maxProvs = db._relationProvenances.values.flatten.map(_._2.provenances.size).max
-    for ((pair, relMap) <- db._relationProvenances) {
-      for ((r, rmps) <- relMap) {
-        relMap(r) = RelModelProvenances(rmps.sourceId, rmps.targetId, rmps.relType, rmps.provenances,
-          math.sqrt(rmps.provenances.size.toDouble / maxProvs))
-        //math.sqrt(rmps.provenances.map(p => (math.log(p.confidence) - minScore) / maxScore).max)) //sum / rmps.provenances.size.toDouble)
+    if(db._relationText.size > 0) {
+      val maxProvenances = db._relationText.map({
+        case (rid, map) => map.provenances.size
+      }).max.toDouble
+      for ((rid, rt) <- db._relationText) {
+        db._relationFreebase(rid) = RelationFreebase(rid._1, rid._2, Seq.empty)
+        db._relationHeader(rid) = RelationHeader(rid._1, rid._2, rt.provenances.size.toDouble / maxProvenances)
+      }
+      // val minScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).min
+      // val maxScore = db._relationProvenances.values.map(_.values).flatten.map(_.provenances).flatten.map(p => math.log(p.confidence)).max
+      val maxProvs = db._relationProvenances.values.flatten.map(_._2.provenances.size).max
+      for ((pair, relMap) <- db._relationProvenances) {
+        for ((r, rmps) <- relMap) {
+          relMap(r) = RelModelProvenances(rmps.sourceId, rmps.targetId, rmps.relType, rmps.provenances,
+            math.sqrt(rmps.provenances.size.toDouble / maxProvs))
+          //math.sqrt(rmps.provenances.map(p => (math.log(p.confidence) - minScore) / maxScore).max)) //sum / rmps.provenances.size.toDouble)
+        }
       }
     }
   }

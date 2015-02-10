@@ -120,7 +120,7 @@ object DocumentStore extends Logging {
     logger.info(" # words    : " + store.keywords.size)
     logger.info(" # entities : " + store.entities.size)
     logger.info("Reading title topics")
-    val titleTopics = Map.empty[String, Int] // readTopics(dir, "title")
+    val titleTopics = readTopics(dir, "title")
     logger.info("Reading content topics")
     val contentTopics = readTopics(dir, "content")
     logger.info("Reading documents")
@@ -143,6 +143,9 @@ object DocumentStore extends Logging {
         + store.topicsMap.size + " topics, " + store.entitiesMap.size + " entities.")
     }
     logger.info("Done.")
+    logger.info("Entities: " + store.entitiesMap.take(10).map(_._1).mkString(", "))
+    logger.info("Words: " + store.keywordsMap.take(10).map(_._1).mkString(", "))
+    logger.info("Topics: " + store.topicsMap.take(10).map(_._1).mkString(", "))
   }
 }
 
