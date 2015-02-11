@@ -54,13 +54,13 @@ class SummaTextToHTML(text: String) {
       |<html>
       |<head>
       |  <title>UW Summa</title>
-      |  <script src="../../javascripts/listCollapse.js" type="text/javascript" language="javascript1.2"></script>
-      |  <link href="../../javascripts/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-      |  <script src="../../javascripts/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+      |  <script src="/assets/javascripts/listCollapse.js" type="text/javascript" language="javascript1.2"></script>
+      |  <link href="/assets/javascripts/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+      |  <script src="/assets/javascripts/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
       |</head>
       |<body onload="compactMenu('root',false,'');">
       |<div class="container">
-      |<h1><a href="index.html">Summa <img id="logo" width="30" src="http://knowitall.cs.washington.edu/summa/img/logo.png"></a></h1>
+      |<h1><a href="index.html">Summa <img id="logo" width="30" src="/assets/images/summa_logo.png"></a></h1>
       |%s
       |</div>
       |<body>
