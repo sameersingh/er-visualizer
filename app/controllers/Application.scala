@@ -25,9 +25,8 @@ object Application extends Controller with Logging {
 
   def init() {
     _entKBA = EntityKBAReader.read()
+    DocumentStore.readDocs(_docs)
   }
-
-  init()
 
   import org.sameersingh.ervisualizer.data.JsonWrites._
 
@@ -39,14 +38,14 @@ object Application extends Controller with Logging {
 
   def page(query: Option[String]) = Action {
     logger.info("Query : \"" + query.get + "\"")
-    if(_docs.numDocs == 0) DocumentStore.readDocs(_docs)
+    if(_docs.numDocs == 0) init()
     val (dbId, _) = _dbStore.query(query.getOrElse(""))
     logger.info("  Id  : " + dbId)
     Ok(views.html.main("UW Visualizer - " + query.get, dbId))
   }
 
   def pageId(dbId: String) = Action {
-    if(_docs.numDocs == 0) DocumentStore.readDocs(_docs)
+    if(_docs.numDocs == 0) init()
     val query = _dbStore.queryIdMap(dbId)
     logger.info("Request Id  : " + dbId + ", saved query: \"" + query + "\"")
     Ok(views.html.main("UW Visualizer - " + query, dbId))
