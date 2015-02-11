@@ -728,7 +728,7 @@ function displayProv(prov, dom) {
        dom.text("");
        // docid
        dom.append("a")
-         .attr("href", "/docs/doc/"+d.docId)
+         .attr("href", "/docs/doc/"+d.docId+"?db="+dbName)
          .attr("target", "_blank")
          .text(d.docId)
          .classed("docId", true);
