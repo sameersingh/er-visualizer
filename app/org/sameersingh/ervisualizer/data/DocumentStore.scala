@@ -21,6 +21,8 @@ class DocumentStore {
   val keywords = new HashSet[String]
   val entities = new HashSet[String]
 
+  def numDocs = docMap.size
+
   def +=(d: nlp_serde.Document): nlp_serde.Document = {
     docMap.getOrElseUpdate(d.id, d)
     // touch to instantiate maps
