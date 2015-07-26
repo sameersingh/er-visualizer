@@ -32,23 +32,6 @@ object FreebaseReader {
     if (useMongo) {
       val mongo = new MongoIO(port = 27017)
       mongo.updateDB(db)
-      // write as well
-      println("Writing Mongo")
-      val entityHeaderWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/ent.head"), "UTF-8"))
-      val entityInfoWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/ent.info"), "UTF-8"))
-      val entityFreebaseWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/ent.freebase"), "UTF-8"))
-      import org.sameersingh.ervisualizer.data.JsonWrites._
-      for (mid <- db.entityIds) {
-        entityHeaderWriter.println(Json.toJson(db.entityHeader(mid)))
-        entityInfoWriter.println(Json.toJson(db.entityInfo(mid)))
-        entityFreebaseWriter.println(Json.toJson(db.entityFreebase(mid)))
-      }
-      entityHeaderWriter.flush()
-      entityHeaderWriter.close()
-      entityInfoWriter.flush()
-      entityInfoWriter.close()
-      entityFreebaseWriter.flush()
-      entityFreebaseWriter.close()
     } else {
       val ehf = io.Source.fromFile(freebaseDir + "/ent.head", "UTF-8").getLines()
       val eif = io.Source.fromFile(freebaseDir + "/ent.info", "UTF-8").getLines()
@@ -61,10 +44,12 @@ object FreebaseReader {
         assert(eh.id == ei.id)
         assert(eh.id == ef.id)
         val mid = eh.id
-        db._entityIds += mid
-        db._entityHeader(mid) = eh
-        db._entityInfo(mid) = ei
-        db._entityFreebase(mid) = ef
+        db._entityHeader.get(mid).foreach(oeh => {
+          //db._entityIds += mid
+          db._entityHeader(mid) = EntityHeader(oeh.id, oeh.name, oeh.nerTag, oeh.popularity, eh.geo)
+          db._entityInfo(mid) = ei
+          db._entityFreebase(mid) = ef
+        })
       }
       assert(eif.isEmpty)
       assert(eff.isEmpty)
@@ -114,8 +99,10 @@ class NLPReader extends Logging {
       db._documents(d.id) = Document(d.id, d.path.getOrElse(""), d.attrs.getOrElse("title", ""), "", d.text, sents)
       // entities
       for (e <- d.entities) {
-        for (id <- entityId(e); if (db._entityHeader.contains(id))) {
-          db._relevantEntityIds += id
+        for (id <- entityId(e)) {
+          if (!db._entityIds.contains(id)) {
+            db._entityIds += id
+          }
           val mentions = e.mids.map(id => d.mentions(id)).toSeq
           mentions.foreach(m => einfo +=(id, m))
           val provenances = mentions.map(m => {
@@ -160,34 +147,34 @@ class NLPReader extends Logging {
             map(t) = TypeModelProvenances(id, t, map.get(t).map(_.provenances).getOrElse(Seq.empty) ++ tmp.provenances)
           }
         }
-        // relations
-        for (s <- d.sentences; r <- s.relations;
-             m1 = d.mentions(r.m1Id);
-             m2 = d.mentions(r.m2Id);
-             //m1 <- s.mentions.find(_.id == r.m1Id);
-             //m2 <- s.mentions.find(_.id == r.m2Id);
-             m1eid <- m1.entityId;
-             m2eid <- m2.entityId;
-             e1 = d.entity(m1eid); //.find(_.id == m1eid);
-             e2 = d.entity(m2eid)) {
-          //.find(_.id == m2eid)) {
-          assert(e1.id == m1eid, s"e1.id (${e1.id}) is not same as m1eid (${m1eid}), entities: ${d.entities.map(_.id).mkString(",")}")
-          assert(e2.id == m2eid, s"e2.id (${e2.id}) is not same as m1eid (${m2eid}), entities: ${d.entities.map(_.id).mkString(",")}")
-          for (e1id <- entityId(e1); e2id <- entityId(e2); if (db._entityHeader.contains(e1id)); if (db._entityHeader.contains(e2id))) {
-            val startPos1 = s.tokens(m1.toks._1 - 1).chars._1 - s.chars._1
-            val endPos1 = s.tokens(m1.toks._2 - 2).chars._2 - s.chars._1
-            val startPos2 = s.tokens(m2.toks._1 - 1).chars._1 - s.chars._1
-            val endPos2 = s.tokens(m2.toks._2 - 2).chars._2 - s.chars._1
-            val prov = Provenance(d.id, s.idx, Seq(startPos1 -> endPos1, startPos2 -> endPos2))
-            val rid = if (e1id < e2id) e1id -> e2id else e2id -> e1id
-            for (unnormRel <- r.relations; rel = normalizeType(unnormRel)) {
-              // db._relevantRelationIds += rid
-              db._relationPredictions(rid) = db._relationPredictions.getOrElse(rid, Set.empty) ++ Seq(rel)
-              val rt = db._relationText.getOrElse(rid, RelationText(rid._1, rid._2, Seq.empty))
-              db._relationText(rid) = RelationText(rt.sourceId, rt.targetId, rt.provenances ++ Seq(prov))
-              val rmp = db._relationProvenances.getOrElseUpdate(rid, new mutable.HashMap).getOrElseUpdate(rel, RelModelProvenances(rid._1, rid._2, rel, Seq.empty))
-              db._relationProvenances(rid)(rel) = RelModelProvenances(rmp.sourceId, rmp.targetId, rmp.relType, rmp.provenances ++ Seq(prov))
-            }
+      }
+      // relations
+      for (s <- d.sentences; r <- s.relations;
+           m1 = d.mentions(r.m1Id);
+           m2 = d.mentions(r.m2Id);
+           //m1 <- s.mentions.find(_.id == r.m1Id);
+           //m2 <- s.mentions.find(_.id == r.m2Id);
+           m1eid <- m1.entityId;
+           m2eid <- m2.entityId;
+           e1 = d.entity(m1eid); //.find(_.id == m1eid);
+           e2 = d.entity(m2eid)) {
+        //.find(_.id == m2eid)) {
+        assert(e1.id == m1eid, s"e1.id (${e1.id}) is not same as m1eid (${m1eid}), entities: ${d.entities.map(_.id).mkString(",")}")
+        assert(e2.id == m2eid, s"e2.id (${e2.id}) is not same as m1eid (${m2eid}), entities: ${d.entities.map(_.id).mkString(",")}")
+        for (e1id <- entityId(e1); e2id <- entityId(e2); if (db._entityHeader.contains(e1id)); if (db._entityHeader.contains(e2id))) {
+          val startPos1 = s.tokens(m1.toks._1 - 1).chars._1 - s.chars._1
+          val endPos1 = s.tokens(m1.toks._2 - 2).chars._2 - s.chars._1
+          val startPos2 = s.tokens(m2.toks._1 - 1).chars._1 - s.chars._1
+          val endPos2 = s.tokens(m2.toks._2 - 2).chars._2 - s.chars._1
+          val prov = Provenance(d.id, s.idx, Seq(startPos1 -> endPos1, startPos2 -> endPos2))
+          val rid = if (e1id < e2id) e1id -> e2id else e2id -> e1id
+          for (unnormRel <- r.relations; rel = normalizeType(unnormRel)) {
+            // db._relevantRelationIds += rid
+            db._relationPredictions(rid) = db._relationPredictions.getOrElse(rid, Set.empty) ++ Seq(rel)
+            val rt = db._relationText.getOrElse(rid, RelationText(rid._1, rid._2, Seq.empty))
+            db._relationText(rid) = RelationText(rt.sourceId, rt.targetId, rt.provenances ++ Seq(prov))
+            val rmp = db._relationProvenances.getOrElseUpdate(rid, new mutable.HashMap).getOrElseUpdate(rel, RelModelProvenances(rid._1, rid._2, rel, Seq.empty))
+            db._relationProvenances(rid)(rel) = RelModelProvenances(rmp.sourceId, rmp.targetId, rmp.relType, rmp.provenances ++ Seq(prov))
           }
         }
       }
@@ -201,16 +188,15 @@ class NLPReader extends Logging {
     // entity header
     if (einfo.mentions.size != 0) {
       val maxMentions = einfo.mentions.values.map(_.size).max
-      for (eid <- db.relevantEntityIds) {
+      for (eid <- db.entityIds) {
         if (!einfo.mentions.contains(eid)) {
           logger.info(s"Cannot find $eid in the documents..")
           // System.exit(0)
         }
-        val oh = db.entityHeader(eid)
         val ments = einfo.mentions.getOrElse(eid, Seq.empty)
-        //val name = if (ments.isEmpty) "unknown" else ments.map(_.text).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
-        //val ner = if (ments.isEmpty) "O" else ments.flatMap(_.ner.toSeq).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
-        db._entityHeader(eid) = EntityHeader(eid, oh.name, oh.nerTag, ments.size.toDouble / maxMentions, oh.geo)
+        val name = if (ments.isEmpty) "unknown" else ments.map(_.text).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
+        val ner = if (ments.isEmpty) "O" else ments.flatMap(_.ner.toSeq).groupBy(x => x).map(p => p._1 -> p._2.size).maxBy(_._2)._1
+        db._entityHeader(eid) = EntityHeader(eid, name, ner, ments.size.toDouble / maxMentions)
       }
     }
   }
@@ -220,7 +206,7 @@ class NLPReader extends Logging {
   */
   def addRelationInfo(db: InMemoryDB) {
     println("Add relational info")
-    if(db._relationText.size > 0) {
+    if (db._relationText.size > 0) {
       val maxProvenances = db._relationText.map({
         case (rid, map) => map.provenances.size
       }).max.toDouble
@@ -247,14 +233,14 @@ class NLPReader extends Logging {
   def removeSingletonEntities(db: InMemoryDB): Unit = {
     println("Removing singleton entities")
     val entsToRemove = new ArrayBuffer[String]
-    for (eid <- db.relevantEntityIds) {
+    for (eid <- db.entityIds) {
       val location = !db.entityHeader(eid).geo.isEmpty // nerTag == "LOCATION"
       if (!location) {
         val relations = db.relations(eid)
         if (relations.size == 0) entsToRemove += eid
       }
     }
-    for (eid <- entsToRemove) db._relevantEntityIds -= eid
+    for (eid <- entsToRemove) db._entityIds -= eid
   }
 
   def read(db: DB): Unit = db match {
@@ -264,15 +250,14 @@ class NLPReader extends Logging {
       val docsFile = cfg.getString("nlp.data.docsFile")
       readDocs(baseDir + "/" + docsFile, inDB)
       addRelationInfo(inDB)
-      //removeSingletonEntities(inDB)
+      removeSingletonEntities(inDB)
     }
   }
 
 }
 
 object EntityInfoReader {
-  def read(): DB = {
-    val db = new InMemoryDB
+  def read(db: InMemoryDB): DB = {
     val cfg = ConfigFactory.load()
     val baseDir = cfg.getString("nlp.data.baseDir") //.replaceAll(" ", "\\ ")
     //StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db)

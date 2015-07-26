@@ -23,13 +23,13 @@ class DBStore(docs: DocumentStore) extends Logging {
     val odb = dbMap.get(id)
     id -> odb.getOrElse({
       val docIds = docs.query(string)
-      val result = EntityInfoReader.read()
       logger.info("Reading " + docIds.size + " docs.")
-      val inDB = result.asInstanceOf[InMemoryDB]
+      val inDB = new InMemoryDB()
       logger.info(inDB.toString)
       NLPReader.readDocs(docIds.map(id => docs(id)).iterator, inDB)
       NLPReader.addRelationInfo(inDB)
       NLPReader.removeSingletonEntities(inDB)
+      EntityInfoReader.read(inDB)
       val freeMem = (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) / (1024 * 1024 * 1024)
       logger.info("Free memory  (Kbytes): " + Runtime.getRuntime().freeMemory() / 1024)
       logger.info("Total memory (Kbytes): " + Runtime.getRuntime().totalMemory() / 1024)
@@ -41,8 +41,8 @@ class DBStore(docs: DocumentStore) extends Logging {
         dbMap.remove(id)
       }
       dbQueue += id
-      dbMap(id) = result
-      result
+      dbMap(id) = inDB
+      inDB
     })
   }
 

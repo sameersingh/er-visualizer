@@ -2,10 +2,13 @@ package org.sameersingh.ervisualizer.freebase
 
 import com.mongodb.casbah.Imports._
 import java.util.zip.GZIPInputStream
-import java.io.FileInputStream
+import java.io.{FileOutputStream, OutputStreamWriter, PrintWriter, FileInputStream}
+import com.typesafe.config.ConfigFactory
+import play.api.libs.json.Json
+
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable
-import org.sameersingh.ervisualizer.data.{EntityHeader, EntityFreebase, EntityInfo, InMemoryDB}
+import org.sameersingh.ervisualizer.data._
 
 /**
  * Created by sameer on 7/11/14.
@@ -338,5 +341,73 @@ object LoadMongo extends MongoIO("localhost", 27017) {
     print("Writing latitudes... ")
     this.loadLatitude(baseDir + "location.geocode.latitude.gz")
     println("done.")
+  }
+}
+
+object GenerateEntInfo extends MongoIO("localhost", 27017) {
+  val nameColl = db("entityNames")
+  val imgColl = db("entityImages")
+  val descColl = db("entityDescription")
+  val typeColl = db("entityTypes")
+  val geoColl = db("geoLocation")
+  val geoLongColl = db("geoLongitude")
+  val geoLatiColl = db("geoLatitude")
+
+  def entityHeader(mid: String): EntityHeader = {
+    var eh: EntityHeader = EntityHeader(mid, "", "", 0.0)
+    nameColl.findOne("entity" $eq mid).map(o => o.get("name").toString).foreach(name => {
+      eh = EntityHeader(eh.id, name, eh.nerTag, eh.popularity)
+    })
+    geoColl.findOne("entity" $eq mid).map(o => o.get("geo").toString).foreach(geo => {
+      geoLongColl.findOne("geo" $eq geo).map(o => o.get("longitude").toString.toDouble).foreach(longitude => {
+        geoLatiColl.findOne("geo" $eq geo).map(o => o.get("latitude").toString.toDouble).foreach(latitude => {
+          eh = EntityHeader(mid, eh.name, eh.nerTag, eh.popularity, Seq(longitude, latitude))
+        })
+      })
+    })
+    eh
+  }
+
+  def entityInfo(mid: String): EntityInfo = {
+    // info
+    val info = new mutable.HashMap[String, String]
+    info("/mid") = "/" + mid.replaceFirst("_", "/")
+    nameColl.findOne("entity" $eq mid).map(o => o.get("name").toString).foreach(v => info("Name") = v)
+    imgColl.findOne("entity" $eq mid).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = "/" + v.replace('.', '/'))
+    descColl.findOne("entity" $eq mid).map(o => o.get("desc").toString).foreach(v => info("/common/topic/description") = v)
+    EntityInfo(mid, info.toMap)
+  }
+
+  def entityFreebase(mid: String): EntityFreebase = {
+    EntityFreebase(mid, typeColl.find("entity" $eq mid).map(o => o.get("type").toString).map(imgID => nameColl.findOne("entity" $eq imgID).map(_.get("name").toString)).flatten.toSeq)
+  }
+
+  def generateEntFiles(entityIds: Iterable[String], outputDir: String): Unit = {
+    val entityHeaderWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputDir + "/ent.head"), "UTF-8"))
+    val entityInfoWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputDir + "/ent.info"), "UTF-8"))
+    val entityFreebaseWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(outputDir + "/ent.freebase"), "UTF-8"))
+    import org.sameersingh.ervisualizer.data.JsonWrites._
+    for (mid <- entityIds) {
+      entityHeaderWriter.println(Json.toJson(entityHeader(mid)))
+      entityInfoWriter.println(Json.toJson(entityInfo(mid)))
+      entityFreebaseWriter.println(Json.toJson(entityFreebase(mid)))
+    }
+    entityHeaderWriter.flush()
+    entityHeaderWriter.close()
+    entityInfoWriter.flush()
+    entityInfoWriter.close()
+    entityFreebaseWriter.flush()
+    entityFreebaseWriter.close()
+  }
+
+  def main(args: Array[String]): Unit = {
+    val store = new DocumentStore
+    val cfg = ConfigFactory.load()
+    val baseDir = cfg.getString("nlp.data.baseDir")
+    val docsFile = cfg.getString("nlp.data.docsFile")
+
+    DocumentStore.readDocs(store, baseDir, docsFile)
+
+    generateEntFiles(store.entities, baseDir)
   }
 }

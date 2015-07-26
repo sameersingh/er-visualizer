@@ -78,7 +78,7 @@ object Application extends Controller with Logging {
 
   def entityHeaders(dbName: Option[String]) = Action {
     println("Entity Headers: " + dbName.get)
-    Ok(Json.toJson(db(dbName.get).relevantEntityIds.map(id => db(dbName.get).entityHeader(id)).toSeq))
+    Ok(Json.toJson(db(dbName.get).entityIds.map(id => db(dbName.get).entityHeader(id)).toSeq))
   }
 
   def entityInfo(id: String, dbName: Option[String]) = Action {

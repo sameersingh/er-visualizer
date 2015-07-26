@@ -14,9 +14,7 @@ trait DB {
 
   def docEntityProvenances(docId: String, sentId: Int): Seq[(String, Seq[Provenance])]
 
-  def entityIds: Seq[String]
-
-  def relevantEntityIds: Iterator[String]
+  def entityIds: Iterable[String]
 
   def entityHeader(id: String): EntityHeader
 
@@ -57,7 +55,7 @@ trait DB {
     sb append ("headers:\t%s\n" format (entityIds.map(entityHeader(_)).take(4).mkString("\n\t", "\n\t", "...")))
     sb append ("info:\t%s\n" format (entityIds.map(entityInfo(_)).take(4).mkString("\n\t", "\n\t", "...")))
     sb append ("freebase:\t%s\n" format (entityIds.map(entityFreebase(_)).take(4).mkString("\n\t", "\n\t", "...")))
-    sb append ("types:\t%s\n" format (entityIds.map(entityTypePredictions(_).mkString(",")).take(10).distinct.mkString("\n\t", "\n\t", "...")))
+    sb append ("types:\t%s\n" format (entityIds.map(entityTypePredictions(_).mkString(",")).take(10).toSet.mkString("\n\t", "\n\t", "...")))
     sb append ("typeProvenaces:\t%s\n" format (
       entityIds.map(id => entityTypePredictions(id).map(t => id -> t)).flatten.take(10).map(idt => entityTypeProvenances(idt._1, idt._2)).mkString("\n\t", "\n\t", "...")))
     sb append ("------- Relations -------\n")

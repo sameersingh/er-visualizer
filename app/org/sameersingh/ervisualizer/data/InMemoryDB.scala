@@ -21,8 +21,7 @@ class InMemoryDB extends DB {
   override def document(docId: String): Document = _documents(docId)
 
   // Entities
-  val _entityIds = new ArrayBuffer[String]
-  val _relevantEntityIds = new mutable.LinkedHashSet[String]
+  val _entityIds = new mutable.LinkedHashSet[String]
   val _entityHeader = new HashMap[String, EntityHeader]
   val _entityInfo = new HashMap[String, EntityInfo]
   val _entityFreebase = new HashMap[String, EntityFreebase]
@@ -31,9 +30,7 @@ class InMemoryDB extends DB {
   val _entityTypeProvenances = new HashMap[String, HashMap[String, TypeModelProvenances]]
   val _docEntityProvenances = new HashMap[(String, Int), HashMap[String, Seq[Provenance]]]
 
-  override def entityIds: Seq[String] = _entityIds
-
-  override def relevantEntityIds: Iterator[String] = _relevantEntityIds.iterator
+  override def entityIds: Iterable[String] = _entityIds.toIterable
 
   override def entityHeader(id: String): EntityHeader = _entityHeader(id)
 
@@ -77,7 +74,6 @@ class InMemoryDB extends DB {
     _documents.clear()
     _docEntityProvenances.clear()
 
-    _relevantEntityIds.clear()
     _entityText.clear()
     _entityTypePredictions.clear()
     _entityTypeProvenances.clear()
