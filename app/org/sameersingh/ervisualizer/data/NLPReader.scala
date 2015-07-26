@@ -264,7 +264,7 @@ class NLPReader extends Logging {
       val docsFile = cfg.getString("nlp.data.docsFile")
       readDocs(baseDir + "/" + docsFile, inDB)
       addRelationInfo(inDB)
-      removeSingletonEntities(inDB)
+      //removeSingletonEntities(inDB)
     }
   }
 
