@@ -16,7 +16,9 @@ resolvers += Resolver.file("Local ivy2 repo", file(System.getProperty("user.home
 
 resolvers += Resolver.sonatypeRepo("public")
 
-libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.5.2"
+libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.4"
+
+libraryDependencies += "edu.stanford.nlp" % "stanford-corenlp" % "3.4" classifier "models"
 
 libraryDependencies += "org.mongodb" %% "casbah" % "2.7.2"
 
