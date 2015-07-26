@@ -116,26 +116,26 @@ object DocumentStore extends Logging {
     result
   }
 
-  def readDocs(store: DocumentStore, dir: String): Unit = {
+  def readDocs(store: DocumentStore, dir: String, docsFile: String): Unit = {
     logger.info("Reading counts")
     store.keywords ++= readWords(dir + "/wcounts.txt.gz", 19)
     store.entities ++= readWords(dir + "/ecounts.txt.gz", 1)
     logger.info(" # words    : " + store.keywords.size)
     logger.info(" # entities : " + store.entities.size)
     logger.info("Reading title topics")
-    val titleTopics = readTopics(dir, "title")
+    //val titleTopics = readTopics(dir, "title")
     logger.info("Reading content topics")
-    val contentTopics = readTopics(dir, "content")
+    //val contentTopics = readTopics(dir, "content")
     logger.info("Reading documents")
-    val docsFile = dir +"docs.nlp.flr.json.gz"
+    val docsPath = dir + "/" + docsFile
     val dotEvery = 100
     val lineEvery = 1000
     var docIdx = 0
-    for(doc <- new PerLineJsonReader().read(docsFile)) {
+    for(doc <- new PerLineJsonReader().read(docsPath)) {
       store += doc
       // add topics
-      titleTopics.get(doc.id).foreach(t => store.addTopic(doc, "title" + t))
-      contentTopics.get(doc.id).foreach(t => store.addTopic(doc, "content" + t))
+      //titleTopics.get(doc.id).foreach(t => store.addTopic(doc, "title" + t))
+      //contentTopics.get(doc.id).foreach(t => store.addTopic(doc, "content" + t))
       // add entities
       store.addEntities(doc)
       // add words
@@ -155,13 +155,14 @@ object DocumentStore extends Logging {
 object WordCounts {
   def main(args: Array[String]): Unit = {
     val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
-    val docsFile = baseDir + "/docs.nlp.flr.json.gz"
+    val docsFile = ConfigFactory.load().getString("nlp.data.docsFile")
+    val docsPath = baseDir + "/" + docsFile
     val wcounts = new mutable.HashMap[String, Int]()
     val ecounts = new mutable.HashMap[String, Int]()
     val dotEvery = 100
     val lineEvery = 1000
     var docIdx = 0
-    for(d <- new PerLineJsonReader().read(docsFile)) {
+    for(d <- new PerLineJsonReader().read(docsPath)) {
       for (s <- d.sentences; t <- s.tokens; lemma <- t.lemma; key = lemma.toLowerCase) {
         wcounts(key) = 1 + wcounts.getOrElse(key, 0)
       }

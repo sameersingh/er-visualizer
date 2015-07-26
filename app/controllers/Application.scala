@@ -13,7 +13,6 @@ object Application extends Controller with Logging {
 
   val config = ConfigFactory.load()
   val defaultDBName = config.getString("nlp.data.defaultDB")
-  val docDir = config.getString("nlp.data.baseDir")
 
   val _docs = new DocumentStore()
   val _dbStore = new DBStore(_docs)
@@ -28,7 +27,9 @@ object Application extends Controller with Logging {
 
   def init() {
     _entKBA = EntityKBAReader.read()
-    DocumentStore.readDocs(_docs, docDir)
+    val docDir = config.getString("nlp.data.baseDir")
+    val docsFile = config.getString("nlp.data.docsFile")
+    DocumentStore.readDocs(_docs, docDir, docsFile)
   }
 
   import org.sameersingh.ervisualizer.data.JsonWrites._

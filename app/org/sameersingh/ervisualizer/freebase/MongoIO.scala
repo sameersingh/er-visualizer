@@ -308,27 +308,27 @@ object LoadMongo extends MongoIO("localhost", 27017) {
 
   def main(args: Array[String]) {
     print("Writing ids... ")
-    // this.loadEntityIds(baseDir + "type.object.id.gz")
+    this.loadEntityIds(baseDir + "type.object.id.gz")
     println("done.")
 
     print("Writing names... ")
-    //this.loadEntityNames(baseDir + "type.object.name.gz")
+    this.loadEntityNames(baseDir + "type.object.name.gz")
     println("done.")
 
     print("Writing images... ")
-    //this.loadEntityImages(baseDir + "common.topic.image.gz")
+    this.loadEntityImages(baseDir + "common.topic.image.gz")
     println("done.")
 
     print("Writing description... ")
-    //this.loadEntityDescription(baseDir + "common.topic.description.gz")
+    this.loadEntityDescription(baseDir + "common.topic.description.gz")
     println("done.")
 
     print("Writing types... ")
-    //this.loadEntityTypes(baseDir + "common.topic.notable_types.gz")
+    this.loadEntityTypes(baseDir + "common.topic.notable_types.gz")
     println("done.")
 
     print("Writing locations... ")
-    // this.loadGeoLocation(baseDir + "location.location.geolocation.gz")
+    this.loadGeoLocation(baseDir + "location.location.geolocation.gz")
     println("done.")
 
     print("Writing longitudes... ")
