@@ -26,6 +26,7 @@ class DBStore(docs: DocumentStore) extends Logging {
       val result = EntityInfoReader.read()
       logger.info("Reading " + docIds.size + " docs.")
       val inDB = result.asInstanceOf[InMemoryDB]
+      logger.info(inDB.toString)
       NLPReader.readDocs(docIds.map(id => docs(id)).iterator, inDB)
       NLPReader.addRelationInfo(inDB)
       NLPReader.removeSingletonEntities(inDB)
