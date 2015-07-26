@@ -2,7 +2,6 @@ package org.sameersingh.ervisualizer.data
 
 import java.io.PrintWriter
 
-import org.sameersingh.ervisualizer.nlp.{ReadProcessedDocs}
 import com.typesafe.config.ConfigFactory
 import org.sameersingh.ervisualizer.freebase.MongoIO
 import scala.collection.mutable

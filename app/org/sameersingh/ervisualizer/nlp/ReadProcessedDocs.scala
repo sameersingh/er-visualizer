@@ -15,6 +15,7 @@ import play.api.libs.json.Json
  * @author sameer
  * @since 7/15/14.
  */
+/*
 class ReadProcessedDocs(val baseDir: String, val filelist: String) {
 
   val reader = new ReadD2DDocs(baseDir)
@@ -282,3 +283,4 @@ object ReadProcessedDocs extends App {
   entityFreebaseWriter.close()
   //println(db)
 }
+*/
