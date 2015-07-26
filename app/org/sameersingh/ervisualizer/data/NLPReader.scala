@@ -111,7 +111,7 @@ class NLPReader extends Logging {
     for (d <- docs) {
       // sentences
       val sents = d.sentences.map(s => Sentence(d.id, s.idx, s.text))
-      db._documents(d.id) = Document(d.id, d.path.get, d.attrs.getOrElse("title", ""), "", d.text, sents)
+      db._documents(d.id) = Document(d.id, d.path.getOrElse(""), d.attrs.getOrElse("title", ""), "", d.text, sents)
       // entities
       for (e <- d.entities) {
         for (id <- entityId(e); if (db._entityHeader.contains(id))) {
