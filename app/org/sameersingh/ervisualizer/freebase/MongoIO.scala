@@ -172,7 +172,7 @@ class MongoIO(host: String = "localhost", port: Int) {
       (split(0).startsWith("m.") && split(2).startsWith("\"") && split(2).endsWith("\"") && !split(2).startsWith("\"/user") && !split(2).startsWith("\"/soft"))
     }
 
-    def cleanValue(value: String): String = value.drop(1).dropRight(4)
+    def cleanValue(value: String): String = value.drop(1).dropRight(1)
 
     val buffer = new MongoInsertBuffer(db("entityIds"), 10000)
     val source = io.Source.fromInputStream(new GZIPInputStream(new FileInputStream(fname)))
