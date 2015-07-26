@@ -3,7 +3,7 @@ package org.sameersingh.ervisualizer.data
 import java.io.{FileOutputStream, OutputStreamWriter, PrintWriter}
 
 import com.typesafe.config.ConfigFactory
-import com.typesafe.scalalogging.slf4j.Logging
+import org.sameersingh.ervisualizer.Logging
 import nlp_serde.{FileUtil, Mention, Entity}
 import nlp_serde.readers.PerLineJsonReader
 import org.sameersingh.ervisualizer.freebase.MongoIO

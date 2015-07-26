@@ -2,7 +2,7 @@ package org.sameersingh.ervisualizer.data
 
 import java.io.PrintWriter
 
-import org.sameersingh.ervisualizer.nlp.{ReadMultiROutput, ReadProcessedDocs}
+import org.sameersingh.ervisualizer.nlp.{ReadProcessedDocs}
 import com.typesafe.config.ConfigFactory
 import org.sameersingh.ervisualizer.freebase.MongoIO
 import scala.collection.mutable
@@ -70,7 +70,7 @@ class SummaTextToHTML(text: String) {
 
 object SummaTextToHTML {
   def main(args: Array[String]): Unit = {
-    val baseDir = "data/d2d/summa/"
+    val baseDir = ConfigFactory.load().getString("nlp.data.baseDir") + "/summa/"
     val fileName = if (args.isEmpty) "janara" else args(0)
     val text = io.Source.fromFile(baseDir + fileName + "/summa.txt").getLines().mkString("\n")
     val summa = new SummaTextToHTML(text)

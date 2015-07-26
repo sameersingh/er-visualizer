@@ -1,6 +1,7 @@
 package org.sameersingh.ervisualizer.data
 
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.config.ConfigFactory
+import org.sameersingh.ervisualizer.Logging
 import nlp_serde.FileUtil
 import nlp_serde.readers.PerLineJsonReader
 
@@ -115,7 +116,7 @@ object DocumentStore extends Logging {
     result
   }
 
-  def readDocs(store: DocumentStore, dir: String = "data/d2d/"): Unit = {
+  def readDocs(store: DocumentStore, dir: String): Unit = {
     logger.info("Reading counts")
     store.keywords ++= readWords(dir + "/wcounts.txt.gz", 19)
     store.entities ++= readWords(dir + "/ecounts.txt.gz", 1)
@@ -153,7 +154,8 @@ object DocumentStore extends Logging {
 
 object WordCounts {
   def main(args: Array[String]): Unit = {
-    val docsFile = "data/d2d/docs.nlp.flr.json.gz"
+    val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
+    val docsFile = baseDir + "/docs.nlp.flr.json.gz"
     val wcounts = new mutable.HashMap[String, Int]()
     val ecounts = new mutable.HashMap[String, Int]()
     val dotEvery = 100
@@ -170,13 +172,13 @@ object WordCounts {
       if(docIdx % dotEvery == 0) print(".")
       if(docIdx % lineEvery == 0) println(": read " + docIdx + " docs, " + wcounts.size + " words, " + ecounts.size + " entities.")
     }
-    val ww = FileUtil.writer("data/d2d/wcounts.txt.gz", true)
+    val ww = FileUtil.writer(baseDir + "/wcounts.txt.gz", true)
     for((word,c) <- wcounts.toSeq.sortBy(-_._2)) {
       ww.println(word + "\t" + c)
     }
     ww.flush()
     ww.close
-    val ew = FileUtil.writer("data/d2d/ecounts.txt.gz", true)
+    val ew = FileUtil.writer(baseDir + "/ecounts.txt.gz", true)
     for((ent,c) <- ecounts.toSeq.sortBy(-_._2)) {
       ew.println(ent + "\t" + c)
     }
