@@ -3,7 +3,7 @@ package org.sameersingh.ervisualizer.data
 import java.io.{FileOutputStream, OutputStreamWriter, PrintWriter}
 
 import com.typesafe.config.ConfigFactory
-import com.typesafe.scalalogging.slf4j.Logging
+import org.sameersingh.ervisualizer.Logging
 import nlp_serde.{FileUtil, Mention, Entity}
 import nlp_serde.readers.PerLineJsonReader
 import org.sameersingh.ervisualizer.freebase.MongoIO
@@ -34,9 +34,9 @@ object FreebaseReader {
       mongo.updateDB(db)
       // write as well
       println("Writing Mongo")
-      val entityHeaderWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/d2d.ent.head"), "UTF-8"))
-      val entityInfoWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/d2d.ent.info"), "UTF-8"))
-      val entityFreebaseWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/d2d.ent.freebase"), "UTF-8"))
+      val entityHeaderWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/ent.head"), "UTF-8"))
+      val entityInfoWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/ent.info"), "UTF-8"))
+      val entityFreebaseWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(freebaseDir + "/ent.freebase"), "UTF-8"))
       import org.sameersingh.ervisualizer.data.JsonWrites._
       for (mid <- db.entityIds) {
         entityHeaderWriter.println(Json.toJson(db.entityHeader(mid)))
@@ -50,9 +50,9 @@ object FreebaseReader {
       entityFreebaseWriter.flush()
       entityFreebaseWriter.close()
     } else {
-      val ehf = io.Source.fromFile(freebaseDir + "/d2d.ent.head", "UTF-8").getLines()
-      val eif = io.Source.fromFile(freebaseDir + "/d2d.ent.info", "UTF-8").getLines()
-      val eff = io.Source.fromFile(freebaseDir + "/d2d.ent.freebase", "UTF-8").getLines()
+      val ehf = io.Source.fromFile(freebaseDir + "/ent.head", "UTF-8").getLines()
+      val eif = io.Source.fromFile(freebaseDir + "/ent.info", "UTF-8").getLines()
+      val eff = io.Source.fromFile(freebaseDir + "/ent.freebase", "UTF-8").getLines()
       import JsonReads._
       for (ehl <- ehf; eil = eif.next(); efl = eff.next()) {
         val eh = Json.fromJson[EntityHeader](Json.parse(ehl)).get
@@ -261,7 +261,8 @@ class NLPReader extends Logging {
     case inDB: InMemoryDB => {
       val cfg = ConfigFactory.load()
       val baseDir = cfg.getString("nlp.data.baseDir") //.replaceAll(" ", "\\ ")
-      readDocs(baseDir + "/docs.nlp.flr.json.gz", inDB)
+      val docsFile = cfg.getString("nlp.data.docsFile")
+      readDocs(baseDir + "/" + docsFile, inDB)
       addRelationInfo(inDB)
       removeSingletonEntities(inDB)
     }
@@ -275,7 +276,7 @@ object EntityInfoReader {
     val cfg = ConfigFactory.load()
     val baseDir = cfg.getString("nlp.data.baseDir") //.replaceAll(" ", "\\ ")
     //StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db)
-    FreebaseReader.readFreebaseInfo(db, baseDir + "/freebase")
+    FreebaseReader.readFreebaseInfo(db, baseDir)
     db
   }
 }

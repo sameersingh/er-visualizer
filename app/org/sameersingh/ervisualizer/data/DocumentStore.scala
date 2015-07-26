@@ -1,6 +1,7 @@
 package org.sameersingh.ervisualizer.data
 
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.config.ConfigFactory
+import org.sameersingh.ervisualizer.Logging
 import nlp_serde.FileUtil
 import nlp_serde.readers.PerLineJsonReader
 
@@ -115,26 +116,26 @@ object DocumentStore extends Logging {
     result
   }
 
-  def readDocs(store: DocumentStore, dir: String = "data/d2d/"): Unit = {
+  def readDocs(store: DocumentStore, dir: String, docsFile: String): Unit = {
     logger.info("Reading counts")
     store.keywords ++= readWords(dir + "/wcounts.txt.gz", 19)
     store.entities ++= readWords(dir + "/ecounts.txt.gz", 1)
     logger.info(" # words    : " + store.keywords.size)
     logger.info(" # entities : " + store.entities.size)
     logger.info("Reading title topics")
-    val titleTopics = readTopics(dir, "title")
+    //val titleTopics = readTopics(dir, "title")
     logger.info("Reading content topics")
-    val contentTopics = readTopics(dir, "content")
+    //val contentTopics = readTopics(dir, "content")
     logger.info("Reading documents")
-    val docsFile = dir +"docs.nlp.flr.json.gz"
+    val docsPath = dir + "/" + docsFile
     val dotEvery = 100
     val lineEvery = 1000
     var docIdx = 0
-    for(doc <- new PerLineJsonReader().read(docsFile)) {
+    for(doc <- new PerLineJsonReader().read(docsPath)) {
       store += doc
       // add topics
-      titleTopics.get(doc.id).foreach(t => store.addTopic(doc, "title" + t))
-      contentTopics.get(doc.id).foreach(t => store.addTopic(doc, "content" + t))
+      //titleTopics.get(doc.id).foreach(t => store.addTopic(doc, "title" + t))
+      //contentTopics.get(doc.id).foreach(t => store.addTopic(doc, "content" + t))
       // add entities
       store.addEntities(doc)
       // add words
@@ -153,13 +154,15 @@ object DocumentStore extends Logging {
 
 object WordCounts {
   def main(args: Array[String]): Unit = {
-    val docsFile = "data/d2d/docs.nlp.flr.json.gz"
+    val baseDir = ConfigFactory.load().getString("nlp.data.baseDir")
+    val docsFile = ConfigFactory.load().getString("nlp.data.docsFile")
+    val docsPath = baseDir + "/" + docsFile
     val wcounts = new mutable.HashMap[String, Int]()
     val ecounts = new mutable.HashMap[String, Int]()
     val dotEvery = 100
     val lineEvery = 1000
     var docIdx = 0
-    for(d <- new PerLineJsonReader().read(docsFile)) {
+    for(d <- new PerLineJsonReader().read(docsPath)) {
       for (s <- d.sentences; t <- s.tokens; lemma <- t.lemma; key = lemma.toLowerCase) {
         wcounts(key) = 1 + wcounts.getOrElse(key, 0)
       }
@@ -170,13 +173,13 @@ object WordCounts {
       if(docIdx % dotEvery == 0) print(".")
       if(docIdx % lineEvery == 0) println(": read " + docIdx + " docs, " + wcounts.size + " words, " + ecounts.size + " entities.")
     }
-    val ww = FileUtil.writer("data/d2d/wcounts.txt.gz", true)
+    val ww = FileUtil.writer(baseDir + "/wcounts.txt.gz", true)
     for((word,c) <- wcounts.toSeq.sortBy(-_._2)) {
       ww.println(word + "\t" + c)
     }
     ww.flush()
     ww.close
-    val ew = FileUtil.writer("data/d2d/ecounts.txt.gz", true)
+    val ew = FileUtil.writer(baseDir + "/ecounts.txt.gz", true)
     for((ent,c) <- ecounts.toSeq.sortBy(-_._2)) {
       ew.println(ent + "\t" + c)
     }

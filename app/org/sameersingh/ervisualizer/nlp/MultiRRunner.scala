@@ -2,19 +2,21 @@ package org.sameersingh.ervisualizer.nlp
 
 import org.sameersingh.ervisualizer.data._
 import scala.collection.mutable.ArrayBuffer
-import edu.washington.multirframework.featuregeneration.{FeatureGenerator, DefaultFeatureGeneratorMinusDirMinusDep}
-import edu.washington.multirframework.argumentidentification.{SententialInstanceGeneration, ArgumentIdentification, DefaultSententialInstanceGeneration, NERArgumentIdentification}
-import edu.washington.multirframework.multiralgorithm._
 import scala.collection.mutable
 import edu.stanford.nlp.pipeline.Annotation
-import edu.washington.multir.preprocess.CorpusPreprocessing
-import edu.washington.multirframework.data.{KBArgument, Argument}
 import edu.stanford.nlp.ling.CoreAnnotations
 import java.util.Arrays
 import java.util
 import com.typesafe.config.ConfigFactory
 import java.io.{File, FileOutputStream, OutputStreamWriter, PrintWriter}
 import org.sameersingh.ervisualizer.data.Provenance
+
+/*
+import edu.washington.multirframework.featuregeneration.{FeatureGenerator, DefaultFeatureGeneratorMinusDirMinusDep}
+import edu.washington.multirframework.argumentidentification.{SententialInstanceGeneration, ArgumentIdentification, DefaultSententialInstanceGeneration, NERArgumentIdentification}
+import edu.washington.multirframework.multiralgorithm._
+import edu.washington.multir.preprocess.CorpusPreprocessing
+import edu.washington.multirframework.data.{KBArgument, Argument}
 
 /**
  * @author sameer
@@ -325,3 +327,4 @@ class ReadMultiROutput(val baseDir: String, val filelist: String, val minScore: 
   }
 
 }
+*/

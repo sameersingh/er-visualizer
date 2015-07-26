@@ -35,7 +35,7 @@ object EntityKBAReader {
     val db = new InMemEntityKBA
     val cfg = ConfigFactory.load()
     val baseDir = cfg.getString("nlp.data.baseDir") //.replaceAll(" ", "\\ ")
-    StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db, Some(100))
+    //StalenessReader.readStaleness(baseDir + "/docs.staleness.json.gz", db, Some(100))
     db
   }
 }
@@ -81,7 +81,7 @@ object StalenessReader {
   import JsonReads._
 
   def main(args: Array[String]): Unit = {
-    for (line <- io.Source.fromFile("data/d2d/docs.staleness.json").getLines()) {
+    for (line <- io.Source.fromFile(ConfigFactory.load().getString("nlp.data.baseDir") + "/docs.staleness.json").getLines()) {
       val e = Json.fromJson[kba.Entity](Json.parse(line)).get
       println(e)
     }

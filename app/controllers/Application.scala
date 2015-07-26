@@ -1,6 +1,7 @@
 package controllers
 
-import com.typesafe.scalalogging.slf4j.Logging
+import com.typesafe.config.ConfigFactory
+import org.sameersingh.ervisualizer.Logging
 import org.sameersingh.ervisualizer.kba.{EntityKBAReader, KBAStore}
 import play.api.mvc._
 import org.sameersingh.ervisualizer.data._
@@ -10,7 +11,8 @@ import scala.collection.mutable
 
 object Application extends Controller with Logging {
 
-  val defaultDBName = "drug"
+  val config = ConfigFactory.load()
+  val defaultDBName = config.getString("nlp.data.defaultDB")
 
   val _docs = new DocumentStore()
   val _dbStore = new DBStore(_docs)
@@ -25,7 +27,9 @@ object Application extends Controller with Logging {
 
   def init() {
     _entKBA = EntityKBAReader.read()
-    DocumentStore.readDocs(_docs)
+    val docDir = config.getString("nlp.data.baseDir")
+    val docsFile = config.getString("nlp.data.docsFile")
+    DocumentStore.readDocs(_docs, docDir, docsFile)
   }
 
   import org.sameersingh.ervisualizer.data.JsonWrites._
