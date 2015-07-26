@@ -80,9 +80,10 @@ object TestDocs {
 
   def main(args: Array[String]): Unit = {
     val outputFile = "data/test/docs.json.gz"
-    val docs = docTexts.map(t => {
+    val docs = docTexts.zipWithIndex.map(ti => {
       val d = new Doc()
-      d.text = t
+      d.id = "doc" + ti._2
+      d.text = ti._1
       d
     })
     val w = new PerLineJsonWriter(true)
