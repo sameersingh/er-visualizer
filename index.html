@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Entity-Relation Visualizer by sameersingh</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Entity-Relation Visualizer</h1>
+      <h2 class="project-tagline">D3 and Play based visualization for entity-relation graphs, especially for NLP and information extraction</h2>
+      <a href="https://github.com/sameersingh/er-visualizer" class="btn">View on GitHub</a>
+      <a href="https://github.com/sameersingh/er-visualizer/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/sameersingh/er-visualizer/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p>D3 and Play based visualization for entity-relation graphs, especially for NLP and information extraction</p>
+
+<h1>
+<a id="basic-example-of-entity-relation-visualization" class="anchor" href="#basic-example-of-entity-relation-visualization" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic Example of Entity-Relation Visualization</h1>
+
+<p>Here we are going to show the visualization with a few entities and relations, although it can handle upto hundreds of thousands of entities and relations.</p>
+
+<p>The first page show a simple search box to identify subsets of documents to visualize.</p>
+
+<p><img src="https://github.com/sameersingh/er-visualizer/raw/master/docs/img/search.png" alt="Search page"></p>
+
+<p>The visualization lays out all the extracted entities and relations onto a map as a graph. The entity nodes are sized according to their popularity (in the document collection), and colored according to their types (person, location, or organization).</p>
+
+<p>Clicking on an entity node bring ups details from Freebase on the left, and detailed textual provenance on the right. The provenance also contained fine-grained types, if part of the annotations.</p>
+
+<p><img src="https://github.com/sameersingh/er-visualizer/raw/master/docs/img/entity.png" alt="Entities"></p>
+
+<p>The edges represent extracted relations, with the width proportional to the number of mentions of the relation. Clicking on a relation brings up their provenances on the right.</p>
+
+<p><img src="https://github.com/sameersingh/er-visualizer/raw/master/docs/img/relations.png" alt="Relations"></p>
+
+<h2>
+<a id="running-the-example" class="anchor" href="#running-the-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running the Example</h2>
+
+<p>The following are the instructions for running the basic example shown above</p>
+
+<ol>
+<li><code>sbt clean compile</code></li>
+<li><code>sbt run</code></li>
+<li>Open <a href="http://localhost:9000/">localhost:9000</a>
+</li>
+<li>Use <code>obama</code> to visualize <del>all</del> both documents.</li>
+</ol>
+
+<h1>
+<a id="input-data" class="anchor" href="#input-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Input Data</h1>
+
+<p>To visualize the documents, they needed to be annotated with basic NLP (NER specifically), linked to Freebase entities, and have relation extracted on a per-sentence level. The following are the list of files that contain this information.</p>
+
+<p>For the files used for the visualization above, see <a href="https://github.com/sameersingh/er-visualizer/tree/master/data/test">data/test</a>.</p>
+
+<h2>
+<a id="necessary-files" class="anchor" href="#necessary-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>Necessary files</h2>
+
+<ol>
+<li>Create a directory where all the files below will go, and specify it in <code>application.conf</code> as <code>nlp.data.baseDir</code> (See <code>reference.conf</code>)</li>
+<li>
+<strong>Documents</strong>: A json file (<code>docs.json.gz</code>), as described below (see <strong>Processed Documents</strong>), containing the processed documents with entity linking and relations.</li>
+<li>
+<strong>Entities</strong>: Information about the entities from Freebase, either read from a Mongo server, or read from files <code>ent.info</code>, <code>ent.freebase</code>, and <code>ent.head</code> as prepared from Freebase below (see <strong>Freebase Information</strong>)</li>
+<li>
+<code>wcounts.txt.gz</code> and <code>ecounts.txt.gz</code>: Gzipped files containing list of keywords and entities for search (generated from <code>docs.json.gz</code> using <code>org.sameersingh.ervisualizer.data.WordCounts</code>).</li>
+</ol>
+
+<h2>
+<a id="processed-documents" class="anchor" href="#processed-documents" aria-hidden="true"><span class="octicon octicon-link"></span></a>Processed Documents</h2>
+
+<p>This will describe how we generate <code>docs.json.gz</code> (file name can me modified in the configuration using <code>docsFile</code>).</p>
+
+<p>We will be using <code>nlp_serde</code> as the underlying document representation. The library contains data structures for representing most of the NLP annotations, including entity linking and relation extraction, so you can directly wrap your document annotations into those classes, and then write out a documents file using <code>nlp_serde.writers.PerLineJsonWriter</code>. See <a href="https://github.com/sameersingh/er-visualizer/blob/master/app/org/sameersingh/ervisualizer/data/TestDocs.scala"><code>org.sameersingh.ervisualizer.data.TestDocs</code></a> for example annotated documents.</p>
+
+<p>Or, less desirably, you can write out the JSON files directly from your code (see <code>data/test/docs.json.gz</code> for an example).</p>
+
+<h2>
+<a id="freebase-information" class="anchor" href="#freebase-information" aria-hidden="true"><span class="octicon octicon-link"></span></a>Freebase Information</h2>
+
+<p>Visualization needs access to Freebase information about the entities that appear in your document collection.</p>
+
+<p>You can either have a Mongo server running (requires a lot of memory, and might be slower), or create the relevant files yourself (configured using <code>nlp.data.mongo</code> flag). The test above uses the file mode, i.e. you don't need to run a Mongo server.</p>
+
+<h3>
+<a id="reading-freebase-info-from-mongo" class="anchor" href="#reading-freebase-info-from-mongo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reading Freebase Info from Mongo</h3>
+
+<ol>
+<li>Download a <a href="http://commondatastorage.googleapis.com/freebase-public/rdf/freebase-rdf-latest.gz">freebase RDF dump</a>, for example <code>freebase-rdf-2014-07-06-00-00.gz</code>.</li>
+<li>Grep the dump to create a file for each of the following relations (using something like <code>zcat freebase-rdf-2014-07-06-00-00.gz | grep "&lt;http://rdf.freebase.com/ns/$relation&gt;" | gzip &gt; $relation.gz</code>):
+
+<ul>
+<li><code>type.object.id</code></li>
+<li><code>type.object.name</code></li>
+<li><code>common.topic.image</code></li>
+<li><code>common.topic.description</code></li>
+<li><code>common.topic.notable_types</code></li>
+<li><code>location.location.geolocation</code></li>
+<li><code>location.geocode.longitude</code></li>
+<li><code>location.geocode.latitude</code></li>
+</ul>
+</li>
+<li>Start a Mongo server, and run <code>org.sameersingh.ervisualizer.freebase.LoadMongo</code> to populate it (change <code>baseDir</code>, <code>host</code>, and <code>port</code> if needed)</li>
+<li>Run visualization with <code>nlp.data.mongo = true</code> to use the Mongo server.</li>
+</ol>
+
+<h3>
+<a id="reading-freebase-info-from-files" class="anchor" href="#reading-freebase-info-from-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reading Freebase Info from Files</h3>
+
+<p>Reading Mongo can be inefficient, and thus it is more efficient to read this information directly from files, as we will describe here. Note that you still need Mongo to generate the files the first time around, but you don't need it after the files have been created. </p>
+
+<p>The files <code>ent.info</code>, <code>ent.freebase</code>, and <code>ent.head</code> are pretty simple per-line JSON files containing the entity information, corresponding to the case classes in <a href="https://github.com/sameersingh/er-visualizer/blob/master/app/org/sameersingh/ervisualizer/data/Entity.scala"><code>Entity.scala</code></a>. You can use the method below to construct these files, or generate your own directly. The only constraint is that these three files are aligned, i.e. information about the same entity appears in the three files on the same line number.</p>
+
+<p>If you want to use Mongo to generate these files:</p>
+
+<ol>
+<li>Previous steps of creating documents and setting up a Mongo server.</li>
+<li>Run <code>org.sameersingh.ervisualizer.freebase.GenerateEntInfo</code> to generate the files.</li>
+<li>Run visualization with <code>nlp.data.mongo = false</code>, and you can shut down the Mongo sever.</li>
+</ol>
+
+<h1>
+<a id="contact" class="anchor" href="#contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contact</h1>
+
+<p>Please use Github issues if you have problems/questions.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/sameersingh/er-visualizer">Entity-Relation Visualizer</a> is maintained by <a href="https://github.com/sameersingh">sameersingh</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-1202265-7");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
+
