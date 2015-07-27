@@ -53,7 +53,7 @@ class DocumentStore {
 
   def addEntities(doc: nlp_serde.Document): Unit = {
     this += doc
-    for (e <- doc.entities; if (!e.freebaseIds.isEmpty); key = e.freebaseIds.maxBy(_._2)._1; if (entities(key))) {
+    for (e <- doc.entities; if (!e.freebaseIds.isEmpty); key = FreebaseReader.convertFbIdToId(e.freebaseIds.maxBy(_._2)._1); if (entities(key))) {
       entitiesMap.getOrElseUpdate(key, new HashSet[Id]) += doc.id
     }
   }

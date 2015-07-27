@@ -44,12 +44,14 @@ object FreebaseReader {
         assert(eh.id == ei.id)
         assert(eh.id == ef.id)
         val mid = eh.id
-        db._entityHeader.get(mid).foreach(oeh => {
+        if(db._entityIds.contains(mid)) {
           //db._entityIds += mid
+          val oeh = db._entityHeader(mid)
+          println("Found" + oeh + " for " + eh)
           db._entityHeader(mid) = EntityHeader(oeh.id, oeh.name, oeh.nerTag, oeh.popularity, eh.geo)
           db._entityInfo(mid) = ei
           db._entityFreebase(mid) = ef
-        })
+        }
       }
       assert(eif.isEmpty)
       assert(eff.isEmpty)
@@ -88,7 +90,7 @@ class NLPReader extends Logging {
    */
   def readDocs(docs: Iterator[nlp_serde.Document], db: InMemoryDB): Unit = {
     logger.info("Reading documents")
-    db.clearTextEvidence()
+    //db.clearTextEvidence()
     val dotEvery = 100
     val lineEvery = 1000
     var docIdx = 0
@@ -106,9 +108,9 @@ class NLPReader extends Logging {
           val mentions = e.mids.map(id => d.mentions(id)).toSeq
           mentions.foreach(m => einfo +=(id, m))
           val provenances = mentions.map(m => {
-            val startPos = d.sentences(m.sentenceId).tokens(m.toks._1 - 1).chars._1 - d.sentences(m.sentenceId).chars._1
-            val endPos = d.sentences(m.sentenceId).tokens(m.toks._2 - 2).chars._2 - d.sentences(m.sentenceId).chars._1
-            Provenance(d.id, m.sentenceId, Seq(startPos -> endPos))
+            val startPos = d.sentences(m.sentenceId-1).tokens(m.toks._1 - 1).chars._1 - d.sentences(m.sentenceId-1).chars._1
+            val endPos = d.sentences(m.sentenceId-1).tokens(m.toks._2 - 2).chars._2 - d.sentences(m.sentenceId-1).chars._1
+            Provenance(d.id, m.sentenceId-1, Seq(startPos -> endPos))
           }).distinct
           val oldEText = db._entityText.getOrElse(id, EntityUtils.emptyText(id))
           val etext = EntityText(id, provenances ++ oldEText.provenances)
@@ -128,12 +130,12 @@ class NLPReader extends Logging {
                 (normalizeType(pair(0)), pair(1).toDouble)
               }).toSeq
             })
-            val startPos = d.sentences(m.sentenceId).tokens(m.toks._1 - 1).chars._1 - d.sentences(m.sentenceId).chars._1
-            val endPos = d.sentences(m.sentenceId).tokens(m.toks._2 - 2).chars._2 - d.sentences(m.sentenceId).chars._1
+            val startPos = d.sentences(m.sentenceId-1).tokens(m.toks._1 - 1).chars._1 - d.sentences(m.sentenceId-1).chars._1
+            val endPos = d.sentences(m.sentenceId-1).tokens(m.toks._2 - 2).chars._2 - d.sentences(m.sentenceId-1).chars._1
             // add to local data
             types ++= figerPreds.map(_._1)
             for (tc <- figerPreds; t = tc._1; c = tc._2) {
-              val prov = Provenance(d.id, m.sentenceId, Seq(startPos -> endPos), c)
+              val prov = Provenance(d.id, m.sentenceId-1, Seq(startPos -> endPos), c)
               typeProvs(t) = TypeModelProvenances(id, t, typeProvs.get(t).map(_.provenances).getOrElse(Seq.empty) ++ Seq(prov))
             }
           }

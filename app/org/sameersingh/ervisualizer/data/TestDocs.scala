@@ -30,12 +30,12 @@ object TestDocs {
     override def process(doc: Doc): Doc = {
       for (e <- doc.entities) {
         e.representativeString match {
-          case "Barack Obama" => e.freebaseIds("m.02mjmr") = 1.0
-          case "USA" => e.freebaseIds("m.09c7w0") = 1.0
-          case "Michelle" => e.freebaseIds("m.025s5v9") = 1.0
-          case "Columbia University" => e.freebaseIds("m.01w5m") = 1.0
-          case "Columbia" => e.freebaseIds("m.01w5m") = 1.0
-          case "Honolulu" => e.freebaseIds("m.02hrh0_") = 1.0
+          case "Barack Obama" => e.freebaseIds("/m/02mjmr") = 1.0
+          case "USA" => e.freebaseIds("/m/09c7w0") = 1.0
+          case "Michelle" => e.freebaseIds("/m/025s5v9") = 1.0
+          case "Columbia University" => e.freebaseIds("/m/01w5m") = 1.0
+          case "Columbia" => e.freebaseIds("/m/01w5m") = 1.0
+          case "Honolulu" => e.freebaseIds("/m/02hrh0_") = 1.0
           case _ => println("unlinked: " + e.representativeString)
         }
       }
@@ -56,11 +56,11 @@ object TestDocs {
             if (!e2.freebaseIds.isEmpty);
             if (m1 != m2)) {
           val rels: mutable.Set[String] = (e1.freebaseIds.maxBy(_._2)._1, e2.freebaseIds.maxBy(_._2)._1) match {
-            case ("m.02mjmr", "m.025s5v9") => mutable.Set("per:spouse")
-            case ("m.025s5v9","m.02mjmr") => mutable.Set("per:spouse")
-            case ("m.02mjmr", "m.01w5m") => mutable.Set("per:school_attended")
-            case ("m.02mjmr", "m.02hrh0_") => mutable.Set("per:born_in")
-            case ("m.02mjmr", "m.09c7w0") => mutable.Set("per:president_of", "per:lives_in")
+            case ("/m/02mjmr", "/m/025s5v9") => mutable.Set("per:spouse")
+            case ("/m/025s5v9","/m/02mjmr") => mutable.Set("per:spouse")
+            case ("/m/02mjmr", "/m/01w5m") => mutable.Set("per:school_attended")
+            case ("/m/02mjmr", "/m/02hrh0_") => mutable.Set("per:born_in")
+            case ("/m/02mjmr", "/m/09c7w0") => mutable.Set("per:president_of", "per:lives_in")
             case _ => mutable.Set.empty
           }
           if(!rels.isEmpty) s.relations += {

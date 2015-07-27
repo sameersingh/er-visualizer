@@ -354,11 +354,12 @@ object GenerateEntInfo extends MongoIO("localhost", 27017) {
   val geoLatiColl = db("geoLatitude")
 
   def entityHeader(mid: String): EntityHeader = {
+    val queryID = mid.replaceFirst("_", ".")
     var eh: EntityHeader = EntityHeader(mid, "", "", 0.0)
-    nameColl.findOne("entity" $eq mid).map(o => o.get("name").toString).foreach(name => {
+    nameColl.findOne("entity" $eq queryID).map(o => o.get("name").toString).foreach(name => {
       eh = EntityHeader(eh.id, name, eh.nerTag, eh.popularity)
     })
-    geoColl.findOne("entity" $eq mid).map(o => o.get("geo").toString).foreach(geo => {
+    geoColl.findOne("entity" $eq queryID).map(o => o.get("geo").toString).foreach(geo => {
       geoLongColl.findOne("geo" $eq geo).map(o => o.get("longitude").toString.toDouble).foreach(longitude => {
         geoLatiColl.findOne("geo" $eq geo).map(o => o.get("latitude").toString.toDouble).foreach(latitude => {
           eh = EntityHeader(mid, eh.name, eh.nerTag, eh.popularity, Seq(longitude, latitude))
@@ -370,16 +371,18 @@ object GenerateEntInfo extends MongoIO("localhost", 27017) {
 
   def entityInfo(mid: String): EntityInfo = {
     // info
+    val queryID = mid.replaceFirst("_", ".")
     val info = new mutable.HashMap[String, String]
     info("/mid") = "/" + mid.replaceFirst("_", "/")
-    nameColl.findOne("entity" $eq mid).map(o => o.get("name").toString).foreach(v => info("Name") = v)
-    imgColl.findOne("entity" $eq mid).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = "/" + v.replace('.', '/'))
-    descColl.findOne("entity" $eq mid).map(o => o.get("desc").toString).foreach(v => info("/common/topic/description") = v)
+    nameColl.findOne("entity" $eq queryID).map(o => o.get("name").toString).foreach(v => info("Name") = v)
+    imgColl.findOne("entity" $eq queryID).map(o => o.get("img").toString).foreach(v => info("/common/topic/image") = "/" + v.replace('.', '/'))
+    descColl.findOne("entity" $eq queryID).map(o => o.get("desc").toString).foreach(v => info("/common/topic/description") = v)
     EntityInfo(mid, info.toMap)
   }
 
   def entityFreebase(mid: String): EntityFreebase = {
-    EntityFreebase(mid, typeColl.find("entity" $eq mid).map(o => o.get("type").toString).map(imgID => nameColl.findOne("entity" $eq imgID).map(_.get("name").toString)).flatten.toSeq)
+    val queryID = mid.replaceFirst("_", ".")
+    EntityFreebase(mid, typeColl.find("entity" $eq queryID).map(o => o.get("type").toString).map(imgID => nameColl.findOne("entity" $eq imgID).map(_.get("name").toString)).flatten.toSeq)
   }
 
   def generateEntFiles(entityIds: Iterable[String], outputDir: String): Unit = {
