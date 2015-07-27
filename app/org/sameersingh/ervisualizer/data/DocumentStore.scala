@@ -119,7 +119,7 @@ object DocumentStore extends Logging {
   def readDocs(store: DocumentStore, dir: String, docsFile: String): Unit = {
     logger.info("Reading counts")
     store.keywords ++= readWords(dir + "/wcounts.txt.gz", 0)
-    store.entities ++= readWords(dir + "/ecounts.txt.gz", 0)
+    store.entities ++= readWords(dir + "/ecounts.txt.gz", 0).map(mid => FreebaseReader.convertFbIdToId(mid))
     logger.info(" # words    : " + store.keywords.size)
     logger.info(" # entities : " + store.entities.size)
     logger.info("Reading title topics")
