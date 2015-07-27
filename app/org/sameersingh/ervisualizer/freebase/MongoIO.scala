@@ -348,7 +348,7 @@ object GenerateEntInfo extends MongoIO("localhost", 27017) {
   val nameColl = db("entityNames")
   val imgColl = db("entityImages")
   val descColl = db("entityDescription")
-  val typeColl = db("entityNotableTypes")
+  val typeColl = db("entityTypes")
   val geoColl = db("geoLocation")
   val geoLongColl = db("geoLongitude")
   val geoLatiColl = db("geoLatitude")
@@ -382,7 +382,7 @@ object GenerateEntInfo extends MongoIO("localhost", 27017) {
 
   def entityFreebase(mid: String): EntityFreebase = {
     val queryID = mid.replaceFirst("_", ".")
-    EntityFreebase(mid, typeColl.find("entity" $eq queryID).map(o => o.get("type").toString).map(imgID => nameColl.findOne("entity" $eq imgID).map(_.get("name").toString)).flatten.toSeq)
+    EntityFreebase(mid, typeColl.find("entity" $eq queryID).map(o => o.get("type").toString).map(typeID => nameColl.findOne("entity" $eq typeID).map(_.get("name").toString)).flatten.toSeq)
   }
 
   def generateEntFiles(entityIds: Iterable[String], outputDir: String): Unit = {
