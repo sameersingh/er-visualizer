@@ -164,8 +164,8 @@ function run(db) {
     dbName = db;
 
     projection = d3.geo.mercator()
-        .center([0, 5 ])
-        .scale(900)
+        .center([-100, 40 ])
+        .scale(600)
         .rotate([0,0]);
     var path = d3.geo.path()
         .projection(projection);
