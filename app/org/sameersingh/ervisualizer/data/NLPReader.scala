@@ -48,7 +48,7 @@ object FreebaseReader {
           //db._entityIds += mid
           val oeh = db._entityHeader(mid)
           println("Found" + oeh + " for " + eh)
-          db._entityHeader(mid) = EntityHeader(oeh.id, oeh.name, oeh.nerTag, oeh.popularity, eh.geo)
+          db._entityHeader(mid) = EntityHeader(oeh.id, eh.name, oeh.nerTag, oeh.popularity, eh.geo)
           db._entityInfo(mid) = ei
           db._entityFreebase(mid) = ef
         }
@@ -68,8 +68,11 @@ class NLPReader extends Logging {
   }
 
   def normalizeType(str: String) = {
+    var s = str
     val idx = math.max(0, str.indexOf("|"))
-    str.substring(idx).drop(1).replaceAll("/", ":")
+    if(s.startsWith("/")) s = s.drop(1)
+    s = s.substring(idx).replaceAll("/", ":")
+    s
   }
 
   class EntityMentions {
@@ -163,7 +166,7 @@ class NLPReader extends Logging {
         //.find(_.id == m2eid)) {
         assert(e1.id == m1eid, s"e1.id (${e1.id}) is not same as m1eid (${m1eid}), entities: ${d.entities.map(_.id).mkString(",")}")
         assert(e2.id == m2eid, s"e2.id (${e2.id}) is not same as m1eid (${m2eid}), entities: ${d.entities.map(_.id).mkString(",")}")
-        for (e1id <- entityId(e1); e2id <- entityId(e2); if (db._entityHeader.contains(e1id)); if (db._entityHeader.contains(e2id))) {
+        for (e1id <- entityId(e1); e2id <- entityId(e2); if (db._entityIds.contains(e1id)); if (db._entityIds.contains(e2id))) {
           val startPos1 = s.tokens(m1.toks._1 - 1).chars._1 - s.chars._1
           val endPos1 = s.tokens(m1.toks._2 - 2).chars._2 - s.chars._1
           val startPos2 = s.tokens(m2.toks._1 - 1).chars._1 - s.chars._1

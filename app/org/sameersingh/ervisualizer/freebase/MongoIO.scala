@@ -348,7 +348,7 @@ object GenerateEntInfo extends MongoIO("localhost", 27017) {
   val nameColl = db("entityNames")
   val imgColl = db("entityImages")
   val descColl = db("entityDescription")
-  val typeColl = db("entityTypes")
+  val typeColl = db("entityNotableTypes")
   val geoColl = db("geoLocation")
   val geoLongColl = db("geoLongitude")
   val geoLatiColl = db("geoLatitude")

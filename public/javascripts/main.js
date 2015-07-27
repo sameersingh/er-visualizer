@@ -751,6 +751,7 @@ function displayProv(prov, dom) {
        dom.append("span")
            .text(sent.slice(currIndex, sent.length));
       // buttons
+      /*
       var btnDiv = dom.append("div").classed("btn-group", true);
       btnDiv.append("button")
         .attr("type", "button")
@@ -769,7 +770,7 @@ function displayProv(prov, dom) {
           dom
              .classed("text-success", false)
              .classed("text-danger", true)
-        });
+        });*/
      },
      error: function(j, t, e) { console.log(e); }
   });
